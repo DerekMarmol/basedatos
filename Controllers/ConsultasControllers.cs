@@ -167,10 +167,11 @@ namespace ARSAN_Web.Controllers
                 })
                 .Select(g => new
                 {
-                    g.Key.IdResidencia,
-                    g.Key.Propietario,
-                    g.Key.Cluster,
-                    g.Key.Casa,
+                    IdResidencia = g.Key.IdResidencia,
+                    IdCasa = g.Key.IdResidencia, // Agregamos esto para compatibilidad con la vista
+                    Propietario = g.Key.Propietario,
+                    Cluster = g.Key.Cluster,
+                    Casa = g.Key.Casa,
                     TotalPagado = g.Sum(p => p.Monto)
                 })
                 .OrderByDescending(x => x.TotalPagado)
@@ -361,12 +362,17 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #12: Vivienda más atrasada en pagos
+        // Consulta #12: Vivienda más atrasada en pagos (CORREGIDA - SQLite decimal fix)
         public async Task<IActionResult> Consulta12()
         {
-            var resultado = await _context.EstadosCuenta
+            var estadosCuenta = await _context.EstadosCuenta
                 .Include(e => e.Residencia)
                     .ThenInclude(r => r.Cluster)
+                .Include(e => e.Residencia)
+                    .ThenInclude(r => r.Propietario)
+                .ToListAsync(); // Traemos todo a memoria primero para evitar el error de SQLite
+
+            var resultado = estadosCuenta
                 .OrderByDescending(e => e.SaldoPendiente)
                 .Select(e => new
                 {
@@ -376,19 +382,22 @@ namespace ARSAN_Web.Controllers
                     Propietario = e.Residencia.Propietario.NombreCompleto,
                     e.SaldoPendiente
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             ViewBag.Resultado = resultado;
             return View();
         }
 
-        // Consulta #13: Día del mes con mayor recaudación
+        // Consulta #13: Día del mes con mayor recaudación (CORREGIDA - SQLite decimal fix)
         public async Task<IActionResult> Consulta13(int anio)
         {
             if (anio == 0) anio = DateTime.Today.Year;
 
-            var resultado = await _context.Recibos
+            var recibos = await _context.Recibos
                 .Where(r => r.Fecha.Year == anio)
+                .ToListAsync(); // Traemos todo a memoria primero para evitar el error de SQLite
+
+            var resultado = recibos
                 .GroupBy(r => r.Fecha.Day)
                 .Select(g => new
                 {
@@ -396,7 +405,7 @@ namespace ARSAN_Web.Controllers
                     Recaudado = g.Sum(r => r.Total)
                 })
                 .OrderByDescending(x => x.Recaudado)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             ViewBag.Resultado = resultado;
             ViewBag.Anio = anio;

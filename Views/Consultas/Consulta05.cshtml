@@ -37,8 +37,15 @@
             <div class="card-body">
                 <table class="table table-bordered">
                     <tr>
-                        <th>ID Casa:</th>
-                        <td><span class="badge bg-primary fs-5">Casa #@ViewBag.Resultado.IdCasa</span></td>
+                        <th>Propietario:</th>
+                        <td><h5>@ViewBag.Resultado.Propietario</h5></td>
+                    </tr>
+                    <tr>
+                        <th>Ubicación:</th>
+                        <td>
+                            <strong>@ViewBag.Resultado.Cluster</strong>
+                            <span class="badge bg-primary fs-5 ms-2">Casa #@ViewBag.Resultado.Casa</span>
+                        </td>
                     </tr>
                     <tr>
                         <th>Total Pagado:</th>
