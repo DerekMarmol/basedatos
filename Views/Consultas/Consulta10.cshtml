@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Consulta 10 - Guardia con Más Ingresos";
+}
+
+<div class="container mt-4">
+    <h2>🛡️ Consulta #10: Guardia con Más Ingresos Atendidos</h2>
+    <p class="text-muted">Identifica al guardia más activo en atención de ingresos</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
+                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
+                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
+                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.Resultado != null)
+    {
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">🏆 Guardia Más Activo</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>ID Guardia:</th>
+                        <td>@ViewBag.Resultado.IdGuardia</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre:</th>
+                        <td><h5>@ViewBag.Resultado.NombreCompleto</h5></td>
+                    </tr>
+                    <tr>
+                        <th>Ingresos Atendidos:</th>
+                        <td><span class="badge bg-success fs-4">@ViewBag.Resultado.IngresosAtendidos</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">No hay registros en el período seleccionado.</div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Volver a Consultas</a>
+    </div>
+</div>

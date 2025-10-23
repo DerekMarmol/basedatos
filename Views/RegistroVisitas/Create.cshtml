@@ -1,0 +1,59 @@
+﻿@model ARSAN_Web.Models.RegistroVisita
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>RegistroVisita</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="IdVisitante" class="control-label"></label>
+                <select asp-for="IdVisitante" class ="form-control" asp-items="ViewBag.IdVisitante"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdCasa" class="control-label"></label>
+                <select asp-for="IdCasa" class ="form-control" asp-items="ViewBag.IdCasa"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaIngreso" class="control-label"></label>
+                <input asp-for="FechaIngreso" class="form-control" />
+                <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaSalida" class="control-label"></label>
+                <input asp-for="FechaSalida" class="form-control" />
+                <span asp-validation-for="FechaSalida" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdGuardiaIngreso" class="control-label"></label>
+                <select asp-for="IdGuardiaIngreso" class ="form-control" asp-items="ViewBag.IdGuardiaIngreso"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdGuardiaSalida" class="control-label"></label>
+                <select asp-for="IdGuardiaSalida" class ="form-control" asp-items="ViewBag.IdGuardiaSalida"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Motivo" class="control-label"></label>
+                <input asp-for="Motivo" class="form-control" />
+                <span asp-validation-for="Motivo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

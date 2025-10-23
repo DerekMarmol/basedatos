@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Consultas Especiales";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary mb-3">📊 Consultas Especiales</h1>
+        <p class="lead text-muted">Sistema de consultas - ARSAN-F</p>
+        <hr class="mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #0d6efd, #198754);">
+    </div>
+
+    <div class="row g-4">
+        <!-- Consultas de Gestión -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-house-door"></i> 🏠 Consultas de Gestión</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Consulta01" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">1</span> Vehículos por vivienda
+                        </a>
+                        <a asp-action="Consulta03" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">3</span> Reporte de viviendas
+                        </a>
+                        <a asp-action="Consulta06" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">6</span> Propietarios Diana II casados menores de 30
+                        </a>
+                        <a asp-action="Consulta17" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">17</span> Inquilinos que son propietarios
+                        </a>
+                        <a asp-action="Consulta18" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">18</span> Propietarios con licencia tipo A
+                        </a>
+                        <a asp-action="Consulta19" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-primary me-2">19</span> Cobro extra por vehículos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultas de Seguridad -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">🛡️ Consultas de Seguridad</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Consulta02" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">2</span> Visitas de hoy
+                        </a>
+                        <a asp-action="Consulta04" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">4</span> Intentos de personas no gratas
+                        </a>
+                        <a asp-action="Consulta09" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">9</span> Top casas con más visitas
+                        </a>
+                        <a asp-action="Consulta10" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">10</span> Guardia con más ingresos
+                        </a>
+                        <a asp-action="Consulta11" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">11</span> Visitas abiertas (sin salida)
+                        </a>
+                        <a asp-action="Consulta15" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">15</span> Vehículos no permitidos detectados
+                        </a>
+                        <a asp-action="Consulta16" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">16</span> Visitantes frecuentes
+                        </a>
+                        <a asp-action="Consulta20" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-success me-2">20</span> Bitácora diaria
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultas Financieras -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h5 class="mb-0">💰 Consultas Financieras</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Consulta05" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-warning text-dark me-2">5</span> Vecino que más ha pagado
+                        </a>
+                        <a asp-action="Consulta12" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-warning text-dark me-2">12</span> Vivienda más atrasada en pagos
+                        </a>
+                        <a asp-action="Consulta13" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-warning text-dark me-2">13</span> Día del mes con mayor recaudación
+                        </a>
+                        <a asp-action="Consulta14" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-warning text-dark me-2">14</span> Residencia con más recibos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultas de Multas -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">⚠️ Consultas de Multas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Consulta21" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-danger me-2">21</span> Concepto de multa más utilizado
+                        </a>
+                        <a asp-action="Consulta22" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-danger me-2">22</span> Casas con multas pendientes
+                        </a>
+                        <a asp-action="Consulta23" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-danger me-2">23</span> Mes con más multas por desorden
+                        </a>
+                        <a asp-action="Consulta24" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-danger me-2">24</span> Total recaudado por multas
+                        </a>
+                        <a asp-action="Consulta25" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-danger me-2">25</span> Propietario con más multas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultas Administrativas -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0">📋 Consultas Administrativas</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Consulta07" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-info me-2">7</span> Persona que más veces ha sido presidente
+                        </a>
+                        <a asp-action="Consulta08" class="list-group-item list-group-item-action border-0 py-3">
+                            <span class="badge bg-info me-2">8</span> Propietarios que nunca han sido de junta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg px-5">
+            ← Volver al inicio
+        </a>
+    </div>
+</div>
+
+<style>
+    .list-group-item {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            padding-left: 1.5rem !important;
+            font-weight: 500;
+        }
+
+    .card {
+        transition: transform 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+    }
+</style>

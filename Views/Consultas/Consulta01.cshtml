@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Consulta 1 - Vehículos por Vivienda";
+}
+
+<div class="container mt-4">
+    <h2>🚗 Consulta #1: Vehículos por Vivienda</h2>
+    <p class="text-muted">Consulta cuántos vehículos tiene una vivienda específica</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="cluster" class="form-label">Cluster:</label>
+                        <select name="cluster" id="cluster" class="form-select" required>
+                            <option value="">-- Seleccione un cluster --</option>
+                            @if (ViewBag.Clusters != null)
+                            {
+                                foreach (var cluster in ViewBag.Clusters)
+                                {
+                                    <option value="@cluster.Nombre">@cluster.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="numeroCasa" class="form-label">Número de Casa:</label>
+                        <input type="number" name="numeroCasa" id="numeroCasa" class="form-control" required min="1" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.Resultado != null)
+    {
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Resultado</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Cluster:</th>
+                        <td>@ViewBag.Resultado.Cluster</td>
+                    </tr>
+                    <tr>
+                        <th>Número de Casa:</th>
+                        <td>@ViewBag.Resultado.NumeroCasa</td>
+                    </tr>
+                    <tr>
+                        <th>Propietario:</th>
+                        <td>@ViewBag.Resultado.Propietario</td>
+                    </tr>
+                    <tr>
+                        <th>Cantidad de Vehículos:</th>
+                        <td><span class="badge bg-primary fs-6">@ViewBag.Resultado.CantidadVehiculos</span></td>
+                    </tr>
+                    <tr>
+                        <th>Cargo Extra:</th>
+                        <td>
+                            @if (ViewBag.Resultado.CantidadVehiculos > 4)
+                            {
+                                <span class="badge bg-warning text-dark">@ViewBag.Resultado.CargoExtra</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">@ViewBag.Resultado.CargoExtra</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Volver a Consultas</a>
+    </div>
+</div>

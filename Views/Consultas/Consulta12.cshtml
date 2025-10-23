@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Consulta 12 - Vivienda Más Atrasada";
+}
+
+<div class="container mt-4">
+    <h2>💸 Consulta #12: Vivienda Más Atrasada en Pagos</h2>
+    <p class="text-muted">Identifica la vivienda con mayor saldo pendiente</p>
+
+    @if (ViewBag.Resultado != null)
+    {
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">⚠️ Vivienda Más Atrasada</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>ID Casa:</th>
+                        <td><span class="badge bg-danger fs-5">Casa #@ViewBag.Resultado.IdCasa</span></td>
+                    </tr>
+                    <tr>
+                        <th>Saldo Pendiente:</th>
+                        <td><h2 class="text-danger mb-0">Q @ViewBag.Resultado.SaldoPendiente?.ToString("N2")</h2></td>
+                    </tr>
+                </table>
+                <div class="alert alert-warning mt-3">
+                    <strong>Acción requerida:</strong> Se debe contactar al propietario para regularizar los pagos.
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">Todas las viviendas están al corriente con sus pagos.</div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Volver a Consultas</a>
+    </div>
+</div>

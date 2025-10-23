@@ -1,0 +1,85 @@
+﻿@model IEnumerable<ARSAN_Web.Models.Cluster>
+
+@{
+    ViewData["Title"] = "Clusters";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6 mb-1">📍 Clusters</h1>
+            <p class="text-muted">Gestión de agrupaciones residenciales</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                ➕ Crear Nuevo
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 py-3">@Html.DisplayNameFor(model => model.Nombre)</th>
+                            <th class="px-4 py-3 text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 fw-semibold">
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td class="px-4 py-3 text-end">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.IdCluster"
+                                           class="btn btn-sm btn-outline-info" title="Ver detalles">
+                                            👁️ Ver
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.IdCluster"
+                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                            ✏️ Editar
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.IdCluster"
+                                           class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            🗑️ Eliminar
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info mt-4" role="alert">
+            <strong>ℹ️ No hay clusters registrados.</strong> Comienza creando uno nuevo.
+        </div>
+    }
+</div>
+
+<style>
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .btn-group .btn {
+        transition: all 0.2s ease;
+    }
+
+        .btn-group .btn:hover {
+            transform: translateY(-1px);
+        }
+</style>

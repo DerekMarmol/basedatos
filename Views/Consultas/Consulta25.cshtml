@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Consulta 25 - Propietario con Más Multas";
+}
+
+<div class="container mt-4">
+    <h2>⚠️ Consulta #25: Propietario con Más Multas</h2>
+    <p class="text-muted">Identifica al propietario con mayor cantidad de multas</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
+                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
+                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
+                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.Resultado != null)
+    {
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">⚠️ Mayor Infractor</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Propietario:</th>
+                        <td><h5>@ViewBag.Resultado.Propietario</h5></td>
+                    </tr>
+                    <tr>
+                        <th>Ubicación:</th>
+                        <td>@ViewBag.Resultado.Cluster - Casa #@ViewBag.Resultado.Casa</td>
+                    </tr>
+                    <tr>
+                        <th>Total de Multas:</th>
+                        <td><span class="badge bg-danger fs-3">@ViewBag.Resultado.TotalMultas</span></td>
+                    </tr>
+                </table>
+                <div class="alert alert-warning mt-3">
+                    <strong>Nota:</strong> Se recomienda contactar al propietario para evitar futuras infracciones.
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">No hay multas registradas en el período seleccionado.</div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Volver a Consultas</a>
+    </div>
+</div>

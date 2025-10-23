@@ -1,0 +1,101 @@
+﻿@model IEnumerable<ARSAN_Web.Models.AccesoVehicular>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Placa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaIngreso)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HoraIngreso)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaSalida)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HoraSalida)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TipoAcceso)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Observaciones)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Vehiculo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Visitante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Garita)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GuardiaIngreso)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GuardiaSalida)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Placa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaIngreso)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HoraIngreso)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaSalida)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HoraSalida)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TipoAcceso)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Observaciones)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Vehiculo.NumeroTarjeta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Visitante.NombreCompleto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Garita.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GuardiaIngreso.Dpi)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GuardiaSalida.Dpi)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.IdAcceso">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.IdAcceso">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.IdAcceso">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

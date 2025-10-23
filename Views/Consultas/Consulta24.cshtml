@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Consulta 24 - Total Recaudado por Multas";
+}
+
+<div class="container mt-4">
+    <h2>💰 Consulta #24: Total Recaudado por Multas</h2>
+    <p class="text-muted">Monto total recaudado por concepto de multas pagadas</p>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
+                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
+                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
+                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">💵 Total Recaudado</h5>
+        </div>
+        <div class="card-body text-center">
+            <h1 class="display-1 text-success">Q @ViewBag.TotalRecaudado.ToString("N2")</h1>
+            <p class="lead text-muted">
+                Del @ViewBag.FechaIni?.ToString("dd/MM/yyyy") al @ViewBag.FechaFin?.ToString("dd/MM/yyyy")
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Volver a Consultas</a>
+    </div>
+</div>

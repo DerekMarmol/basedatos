@@ -1,0 +1,42 @@
+﻿@model ARSAN_Web.Models.Cargo
+
+@{
+    ViewData["Title"] = "Eliminar Cargo";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h4 class="mb-0">🗑️ Eliminar Cargo</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning" role="alert">
+                        <strong>⚠️ ¿Está seguro que desea eliminar este cargo?</strong>
+                        <p class="mb-0 mt-2">Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 text-muted">Nombre:</dt>
+                        <dd class="col-sm-8 fw-semibold fs-5">
+                            @Html.DisplayFor(model => model.Nombre)
+                        </dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="IdCargo" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                🗑️ Confirmar Eliminación
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                ← Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

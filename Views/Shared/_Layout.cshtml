@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ARSAN</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ARSAN_Web.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            margin: 0 0.2rem;
+        }
+
+            .nav-link:hover {
+                background-color: #f8f9fa;
+                color: var(--primary-color) !important;
+                transform: translateY(-1px);
+            }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+            .dropdown-item:hover {
+                background-color: #e9ecef;
+                transform: translateX(5px);
+            }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            opacity: 0.2;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+            footer a {
+                color: var(--primary-color);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+                footer a:hover {
+                    color: #0a58ca;
+                }
+
+        .container-fluid {
+            max-width: 1400px;
+        }
+
+        /* Efectos en el navbar brand */
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+        }
+
+        /* Mejorar el toggle en móvil */
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+        }
+
+            .navbar-toggler:focus {
+                box-shadow: none;
+                outline: 2px solid var(--primary-color);
+                outline-offset: 2px;
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    🏘️ ARSAN
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                🏠 Inicio
+                            </a>
+                        </li>
+
+                        <!-- Gestión -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                🏠 Gestión
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Propiedades</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Clusters" asp-action="Index">📍 Clusters</a></li>
+                                <li><a class="dropdown-item" asp-controller="Propietarios" asp-action="Index">👥 Propietarios</a></li>
+                                <li><a class="dropdown-item" asp-controller="Inquilinos" asp-action="Index">🏘️ Inquilinos</a></li>
+                                <li><a class="dropdown-item" asp-controller="Residencias" asp-action="Index">🏡 Residencias</a></li>
+                                <li><a class="dropdown-item" asp-controller="Vehiculos" asp-action="Index">🚗 Vehículos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Organización</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Cargos" asp-action="Index">💼 Cargos</a></li>
+                                <li><a class="dropdown-item" asp-controller="JuntaDirectivas" asp-action="Index">🎯 Juntas Directivas</a></li>
+                                <li><a class="dropdown-item" asp-controller="MiembroJuntas" asp-action="Index">👔 Miembros de Junta</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Seguridad -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                🛡️ Seguridad
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><h6 class="dropdown-header">Personal y Visitas</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Guardias" asp-action="Index">👮 Guardias</a></li>
+                                <li><a class="dropdown-item" asp-controller="Visitantes" asp-action="Index">🚶 Visitantes</a></li>
+                                <li><a class="dropdown-item" asp-controller="RegistroVisitas" asp-action="Index">📋 Registro de Visitas</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Restricciones</h6></li>
+                                <li><a class="dropdown-item" asp-controller="PersonaNoGratas" asp-action="Index">🚫 Personas No Gratas</a></li>
+                                <li><a class="dropdown-item" asp-controller="VehiculoNoPermitidos" asp-action="Index">⛔ Vehículos No Permitidos</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Financiero -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
+                                💰 Financiero
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Casas" asp-action="Index">🏠 Casas</a></li>
+                                <li><a class="dropdown-item" asp-controller="PagoMantenimientos" asp-action="Index">💵 Pagos de Mantenimiento</a></li>
+                                <li><a class="dropdown-item" asp-controller="Multas" asp-action="Index">⚠️ Multas</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Consultas -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Consultas" asp-action="Index">
+                                📊 <strong>Consultas</strong>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container text-center">
+            <p class="mb-0">
+                &copy; 2025 <strong>ARSAN</strong> - Sistema de Administración Residencial
+                <span class="mx-2">|</span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

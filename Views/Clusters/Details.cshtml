@@ -1,0 +1,36 @@
+﻿@model ARSAN_Web.Models.Cluster
+
+@{
+    ViewData["Title"] = "Detalles del Cluster";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white py-3">
+                    <h4 class="mb-0">👁️ Detalles del Cluster</h4>
+                </div>
+                <div class="card-body p-4">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Nombre:</dt>
+                        <dd class="col-sm-8 fw-semibold fs-5">
+                            @Html.DisplayFor(model => model.Nombre)
+                        </dd>
+                    </dl>
+                </div>
+                <div class="card-footer bg-light py-3">
+                    <div class="d-flex gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model?.IdCluster"
+                           class="btn btn-warning">
+                            ✏️ Editar
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            ← Volver al Listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
