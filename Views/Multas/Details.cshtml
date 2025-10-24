@@ -1,60 +1,44 @@
 ﻿@model ARSAN_Web.Models.Multa
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de Multa";
 }
 
-<h1>Details</h1>
+<h1>Detalles de Multa</h1>
 
 <div>
     <h4>Multa</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IdCasa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IdCasa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Concepto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Concepto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Monto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Monto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Fecha)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Fecha)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Pagada)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Pagada)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Residencia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Residencia.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoMulta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoMulta.Codigo)
+        <dt class="col-sm-3">ID Residencia</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.IdResidencia)</dd>
+
+        <dt class="col-sm-3">Cluster</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Residencia.Cluster.Nombre)</dd>
+
+        <dt class="col-sm-3">Número de Casa</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Residencia.Numero)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Concepto)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Concepto)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Monto)</dt>
+        <dd class="col-sm-9">Q @Html.DisplayFor(model => model.Monto)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Fecha)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Fecha)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Pagada)</dt>
+        <dd class="col-sm-9">@(Model.Pagada ? "Sí" : "No")</dd>
+
+        <dt class="col-sm-3">Tipo de Multa</dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.TipoMulta.Nombre)
+            (@Html.DisplayFor(model => model.TipoMulta.Codigo))
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdMulta">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.IdMulta" class="btn btn-warning">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver al Listado</a>
 </div>

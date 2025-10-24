@@ -22,7 +22,10 @@ namespace ARSAN_Web.Controllers
         // GET: Residencias
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Residencias.Include(r => r.Cluster).Include(r => r.Inquilino).Include(r => r.Propietario);
+            var applicationDbContext = _context.Residencias
+                .Include(r => r.Cluster)
+                .Include(r => r.Inquilino)
+                .Include(r => r.Propietario);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -51,18 +54,23 @@ namespace ARSAN_Web.Controllers
         public IActionResult Create()
         {
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre");
-            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "Dpi");
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi");
+            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "NombreCompleto");
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto");
             return View();
         }
 
         // POST: Residencias/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdResidencia,Numero,IdCluster,IdPropietario,IdInquilino,Estado")] Residencia residencia)
         {
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Propietario");
+            ModelState.Remove("Inquilino");
+            ModelState.Remove("Vehiculos");
+            ModelState.Remove("Censos");
+
             if (ModelState.IsValid)
             {
                 _context.Add(residencia);
@@ -70,8 +78,8 @@ namespace ARSAN_Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", residencia.IdCluster);
-            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "Dpi", residencia.IdInquilino);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", residencia.IdPropietario);
+            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "NombreCompleto", residencia.IdInquilino);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", residencia.IdPropietario);
             return View(residencia);
         }
 
@@ -89,14 +97,12 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", residencia.IdCluster);
-            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "Dpi", residencia.IdInquilino);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", residencia.IdPropietario);
+            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "NombreCompleto", residencia.IdInquilino);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", residencia.IdPropietario);
             return View(residencia);
         }
 
         // POST: Residencias/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdResidencia,Numero,IdCluster,IdPropietario,IdInquilino,Estado")] Residencia residencia)
@@ -105,6 +111,13 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Propietario");
+            ModelState.Remove("Inquilino");
+            ModelState.Remove("Vehiculos");
+            ModelState.Remove("Censos");
 
             if (ModelState.IsValid)
             {
@@ -127,8 +140,8 @@ namespace ARSAN_Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", residencia.IdCluster);
-            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "Dpi", residencia.IdInquilino);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", residencia.IdPropietario);
+            ViewData["IdInquilino"] = new SelectList(_context.Inquilinos, "IdInquilino", "NombreCompleto", residencia.IdInquilino);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", residencia.IdPropietario);
             return View(residencia);
         }
 

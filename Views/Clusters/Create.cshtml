@@ -16,6 +16,16 @@
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                         <div class="mb-4">
+                            <label asp-for="IdResidencial" class="form-label fw-semibold">
+                                Residencial
+                            </label>
+                            <select asp-for="IdResidencial" class="form-control form-control-lg" asp-items="ViewBag.IdResidencial">
+                                <option value="">-- Seleccione un residencial --</option>
+                            </select>
+                            <span asp-validation-for="IdResidencial" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
                             <label asp-for="Nombre" class="form-label fw-semibold">
                                 Nombre del Cluster
                             </label>

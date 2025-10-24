@@ -1,59 +1,72 @@
 ﻿@model ARSAN_Web.Models.Multa
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Multa";
 }
 
-<h1>Create</h1>
+<h1>Crear Multa</h1>
 
-<h4>Multa</h4>
+<h4>Nueva Multa</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdCasa" class="control-label"></label>
-                <input asp-for="IdCasa" class="form-control" />
-                <span asp-validation-for="IdCasa" class="text-danger"></span>
+            
+            <div class="form-group mb-3">
+                <label asp-for="IdCluster" class="control-label">Cluster</label>
+                <select asp-for="IdCluster" class="form-control" asp-items="ViewBag.IdCluster" id="clusterSelect">
+                    <option value="">-- Seleccione un cluster --</option>
+                </select>
+                <span asp-validation-for="IdCluster" class="text-danger"></span>
+                <small class="form-text text-muted">Primero seleccione el cluster al que pertenece la residencia</small>
             </div>
-            <div class="form-group">
-                <label asp-for="IdResidencia" class="control-label"></label>
-                <select asp-for="IdResidencia" class ="form-control" asp-items="ViewBag.IdResidencia"></select>
+            
+            <div class="form-group mb-3">
+                <label asp-for="IdResidencia" class="control-label">ID Residencia</label>
+                <input asp-for="IdResidencia" class="form-control" type="number" min="1" />
+                <span asp-validation-for="IdResidencia" class="text-danger"></span>
+                <small class="form-text text-muted">Ingrese el ID de la residencia dentro del cluster seleccionado</small>
             </div>
-            <div class="form-group">
+            
+            <div class="form-group mb-3">
                 <label asp-for="Concepto" class="control-label"></label>
-                <input asp-for="Concepto" class="form-control" />
+                <textarea asp-for="Concepto" class="form-control" rows="3" placeholder="Describa el motivo de la multa"></textarea>
                 <span asp-validation-for="Concepto" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            
+            <div class="form-group mb-3">
                 <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" />
+                <input asp-for="Monto" class="form-control" type="number" step="0.01" min="0" />
                 <span asp-validation-for="Monto" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            
+            <div class="form-group mb-3">
                 <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" />
+                <input asp-for="Fecha" class="form-control" type="date" />
                 <span asp-validation-for="Fecha" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
+            
+            <div class="form-group form-check mb-3">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Pagada" /> @Html.DisplayNameFor(model => model.Pagada)
                 </label>
             </div>
-            <div class="form-group">
-                <label asp-for="IdTipoMulta" class="control-label"></label>
-                <select asp-for="IdTipoMulta" class ="form-control" asp-items="ViewBag.IdTipoMulta"></select>
+            
+            <div class="form-group mb-3">
+                <label asp-for="IdTipoMulta" class="control-label">Tipo de Multa</label>
+                <select asp-for="IdTipoMulta" class="form-control" asp-items="ViewBag.IdTipoMulta">
+                    <option value="">-- Seleccione un tipo --</option>
+                </select>
+                <span asp-validation-for="IdTipoMulta" class="text-danger"></span>
             </div>
+            
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

@@ -33,7 +33,6 @@ namespace ARSAN_Web.Data
         public DbSet<VehiculoNoPermitido> VehiculosNoPermitidos { get; set; }
         public DbSet<TarjetaIntegracionPagos> TarjetasIntegracionPagos { get; set; }
 
-        // NUEVAS TABLAS
         public DbSet<Garita> Garitas { get; set; }
         public DbSet<TurnoGuardia> TurnosGuardia { get; set; }
         public DbSet<AccesoVehicular> AccesosVehiculares { get; set; }
@@ -45,7 +44,7 @@ namespace ARSAN_Web.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // =============== NUEVA TABLA: Residencial ===============
+            // =============== TABLA: Residencial ===============
             modelBuilder.Entity<Residencial>(entity =>
             {
                 entity.ToTable("Residencial");
@@ -66,7 +65,7 @@ namespace ARSAN_Web.Data
                 entity.HasIndex(e => e.Nombre).IsUnique();
             });
 
-            // =============== NUEVA TABLA: Garita ===============
+            // =============== TABLA: Garita ===============
             modelBuilder.Entity<Garita>(entity =>
             {
                 entity.ToTable("Garita");
@@ -85,7 +84,7 @@ namespace ARSAN_Web.Data
                 entity.HasIndex(e => e.Nombre).IsUnique();
             });
 
-            // =============== NUEVA TABLA: TurnoGuardia ===============
+            // =============== TABLA: TurnoGuardia ===============
             modelBuilder.Entity<TurnoGuardia>(entity =>
             {
                 entity.ToTable("TurnoGuardia");
@@ -106,7 +105,7 @@ namespace ARSAN_Web.Data
                     .HasForeignKey(e => e.IdGuardia);
             });
 
-            // =============== NUEVA TABLA: AccesoVehicular ===============
+            // =============== TABLA: AccesoVehicular ===============
             modelBuilder.Entity<AccesoVehicular>(entity =>
             {
                 entity.ToTable("AccesoVehicular");
@@ -150,7 +149,7 @@ namespace ARSAN_Web.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // =============== NUEVA TABLA: TipoMulta ===============
+            // =============== TABLA: TipoMulta ===============
             modelBuilder.Entity<TipoMulta>(entity =>
             {
                 entity.ToTable("TipoMulta");
@@ -165,7 +164,7 @@ namespace ARSAN_Web.Data
                 entity.HasIndex(e => e.Codigo).IsUnique();
             });
 
-            // =============== NUEVA TABLA: ConceptoPago ===============
+            // =============== TABLA: ConceptoPago ===============
             modelBuilder.Entity<ConceptoPago>(entity =>
             {
                 entity.ToTable("ConceptoPago");
@@ -180,7 +179,7 @@ namespace ARSAN_Web.Data
                 entity.HasIndex(e => e.Codigo).IsUnique();
             });
 
-            // =============== NUEVA TABLA: DetalleRecibo ===============
+            // =============== TABLA: DetalleRecibo ===============
             modelBuilder.Entity<DetalleRecibo>(entity =>
             {
                 entity.ToTable("DetalleRecibo");
@@ -201,23 +200,23 @@ namespace ARSAN_Web.Data
                     .HasForeignKey(e => e.IdConceptoPago);
             });
 
-            // =============== ACTUALIZADO: Cluster ===============
+            // =============== Cluster ===============
             modelBuilder.Entity<Cluster>(entity =>
             {
                 entity.ToTable("Cluster");
                 entity.HasKey(e => e.IdCluster);
                 entity.Property(e => e.IdCluster).HasColumnName("id_cluster");
                 entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(50).IsRequired();
-                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); 
 
-                entity.HasOne(e => e.Residencial) // NUEVO
+                entity.HasOne(e => e.Residencial) 
                     .WithMany(r => r.Clusters)
                     .HasForeignKey(e => e.IdResidencial);
 
                 entity.HasIndex(e => new { e.IdResidencial, e.Nombre }).IsUnique();
             });
 
-            // =============== ACTUALIZADO: Guardia ===============
+            // =============== Guardia ===============
             modelBuilder.Entity<Guardia>(entity =>
             {
                 entity.ToTable("Guardia");
@@ -229,10 +228,10 @@ namespace ARSAN_Web.Data
                 entity.Property(e => e.FechaContratacion).HasColumnName("FechaContratacion");
                 entity.Property(e => e.Turno).HasColumnName("Turno").HasMaxLength(1);
                 entity.Property(e => e.Activo).HasColumnName("Activo").IsRequired();
-                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); // NUEVO
-                entity.Property(e => e.Genero).HasColumnName("genero").HasMaxLength(1); // NUEVO
+                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); 
+                entity.Property(e => e.Genero).HasColumnName("genero").HasMaxLength(1); 
 
-                entity.HasOne(e => e.Residencial) // NUEVO
+                entity.HasOne(e => e.Residencial) 
                     .WithMany(r => r.Guardias)
                     .HasForeignKey(e => e.IdResidencial);
 
@@ -389,20 +388,19 @@ namespace ARSAN_Web.Data
                     .HasForeignKey(e => e.IdResidencia);
             });
 
-            // =============== ACTUALIZADO: PagoMantenimiento ===============
+            // =============== PagoMantenimiento ===============
             modelBuilder.Entity<PagoMantenimiento>(entity =>
             {
                 entity.ToTable("PagosMantenimiento");
                 entity.HasKey(e => e.IdPago);
                 entity.Property(e => e.IdPago).HasColumnName("IdPago");
-                entity.Property(e => e.IdCasa).HasColumnName("IdCasa"); // Mantener por compatibilidad
-                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); 
                 entity.Property(e => e.FechaPago).HasColumnName("FechaPago").IsRequired();
                 entity.Property(e => e.Monto).HasColumnName("Monto").HasColumnType("decimal(10,2)").IsRequired();
                 entity.Property(e => e.FormaPago).HasColumnName("FormaPago").HasMaxLength(20);
                 entity.Property(e => e.Observaciones).HasColumnName("Observaciones").HasMaxLength(200);
 
-                entity.HasOne(e => e.Residencia) // NUEVO
+                entity.HasOne(e => e.Residencia)
                     .WithMany()
                     .HasForeignKey(e => e.IdResidencia);
             });
@@ -423,44 +421,46 @@ namespace ARSAN_Web.Data
                     .HasForeignKey(e => e.IdPago);
             });
 
-            // =============== ACTUALIZADO: EstadoCuenta ===============
+            // =============== EstadoCuenta ===============
             modelBuilder.Entity<EstadoCuenta>(entity =>
             {
                 entity.ToTable("EstadosCuenta");
                 entity.HasKey(e => e.IdEstadoCuenta);
                 entity.Property(e => e.IdEstadoCuenta).HasColumnName("IdEstadoCuenta");
-                entity.Property(e => e.IdCasa).HasColumnName("IdCasa"); // Mantener por compatibilidad
-                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); 
                 entity.Property(e => e.FechaGeneracion).HasColumnName("FechaGeneracion").IsRequired();
                 entity.Property(e => e.SaldoPendiente).HasColumnName("SaldoPendiente").HasColumnType("decimal(10,2)");
                 entity.Property(e => e.TotalPagado).HasColumnName("TotalPagado").HasColumnType("decimal(10,2)");
 
-                entity.HasOne(e => e.Residencia) // NUEVO
+                entity.HasOne(e => e.Residencia)
                     .WithMany()
                     .HasForeignKey(e => e.IdResidencia);
             });
 
-            // =============== ACTUALIZADO: Multa ===============
+            // =============== Multa ===============
             modelBuilder.Entity<Multa>(entity =>
             {
                 entity.ToTable("Multa");
                 entity.HasKey(e => e.IdMulta);
                 entity.Property(e => e.IdMulta).HasColumnName("IdMulta");
-                entity.Property(e => e.IdCasa).HasColumnName("IdCasa"); // Mantener por compatibilidad
-                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired();
+                entity.Property(e => e.IdCluster).HasColumnName("id_cluster").IsRequired();
                 entity.Property(e => e.Concepto).HasColumnName("Concepto").HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Monto).HasColumnName("Monto").HasColumnType("decimal(12,2)").IsRequired();
                 entity.Property(e => e.Fecha).HasColumnName("Fecha").IsRequired();
                 entity.Property(e => e.Pagada).HasColumnName("Pagada").IsRequired();
-                entity.Property(e => e.IdTipoMulta).HasColumnName("id_tipo_multa"); // NUEVO
+                entity.Property(e => e.IdTipoMulta).HasColumnName("id_tipo_multa");
 
-                entity.HasOne(e => e.Residencia) // NUEVO
+                entity.HasOne(e => e.Residencia)
                     .WithMany()
-                    .HasForeignKey(e => e.IdResidencia);
+                    .HasForeignKey(e => e.IdResidencia)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(e => e.TipoMulta) // NUEVO
+                entity.HasOne(e => e.TipoMulta)
                     .WithMany(t => t.Multas)
                     .HasForeignKey(e => e.IdTipoMulta);
+
+                entity.HasIndex(e => new { e.IdCluster, e.IdResidencia });
             });
 
             // Configuración de PagoMulta
@@ -491,27 +491,26 @@ namespace ARSAN_Web.Data
                 entity.Property(e => e.Empresa).HasColumnName("Empresa").HasMaxLength(100);
             });
 
-            // =============== ACTUALIZADO: RegistroVisita ===============
+            // =============== RegistroVisita ===============
             modelBuilder.Entity<RegistroVisita>(entity =>
             {
                 entity.ToTable("RegistroVisita");
                 entity.HasKey(e => e.IdRegistro);
                 entity.Property(e => e.IdRegistro).HasColumnName("IdRegistro");
                 entity.Property(e => e.IdVisitante).HasColumnName("IdVisitante").IsRequired();
-                entity.Property(e => e.IdCasa).HasColumnName("IdCasa"); // Mantener por compatibilidad
-                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired();
                 entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").IsRequired();
                 entity.Property(e => e.FechaSalida).HasColumnName("FechaSalida");
                 entity.Property(e => e.IdGuardiaIngreso).HasColumnName("IdGuardiaIngreso").IsRequired();
                 entity.Property(e => e.IdGuardiaSalida).HasColumnName("IdGuardiaSalida");
                 entity.Property(e => e.Motivo).HasColumnName("Motivo").HasMaxLength(200);
-                entity.Property(e => e.IdGarita).HasColumnName("id_garita"); // NUEVO
+                entity.Property(e => e.IdGarita).HasColumnName("id_garita"); 
 
                 entity.HasOne(e => e.Visitante)
                     .WithMany(v => v.RegistrosVisita)
                     .HasForeignKey(e => e.IdVisitante);
 
-                entity.HasOne(e => e.Residencia) // NUEVO
+                entity.HasOne(e => e.Residencia) 
                     .WithMany()
                     .HasForeignKey(e => e.IdResidencia);
 
@@ -525,12 +524,12 @@ namespace ARSAN_Web.Data
                     .HasForeignKey(e => e.IdGuardiaSalida)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(e => e.Garita) // NUEVO
+                entity.HasOne(e => e.Garita) 
                     .WithMany(g => g.RegistrosVisita)
                     .HasForeignKey(e => e.IdGarita);
             });
 
-            // =============== ACTUALIZADO: PersonaNoGrata ===============
+            // =============== PersonaNoGrata ===============
             modelBuilder.Entity<PersonaNoGrata>(entity =>
             {
                 entity.ToTable("PersonaNoGrata");
@@ -541,14 +540,14 @@ namespace ARSAN_Web.Data
                 entity.Property(e => e.Motivo).HasColumnName("Motivo").HasMaxLength(200).IsRequired();
                 entity.Property(e => e.FechaRegistro).HasColumnName("FechaRegistro").IsRequired();
                 entity.Property(e => e.Activo).HasColumnName("Activo").IsRequired();
-                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); 
 
-                entity.HasOne(e => e.Residencial) // NUEVO
+                entity.HasOne(e => e.Residencial) 
                     .WithMany(r => r.PersonasNoGratas)
                     .HasForeignKey(e => e.IdResidencial);
             });
 
-            // =============== ACTUALIZADO: VehiculoNoPermitido ===============
+            // =============== VehiculoNoPermitido ===============
             modelBuilder.Entity<VehiculoNoPermitido>(entity =>
             {
                 entity.ToTable("VehiculoNoPermitido");
@@ -558,29 +557,28 @@ namespace ARSAN_Web.Data
                 entity.Property(e => e.Motivo).HasColumnName("Motivo").HasMaxLength(200).IsRequired();
                 entity.Property(e => e.FechaRegistro).HasColumnName("FechaRegistro").IsRequired();
                 entity.Property(e => e.Activo).HasColumnName("Activo").IsRequired();
-                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencial).HasColumnName("id_residencial").IsRequired();
 
-                entity.HasOne(e => e.Residencial) // NUEVO
+                entity.HasOne(e => e.Residencial) 
                     .WithMany(r => r.VehiculosNoPermitidos)
                     .HasForeignKey(e => e.IdResidencial);
 
                 entity.HasIndex(e => e.Placa).IsUnique();
             });
 
-            // =============== ACTUALIZADO: TarjetaIntegracionPagos ===============
+            // =============== TarjetaIntegracionPagos ===============
             modelBuilder.Entity<TarjetaIntegracionPagos>(entity =>
             {
                 entity.ToTable("TarjetaIntegracionPagos");
                 entity.HasKey(e => e.IdMovimiento);
                 entity.Property(e => e.IdMovimiento).HasColumnName("IdMovimiento");
-                entity.Property(e => e.IdCasa).HasColumnName("IdCasa"); // Mantener por compatibilidad
-                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); // NUEVO
+                entity.Property(e => e.IdResidencia).HasColumnName("id_residencia").IsRequired(); 
                 entity.Property(e => e.Fecha).HasColumnName("Fecha").IsRequired();
                 entity.Property(e => e.TipoMovimiento).HasColumnName("TipoMovimiento").HasMaxLength(20);
                 entity.Property(e => e.Referencia).HasColumnName("Referencia").HasMaxLength(50);
                 entity.Property(e => e.Monto).HasColumnName("Monto").HasColumnType("decimal(10,2)");
 
-                entity.HasOne(e => e.Residencia) // NUEVO
+                entity.HasOne(e => e.Residencia) 
                     .WithMany()
                     .HasForeignKey(e => e.IdResidencia);
             });

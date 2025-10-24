@@ -1,71 +1,62 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Multa>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Multas";
 }
 
-<h1>Index</h1>
+<h1>Multas</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Crear Nueva Multa</a>
 </p>
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdCasa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Concepto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Monto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Pagada)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Residencia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoMulta)
-            </th>
+            <th>ID Residencia</th>
+            <th>Cluster</th>
+            <th>Número Casa</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Pagada</th>
+            <th>Tipo Multa</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdCasa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Concepto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Monto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Pagada)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Residencia.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoMulta.Codigo)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdMulta">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdMulta">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdMulta">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IdResidencia)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Residencia.Cluster.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Residencia.Numero)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Concepto)
+                </td>
+                <td>
+                    Q @Html.DisplayFor(modelItem => item.Monto)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fecha)
+                </td>
+                <td>
+                    @(item.Pagada ? "Sí" : "No")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoMulta.Codigo)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdMulta" class="btn btn-sm btn-warning">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdMulta" class="btn btn-sm btn-info">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdMulta" class="btn btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

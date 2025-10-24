@@ -22,8 +22,12 @@ namespace ARSAN_Web.Controllers
         // GET: Multas
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Multas.Include(m => m.Residencia).Include(m => m.TipoMulta);
-            return View(await applicationDbContext.ToListAsync());
+            var multas = await _context.Multas
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)  
+                .Include(m => m.TipoMulta)
+                .ToListAsync();
+            return View(multas);
         }
 
         // GET: Multas/Details/5
@@ -49,25 +53,50 @@ namespace ARSAN_Web.Controllers
         // GET: Multas/Create
         public IActionResult Create()
         {
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado");
+            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre");
             ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo");
             return View();
         }
 
         // POST: Multas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdMulta,IdCasa,IdResidencia,Concepto,Monto,Fecha,Pagada,IdTipoMulta")] Multa multa)
+        public async Task<IActionResult> Create([Bind("IdMulta,IdCluster,IdResidencia,Concepto,Monto,Fecha,Pagada,IdTipoMulta")] Multa multa)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Residencia");
+            ModelState.Remove("TipoMulta");
+
             if (ModelState.IsValid)
             {
+                // Verificar que el cluster existe
+                var clusterExiste = await _context.Clusters.AnyAsync(c => c.IdCluster == multa.IdCluster);
+                if (!clusterExiste)
+                {
+                    ModelState.AddModelError("IdCluster", "El cluster especificado no existe.");
+                    ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                    return View(multa);
+                }
+
+                // Verificar que la residencia existe
+                var residenciaExiste = await _context.Residencias
+                    .AnyAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
+
+                if (!residenciaExiste)
+                {
+                    ModelState.AddModelError("IdResidencia", "La residencia especificada no existe o no pertenece al cluster seleccionado.");
+                    ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                    return View(multa);
+                }
+
                 _context.Add(multa);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", multa.IdResidencia);
+
+            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
             ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
             return View(multa);
         }
@@ -81,31 +110,57 @@ namespace ARSAN_Web.Controllers
             }
 
             var multa = await _context.Multas.FindAsync(id);
+
             if (multa == null)
             {
                 return NotFound();
             }
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", multa.IdResidencia);
+
+            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
             ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
             return View(multa);
         }
 
         // POST: Multas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdMulta,IdCasa,IdResidencia,Concepto,Monto,Fecha,Pagada,IdTipoMulta")] Multa multa)
+        public async Task<IActionResult> Edit(int id, [Bind("IdMulta,IdCluster,IdResidencia,Concepto,Monto,Fecha,Pagada,IdTipoMulta")] Multa multa)
         {
             if (id != multa.IdMulta)
             {
                 return NotFound();
             }
 
+            // Remover validación de navegación
+            ModelState.Remove("Residencia");
+            ModelState.Remove("TipoMulta");
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Verificar que el cluster existe
+                    var clusterExiste = await _context.Clusters.AnyAsync(c => c.IdCluster == multa.IdCluster);
+                    if (!clusterExiste)
+                    {
+                        ModelState.AddModelError("IdCluster", "El cluster especificado no existe.");
+                        ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                        return View(multa);
+                    }
+
+                    // Verificar que la residencia existe y pertenece al cluster
+                    var residenciaExiste = await _context.Residencias
+                        .AnyAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
+
+                    if (!residenciaExiste)
+                    {
+                        ModelState.AddModelError("IdResidencia", "La residencia especificada no existe o no pertenece al cluster seleccionado.");
+                        ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                        return View(multa);
+                    }
+
                     _context.Update(multa);
                     await _context.SaveChangesAsync();
                 }
@@ -122,7 +177,8 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", multa.IdResidencia);
+
+            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
             ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
             return View(multa);
         }

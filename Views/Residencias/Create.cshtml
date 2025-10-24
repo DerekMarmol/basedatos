@@ -1,50 +1,70 @@
 ﻿@model ARSAN_Web.Models.Residencia
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Residencia";
 }
 
-<h1>Create</h1>
+<h1>Crear Residencia</h1>
 
-<h4>Residencia</h4>
+<h4>Nueva Residencia</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Numero" class="control-label"></label>
-                <input asp-for="Numero" class="form-control" />
+                <input asp-for="Numero" class="form-control" type="number" min="1" />
                 <span asp-validation-for="Numero" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdCluster" class="control-label"></label>
-                <select asp-for="IdCluster" class ="form-control" asp-items="ViewBag.IdCluster"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdCluster" class="control-label">Cluster</label>
+                <select asp-for="IdCluster" class="form-control" asp-items="ViewBag.IdCluster">
+                    <option value="">-- Seleccione un cluster --</option>
+                </select>
+                <span asp-validation-for="IdCluster" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdPropietario" class="control-label"></label>
-                <select asp-for="IdPropietario" class ="form-control" asp-items="ViewBag.IdPropietario"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdPropietario" class="control-label">Propietario</label>
+                <select asp-for="IdPropietario" class="form-control" asp-items="ViewBag.IdPropietario">
+                    <option value="">-- Seleccione un propietario --</option>
+                </select>
+                <span asp-validation-for="IdPropietario" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdInquilino" class="control-label"></label>
-                <select asp-for="IdInquilino" class ="form-control" asp-items="ViewBag.IdInquilino"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdInquilino" class="control-label">Inquilino (Opcional)</label>
+                <select asp-for="IdInquilino" class="form-control" asp-items="ViewBag.IdInquilino">
+                    <option value="">-- Sin inquilino --</option>
+                </select>
+                <span asp-validation-for="IdInquilino" class="text-danger"></span>
+                <small class="form-text text-muted">Deje vacío si la residencia no tiene inquilino</small>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
+                <select asp-for="Estado" class="form-control">
+                    <option value="">-- Seleccione un estado --</option>
+                    <option value="ocupada">Ocupada</option>
+                    <option value="alquilada">Alquilada</option>
+                    <option value="desocupada">Desocupada</option>
+                </select>
                 <span asp-validation-for="Estado" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

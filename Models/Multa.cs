@@ -9,7 +9,9 @@
         public decimal Monto { get; set; }
         public DateTime Fecha { get; set; }
         public bool Pagada { get; set; } = false;
-        public int? IdTipoMulta { get; set; } 
+        public int? IdTipoMulta { get; set; }
+
+        public int IdCluster { get; set; }  
 
         // Navegación
         public Residencia Residencia { get; set; } = null!; 

@@ -22,7 +22,10 @@ namespace ARSAN_Web.Controllers
         // GET: Clusters
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Clusters.ToListAsync());
+            var clusters = await _context.Clusters
+                .Include(c => c.Residencial)
+                .ToListAsync();
+            return View(clusters);
         }
 
         // GET: Clusters/Details/5
@@ -34,6 +37,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var cluster = await _context.Clusters
+                .Include(c => c.Residencial)
                 .FirstOrDefaultAsync(m => m.IdCluster == id);
             if (cluster == null)
             {
@@ -46,22 +50,29 @@ namespace ARSAN_Web.Controllers
         // GET: Clusters/Create
         public IActionResult Create()
         {
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre");
             return View();
         }
 
         // POST: Clusters/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCluster,Nombre")] Cluster cluster)
+        public async Task<IActionResult> Create([Bind("IdCluster,Nombre,IdResidencial")] Cluster cluster)
         {
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Residencial");
+            ModelState.Remove("Residencias");
+            ModelState.Remove("JuntasDirectivas");
+            ModelState.Remove("Garitas");
+
             if (ModelState.IsValid)
             {
                 _context.Add(cluster);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", cluster.IdResidencial);
             return View(cluster);
         }
 
@@ -78,20 +89,26 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", cluster.IdResidencial);
             return View(cluster);
         }
 
         // POST: Clusters/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdCluster,Nombre")] Cluster cluster)
+        public async Task<IActionResult> Edit(int id, [Bind("IdCluster,Nombre,IdResidencial")] Cluster cluster)
         {
             if (id != cluster.IdCluster)
             {
                 return NotFound();
             }
+
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Residencial");
+            ModelState.Remove("Residencias");
+            ModelState.Remove("JuntasDirectivas");
+            ModelState.Remove("Garitas");
 
             if (ModelState.IsValid)
             {
@@ -113,6 +130,8 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", cluster.IdResidencial);
             return View(cluster);
         }
 
@@ -125,6 +144,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var cluster = await _context.Clusters
+                .Include(c => c.Residencial)
                 .FirstOrDefaultAsync(m => m.IdCluster == id);
             if (cluster == null)
             {
