@@ -4,63 +4,77 @@
     ViewData["Title"] = "Crear Residencia";
 }
 
-<h1>Crear Residencia</h1>
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-house-add"></i> Nueva Residencia</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<h4>Nueva Residencia</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                ```
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Numero" class="form-label"></label>
+                            <input asp-for="Numero" class="form-control" type="number" min="1" placeholder="Ej. 23" />
+                            <span asp-validation-for="Numero" class="text-danger"></span>
+                        </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Numero" class="control-label"></label>
-                <input asp-for="Numero" class="form-control" type="number" min="1" />
-                <span asp-validation-for="Numero" class="text-danger"></span>
-            </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="IdCluster" class="form-label">Cluster</label>
+                            <select asp-for="IdCluster" class="form-select" asp-items="ViewBag.IdCluster">
+                                <option value="">-- Seleccione un cluster --</option>
+                            </select>
+                            <span asp-validation-for="IdCluster" class="text-danger"></span>
+                        </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="IdCluster" class="control-label">Cluster</label>
-                <select asp-for="IdCluster" class="form-control" asp-items="ViewBag.IdCluster">
-                    <option value="">-- Seleccione un cluster --</option>
-                </select>
-                <span asp-validation-for="IdCluster" class="text-danger"></span>
-            </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="IdPropietario" class="form-label">Propietario</label>
+                            <select asp-for="IdPropietario" class="form-select" asp-items="ViewBag.IdPropietario">
+                                <option value="">-- Seleccione un propietario --</option>
+                            </select>
+                            <span asp-validation-for="IdPropietario" class="text-danger"></span>
+                        </div>
+                    </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="IdPropietario" class="control-label">Propietario</label>
-                <select asp-for="IdPropietario" class="form-control" asp-items="ViewBag.IdPropietario">
-                    <option value="">-- Seleccione un propietario --</option>
-                </select>
-                <span asp-validation-for="IdPropietario" class="text-danger"></span>
-            </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="IdInquilino" class="form-label">Inquilino (Opcional)</label>
+                            <select asp-for="IdInquilino" class="form-select" asp-items="ViewBag.IdInquilino">
+                                <option value="">-- Sin inquilino --</option>
+                            </select>
+                            <span asp-validation-for="IdInquilino" class="text-danger"></span>
+                            <small class="form-text text-muted">Deje vacío si la residencia no tiene inquilino</small>
+                        </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="IdInquilino" class="control-label">Inquilino (Opcional)</label>
-                <select asp-for="IdInquilino" class="form-control" asp-items="ViewBag.IdInquilino">
-                    <option value="">-- Sin inquilino --</option>
-                </select>
-                <span asp-validation-for="IdInquilino" class="text-danger"></span>
-                <small class="form-text text-muted">Deje vacío si la residencia no tiene inquilino</small>
-            </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Estado" class="form-label"></label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="">-- Seleccione un estado --</option>
+                                <option value="ocupada">Ocupada</option>
+                                <option value="alquilada">Alquilada</option>
+                                <option value="desocupada">Desocupada</option>
+                            </select>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Estado" class="control-label"></label>
-                <select asp-for="Estado" class="form-control">
-                    <option value="">-- Seleccione un estado --</option>
-                    <option value="ocupada">Ocupada</option>
-                    <option value="alquilada">Alquilada</option>
-                    <option value="desocupada">Desocupada</option>
-                </select>
-                <span asp-validation-for="Estado" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Crear" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Crear
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+    ```
+
 </div>
 
 @section Scripts {

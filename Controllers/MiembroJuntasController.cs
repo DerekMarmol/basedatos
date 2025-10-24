@@ -22,7 +22,11 @@ namespace ARSAN_Web.Controllers
         // GET: MiembroJuntas
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.MiembrosJunta.Include(m => m.Cargo).Include(m => m.JuntaDirectiva).Include(m => m.Propietario);
+            var applicationDbContext = _context.MiembrosJunta
+                .Include(m => m.Cargo)
+                .Include(m => m.JuntaDirectiva)
+                    .ThenInclude(j => j.Cluster)
+                .Include(m => m.Propietario);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -37,6 +41,7 @@ namespace ARSAN_Web.Controllers
             var miembroJunta = await _context.MiembrosJunta
                 .Include(m => m.Cargo)
                 .Include(m => m.JuntaDirectiva)
+                    .ThenInclude(j => j.Cluster)
                 .Include(m => m.Propietario)
                 .FirstOrDefaultAsync(m => m.IdMiembroJunta == id);
             if (miembroJunta == null)
@@ -51,27 +56,52 @@ namespace ARSAN_Web.Controllers
         public IActionResult Create()
         {
             ViewData["IdCargo"] = new SelectList(_context.Cargos, "IdCargo", "Nombre");
-            ViewData["IdJuntaDirectiva"] = new SelectList(_context.JuntasDirectivas, "IdJuntaDirectiva", "IdJuntaDirectiva");
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi");
+
+            // Mostrar las juntas con información más descriptiva
+            var juntas = _context.JuntasDirectivas
+                .Include(j => j.Cluster)
+                .Select(j => new
+                {
+                    j.IdJuntaDirectiva,
+                    Descripcion = j.Cluster.Nombre + " (" + j.AnioInicio + (j.AnioFin.HasValue ? " - " + j.AnioFin.Value : " - Activa") + ")"
+                })
+                .ToList();
+
+            ViewData["IdJuntaDirectiva"] = new SelectList(juntas, "IdJuntaDirectiva", "Descripcion");
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto");
             return View();
         }
 
         // POST: MiembroJuntas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdMiembroJunta,IdJuntaDirectiva,IdPropietario,IdCargo,FechaInicio,FechaFin")] MiembroJunta miembroJunta)
         {
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("JuntaDirectiva");
+            ModelState.Remove("Propietario");
+            ModelState.Remove("Cargo");
+
             if (ModelState.IsValid)
             {
                 _context.Add(miembroJunta);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["IdCargo"] = new SelectList(_context.Cargos, "IdCargo", "Nombre", miembroJunta.IdCargo);
-            ViewData["IdJuntaDirectiva"] = new SelectList(_context.JuntasDirectivas, "IdJuntaDirectiva", "IdJuntaDirectiva", miembroJunta.IdJuntaDirectiva);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", miembroJunta.IdPropietario);
+
+            var juntas = _context.JuntasDirectivas
+                .Include(j => j.Cluster)
+                .Select(j => new
+                {
+                    j.IdJuntaDirectiva,
+                    Descripcion = j.Cluster.Nombre + " (" + j.AnioInicio + (j.AnioFin.HasValue ? " - " + j.AnioFin.Value : " - Activa") + ")"
+                })
+                .ToList();
+
+            ViewData["IdJuntaDirectiva"] = new SelectList(juntas, "IdJuntaDirectiva", "Descripcion", miembroJunta.IdJuntaDirectiva);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", miembroJunta.IdPropietario);
             return View(miembroJunta);
         }
 
@@ -88,15 +118,24 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
             ViewData["IdCargo"] = new SelectList(_context.Cargos, "IdCargo", "Nombre", miembroJunta.IdCargo);
-            ViewData["IdJuntaDirectiva"] = new SelectList(_context.JuntasDirectivas, "IdJuntaDirectiva", "IdJuntaDirectiva", miembroJunta.IdJuntaDirectiva);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", miembroJunta.IdPropietario);
+
+            var juntas = _context.JuntasDirectivas
+                .Include(j => j.Cluster)
+                .Select(j => new
+                {
+                    j.IdJuntaDirectiva,
+                    Descripcion = j.Cluster.Nombre + " (" + j.AnioInicio + (j.AnioFin.HasValue ? " - " + j.AnioFin.Value : " - Activa") + ")"
+                })
+                .ToList();
+
+            ViewData["IdJuntaDirectiva"] = new SelectList(juntas, "IdJuntaDirectiva", "Descripcion", miembroJunta.IdJuntaDirectiva);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", miembroJunta.IdPropietario);
             return View(miembroJunta);
         }
 
         // POST: MiembroJuntas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdMiembroJunta,IdJuntaDirectiva,IdPropietario,IdCargo,FechaInicio,FechaFin")] MiembroJunta miembroJunta)
@@ -105,6 +144,11 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("JuntaDirectiva");
+            ModelState.Remove("Propietario");
+            ModelState.Remove("Cargo");
 
             if (ModelState.IsValid)
             {
@@ -126,9 +170,20 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["IdCargo"] = new SelectList(_context.Cargos, "IdCargo", "Nombre", miembroJunta.IdCargo);
-            ViewData["IdJuntaDirectiva"] = new SelectList(_context.JuntasDirectivas, "IdJuntaDirectiva", "IdJuntaDirectiva", miembroJunta.IdJuntaDirectiva);
-            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "Dpi", miembroJunta.IdPropietario);
+
+            var juntas = _context.JuntasDirectivas
+                .Include(j => j.Cluster)
+                .Select(j => new
+                {
+                    j.IdJuntaDirectiva,
+                    Descripcion = j.Cluster.Nombre + " (" + j.AnioInicio + (j.AnioFin.HasValue ? " - " + j.AnioFin.Value : " - Activa") + ")"
+                })
+                .ToList();
+
+            ViewData["IdJuntaDirectiva"] = new SelectList(juntas, "IdJuntaDirectiva", "Descripcion", miembroJunta.IdJuntaDirectiva);
+            ViewData["IdPropietario"] = new SelectList(_context.Propietarios, "IdPropietario", "NombreCompleto", miembroJunta.IdPropietario);
             return View(miembroJunta);
         }
 
@@ -143,6 +198,7 @@ namespace ARSAN_Web.Controllers
             var miembroJunta = await _context.MiembrosJunta
                 .Include(m => m.Cargo)
                 .Include(m => m.JuntaDirectiva)
+                    .ThenInclude(j => j.Cluster)
                 .Include(m => m.Propietario)
                 .FirstOrDefaultAsync(m => m.IdMiembroJunta == id);
             if (miembroJunta == null)

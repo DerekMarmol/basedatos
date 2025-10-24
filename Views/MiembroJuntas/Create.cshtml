@@ -1,50 +1,65 @@
 ﻿@model ARSAN_Web.Models.MiembroJunta
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Miembro de Junta";
 }
 
-<h1>Create</h1>
+<h1>Crear Miembro de Junta</h1>
 
-<h4>MiembroJunta</h4>
+<h4>Nuevo Miembro de Junta Directiva</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdJuntaDirectiva" class="control-label"></label>
-                <select asp-for="IdJuntaDirectiva" class ="form-control" asp-items="ViewBag.IdJuntaDirectiva"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdJuntaDirectiva" class="control-label">Junta Directiva</label>
+                <select asp-for="IdJuntaDirectiva" class="form-control" asp-items="ViewBag.IdJuntaDirectiva">
+                    <option value="">-- Seleccione una junta directiva --</option>
+                </select>
+                <span asp-validation-for="IdJuntaDirectiva" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdPropietario" class="control-label"></label>
-                <select asp-for="IdPropietario" class ="form-control" asp-items="ViewBag.IdPropietario"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdPropietario" class="control-label">Propietario</label>
+                <select asp-for="IdPropietario" class="form-control" asp-items="ViewBag.IdPropietario">
+                    <option value="">-- Seleccione un propietario --</option>
+                </select>
+                <span asp-validation-for="IdPropietario" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdCargo" class="control-label"></label>
-                <select asp-for="IdCargo" class ="form-control" asp-items="ViewBag.IdCargo"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdCargo" class="control-label">Cargo</label>
+                <select asp-for="IdCargo" class="form-control" asp-items="ViewBag.IdCargo">
+                    <option value="">-- Seleccione un cargo --</option>
+                </select>
+                <span asp-validation-for="IdCargo" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="FechaInicio" class="control-label">Fecha de Inicio</label>
+                <input asp-for="FechaInicio" class="form-control" type="date" />
                 <span asp-validation-for="FechaInicio" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaFin" class="control-label"></label>
-                <input asp-for="FechaFin" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="FechaFin" class="control-label">Fecha de Fin (Opcional)</label>
+                <input asp-for="FechaFin" class="form-control" type="date" />
                 <span asp-validation-for="FechaFin" class="text-danger"></span>
+                <small class="form-text text-muted">Deje vacío si el miembro está actualmente en el cargo</small>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -53,12 +53,14 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: JuntaDirectivas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdJuntaDirectiva,IdCluster,AnioInicio,AnioFin")] JuntaDirectiva juntaDirectiva)
         {
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Miembros");
+
             if (ModelState.IsValid)
             {
                 _context.Add(juntaDirectiva);
@@ -87,8 +89,6 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: JuntaDirectivas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdJuntaDirectiva,IdCluster,AnioInicio,AnioFin")] JuntaDirectiva juntaDirectiva)
@@ -97,6 +97,10 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            // Remover validación de propiedades de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Miembros");
 
             if (ModelState.IsValid)
             {
