@@ -1,0 +1,234 @@
+﻿@model IEnumerable<ARSAN_Web.Models.AccesoVehicular>
+
+@{
+    ViewData["Title"] = "Control de Acceso Vehicular";
+    var filtro = ViewBag.FiltroActual as string ?? "todos";
+    var totalDentro = ViewBag.TotalDentro as int? ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>🚗 Control de Acceso Vehicular</h1>
+        <p class="text-muted">Registro de entradas y salidas de vehículos en garitas</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        Registrar Nuevo Ingreso
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">🚙 Vehículos Dentro del Residencial</h5>
+                <h2 class="mb-0">@totalDentro</h2>
+                <small>vehículos actualmente dentro</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-filtro="todos"
+               class="btn btn-outline-primary @(filtro == "todos" ? "active" : "")">
+                📋 Todos
+            </a>
+            <a asp-action="Index" asp-route-filtro="dentro"
+               class="btn btn-outline-success @(filtro == "dentro" ? "active" : "")">
+                ✓ Dentro (@totalDentro)
+            </a>
+            <a asp-action="Index" asp-route-filtro="fuera"
+               class="btn btn-outline-secondary @(filtro == "fuera" ? "active" : "")">
+                ✗ Salieron
+            </a>
+            <a asp-action="Index" asp-route-filtro="hoy"
+               class="btn btn-outline-info @(filtro == "hoy" ? "active" : "")">
+                📅 Hoy
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Placa</th>
+                        <th>Tipo</th>
+                        <th>Propietario/Visitante</th>
+                        <th>Garita</th>
+                        <th>Ingreso</th>
+                        <th>Salida</th>
+                        <th>Permanencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var dentro = !item.FechaSalida.HasValue;
+                        var fechaHoraIngreso = item.FechaIngreso.Date + item.HoraIngreso;
+                        var fechaHoraSalida = item.FechaSalida.HasValue
+                        ? item.FechaSalida.Value.Date + (item.HoraSalida ?? TimeSpan.Zero)
+                        : DateTime.Now;
+                        var permanencia = fechaHoraSalida - fechaHoraIngreso;
+
+                        <tr class="@(dentro ? "table-success" : "")">
+                            <td>
+                                <strong>@item.Placa</strong>
+                            </td>
+                            <td>
+                                @switch (item.TipoAcceso?.ToLower())
+                                {
+                                    case "residente":
+                                        <span class="badge bg-primary">🏠 Residente</span>
+                                        break;
+                                    case "visitante":
+                                        <span class="badge bg-info">🚶 Visitante</span>
+                                        break;
+                                    case "servicio":
+                                        <span class="badge bg-warning text-dark">🔧 Servicio</span>
+                                        break;
+                                    case "proveedor":
+                                        <span class="badge bg-secondary">📦 Proveedor</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.TipoAcceso</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (item.Vehiculo?.Residencia?.Propietario != null)
+                                {
+                                    <div>
+                                        <strong>@item.Vehiculo.Residencia.Propietario.NombreCompleto</strong>
+                                        <br />
+                                        <small class="text-muted">Casa #@item.Vehiculo.Residencia.Numero</small>
+                                    </div>
+                                }
+                                else if (item.Visitante != null)
+                                {
+                                    <div>
+                                        <strong>@item.Visitante.NombreCompleto</strong>
+                                        <br />
+                                        <small class="text-muted">Visitante</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No especificado</span>
+                                }
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>@item.Garita?.Nombre</strong>
+                                </div>
+                                @if (item.Garita?.Cluster?.Residencial != null)
+                                {
+                                    <small class="text-muted">@item.Garita.Cluster.Residencial.Nombre</small>
+                                }
+                            </td>
+                            <td>
+                                <div>@item.FechaIngreso.ToString("dd/MM/yyyy")</div>
+                                <small class="text-muted">@item.HoraIngreso.ToString(@"hh\:mm")</small>
+                                <br />
+                                <small class="text-muted">👮 @item.GuardiaIngreso?.NombreCompleto</small>
+                            </td>
+                            <td>
+                                @if (item.FechaSalida.HasValue)
+                                {
+                                    <div>@item.FechaSalida.Value.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@item.HoraSalida?.ToString(@"hh\:mm")</small>
+                                    @if (item.GuardiaSalida != null)
+                                    {
+                                        <br />
+                                        <small class="text-muted">👮 @item.GuardiaSalida.NombreCompleto</small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Sin salida</span>
+                                }
+                            </td>
+                            <td>
+                                @if (permanencia.TotalHours < 24)
+                                {
+                                    <span>@((int)permanencia.TotalHours)h @permanencia.Minutes m</span>
+                                }
+                                else
+                                {
+                                    <span>@((int)permanencia.TotalDays) día(s)</span>
+                                }
+                            </td>
+                            <td>
+                                @if (dentro)
+                                {
+                                    <span class="badge bg-success">✓ Dentro</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">✗ Salió</span>
+                                }
+                            </td>
+                            <td>
+                                @if (dentro)
+                                {
+                                    <a asp-action="RegistrarSalida" asp-route-id="@item.IdAcceso"
+                                       class="btn btn-sm btn-warning">
+                                        Registrar Salida
+                                    </a>
+                                }
+                                <a asp-action="Details" asp-route-id="@item.IdAcceso"
+                                   class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdAcceso"
+                                   class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-car-front" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="text-muted mt-3">No hay registros de acceso vehicular.</p>
+                <a asp-action="Create" class="btn btn-primary">Registrar el primer acceso</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong>
+        <ul class="mb-0 mt-2">
+            <li><span class="badge bg-success">Dentro</span> - El vehículo está actualmente dentro del residencial</li>
+            <li><span class="badge bg-secondary">Salió</span> - El vehículo ya salió del residencial</li>
+            <li>La permanencia se calcula desde el ingreso hasta la salida (o hasta ahora si aún está dentro)</li>
+        </ul>
+    </div>
+</div>

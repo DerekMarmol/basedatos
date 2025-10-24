@@ -1,53 +1,181 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.PagoMantenimiento>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Pagos de Mantenimiento";
+    var filtro = ViewBag.FiltroActual as string ?? "todos";
+    var totalMesActual = ViewBag.TotalMesActual as decimal? ?? 0;
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>💵 Pagos de Mantenimiento</h1>
+        <p class="text-muted">Registro de pagos mensuales de las residencias</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        Registrar Nuevo Pago
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaPago)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Monto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FormaPago)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Observaciones)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaPago)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Monto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FormaPago)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Observaciones)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdPago">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdPago">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdPago">Delete</a>
-            </td>
-        </tr>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
-    </tbody>
-</table>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">💰 Total Recaudado - Mes Actual</h5>
+                <h2 class="mb-0">Q @totalMesActual.ToString("N2")</h2>
+                <small>@DateTime.Now.ToString("MMMM yyyy")</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-filtro="todos"
+               class="btn btn-outline-primary @(filtro == "todos" ? "active" : "")">
+                📋 Todos
+            </a>
+            <a asp-action="Index" asp-route-filtro="mes-actual"
+               class="btn btn-outline-success @(filtro == "mes-actual" ? "active" : "")">
+                📅 Mes Actual
+            </a>
+            <a asp-action="Index" asp-route-filtro="mes-anterior"
+               class="btn btn-outline-info @(filtro == "mes-anterior" ? "active" : "")">
+                📆 Mes Anterior
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Recibo #</th>
+                        <th>Fecha</th>
+                        <th>Residencia</th>
+                        <th>Propietario</th>
+                        <th>Monto</th>
+                        <th>Forma de Pago</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var recibo = item.Recibos.FirstOrDefault();
+
+                        <tr>
+                            <td>
+                                @if (recibo != null)
+                                {
+                                    <strong class="text-primary">@recibo.NumeroRecibo</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin recibo</span>
+                                }
+                            </td>
+                            <td>
+                                @item.FechaPago.ToString("dd/MM/yyyy")
+                                <br />
+                                <small class="text-muted">@item.FechaPago.ToString("MMMM yyyy")</small>
+                            </td>
+                            <td>
+                                @if (item.Residencia?.Cluster?.Residencial != null)
+                                {
+                                    <div>
+                                        <strong>Casa #@item.Residencia.Numero</strong><br />
+                                        <small class="text-muted">
+                                            @item.Residencia.Cluster.Residencial.Nombre - @item.Residencia.Cluster.Nombre
+                                        </small>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Residencia?.Propietario != null)
+                                {
+                                    @item.Residencia.Propietario.NombreCompleto
+                                }
+                            </td>
+                            <td>
+                                <strong class="text-success">Q @item.Monto.ToString("N2")</strong>
+                            </td>
+                            <td>
+                                @switch (item.FormaPago?.ToLower())
+                                {
+                                    case "efectivo":
+                                        <span class="badge bg-success">💵 Efectivo</span>
+                                        break;
+                                    case "tarjeta":
+                                        <span class="badge bg-primary">💳 Tarjeta</span>
+                                        break;
+                                    case "cheque":
+                                        <span class="badge bg-info">📝 Cheque</span>
+                                        break;
+                                    case "transferencia":
+                                        <span class="badge bg-warning text-dark">🏦 Transferencia</span>
+                                        break;
+                                    case "planilla":
+                                        <span class="badge bg-secondary">📋 Planilla</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.FormaPago</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Observaciones))
+                                {
+                                    <small>@item.Observaciones</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Sin observaciones</small>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.IdPago"
+                                   class="btn btn-sm btn-info">Ver Recibo</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdPago"
+                                   class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-cash-stack" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="text-muted mt-3">No hay pagos registrados.</p>
+                <a asp-action="Create" class="btn btn-primary">Registrar el primer pago</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong>
+        <ul class="mb-0 mt-2">
+            <li>Los pagos deben realizarse dentro de los <strong>primeros 10 días</strong> de cada mes</li>
+            <li>Cada pago genera un <strong>recibo</strong> con número único y desglose de conceptos</li>
+            <li>La cuota mensual incluye: Agua, Jardinería, Seguridad y Administración</li>
+        </ul>
+    </div>
+</div>

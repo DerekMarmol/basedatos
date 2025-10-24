@@ -1,52 +1,133 @@
-﻿@model ARSAN_Web.Models.PagoMantenimiento
-
-@{
-    ViewData["Title"] = "Create";
+﻿@{
+    ViewData["Title"] = "Registrar Pago de Mantenimiento";
+    var conceptos = ViewBag.ConceptosActivos as List<ARSAN_Web.Models.ConceptoPago> ?? new List<ARSAN_Web.Models.ConceptoPago>();
+    var totalCuota = ViewBag.TotalCuota as decimal? ?? 0;
 }
 
-<h1>Create</h1>
+<div class="mb-4">
+    <h1>Registrar Pago de Mantenimiento</h1>
+    <p class="text-muted">Complete los datos del pago y se generará automáticamente el recibo con desglose</p>
+</div>
 
-<h4>PagoMantenimiento</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdCasa" class="control-label"></label>
-                <select asp-for="IdCasa" class ="form-control" asp-items="ViewBag.IdCasa"></select>
+<div class="card shadow-sm mb-3 bg-light">
+    <div class="card-body">
+        <h5>💰 Cuota Mensual Vigente: <strong class="text-success">Q @totalCuota.ToString("N2")</strong></h5>
+        <p class="mb-0">
+            <strong>Desglose:</strong>
+            @foreach (var concepto in conceptos)
+            {
+                <span class="badge bg-secondary">@concepto.Nombre: Q @concepto.Monto.ToString("N2")</span>
+            }
+        </p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Información del Pago</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="row">
+                <!-- Columna Izquierda -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="IdResidencia" class="form-label">Residencia que Paga</label>
+                        <select name="IdResidencia" class="form-select" asp-items="ViewBag.IdResidencia" required>
+                            <option value="">-- Seleccione la residencia --</option>
+                        </select>
+                        <small class="form-text text-muted">Seleccione la casa que está realizando el pago</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="FechaPago" class="form-label">Fecha del Pago</label>
+                        <input type="date" name="FechaPago" class="form-control"
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        <small class="form-text text-muted">Fecha en que se recibe el pago</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="MesesPagados" class="form-label">Meses a Pagar</label>
+                        <input type="number" name="MesesPagados" id="mesesPagados" class="form-control"
+                               value="1" min="1" max="12" required />
+                        <small class="form-text text-muted">Cantidad de meses que está pagando</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="Monto" class="form-label">Monto Total a Pagar (Q)</label>
+                        <input type="number" name="Monto" id="monto" step="0.01" min="0.01" class="form-control"
+                               value="@totalCuota.ToString("0.00")" required />
+                        <small class="form-text text-muted" id="montoCalculado">
+                            Cuota mensual: Q@totalCuota.ToString("N2")
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha -->
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="FormaPago" class="form-label">Forma de Pago</label>
+                        <select name="FormaPago" class="form-select" required>
+                            <option value="">-- Seleccione forma de pago --</option>
+                            <option value="Efectivo">💵 Efectivo</option>
+                            <option value="Tarjeta">💳 Tarjeta (Débito/Crédito)</option>
+                            <option value="Cheque">📝 Cheque</option>
+                            <option value="Transferencia">🏦 Transferencia Electrónica</option>
+                            <option value="Deposito">🏧 Depósito Bancario</option>
+                            <option value="Planilla">📋 Planilla (Junta Directiva)</option>
+                        </select>
+                        <small class="form-text text-muted">Método de pago utilizado</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="Observaciones" class="form-label">Observaciones (Opcional)</label>
+                        <textarea name="Observaciones" class="form-control" rows="4"
+                                  placeholder="Ej. Número de cheque, referencia de transferencia, etc."></textarea>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>📋 Recibo Automático:</strong>
+                        <p class="mb-0">
+                            Al registrar el pago se generará automáticamente un <strong>recibo</strong> con:
+                        </p>
+                        <ul class="mb-0 mt-2">
+                            <li>Número de recibo único</li>
+                            <li>Desglose de conceptos</li>
+                            <li>Total a pagar</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaPago" class="control-label"></label>
-                <input asp-for="FechaPago" class="form-control" />
-                <span asp-validation-for="FechaPago" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" />
-                <span asp-validation-for="Monto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FormaPago" class="control-label"></label>
-                <input asp-for="FormaPago" class="form-control" />
-                <span asp-validation-for="FormaPago" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Observaciones" class="control-label"></label>
-                <input asp-for="Observaciones" class="form-control" />
-                <span asp-validation-for="Observaciones" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Registrar Pago y Generar Recibo</button>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Calcular monto automáticamente según meses
+        const cuotaMensual = @totalCuota;
+        const mesesInput = document.getElementById('mesesPagados');
+        const montoInput = document.getElementById('monto');
+        const montoCalculado = document.getElementById('montoCalculado');
+
+        mesesInput.addEventListener('input', function() {
+            const meses = parseInt(this.value) || 1;
+            const total = cuotaMensual * meses;
+            montoInput.value = total.toFixed(2);
+            montoCalculado.textContent = `${meses} mes(es) × Q${cuotaMensual.toFixed(2)} = Q${total.toFixed(2)}`;
+        });
+    </script>
 }

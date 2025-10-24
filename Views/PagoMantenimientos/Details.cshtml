@@ -1,42 +1,175 @@
 ﻿@model ARSAN_Web.Models.PagoMantenimiento
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Recibo de Pago";
+    var recibo = Model.Recibos.FirstOrDefault();
 }
 
-<h1>Details</h1>
+<div class="mb-4">
+    <h1>📄 Recibo de Pago de Mantenimiento</h1>
+    <p class="text-muted">Comprobante de pago con desglose de conceptos</p>
+</div>
 
-<div>
-    <h4>PagoMantenimiento</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaPago)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaPago)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Monto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Monto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FormaPago)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FormaPago)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Observaciones)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Observaciones)
-        </dd>
-    </dl>
+<!-- Recibo Imprimible -->
+<div class="card shadow-lg" id="recibo" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header bg-primary text-white text-center">
+        <h3 class="mb-0">🏘️ RESIDENCIAL SAN FRANCISCO</h3>
+        <p class="mb-0">RECIBO DE PAGO DE MANTENIMIENTO</p>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5>Información del Recibo</h5>
+                <dl class="row">
+                    <dt class="col-sm-5">No. Recibo:</dt>
+                    <dd class="col-sm-7">
+                        <strong class="text-primary fs-5">@recibo?.NumeroRecibo</strong>
+                    </dd>
+
+                    <dt class="col-sm-5">Fecha:</dt>
+                    <dd class="col-sm-7">@Model.FechaPago.ToString("dd/MM/yyyy")</dd>
+
+                    <dt class="col-sm-5">Forma de Pago:</dt>
+                    <dd class="col-sm-7">
+                        @switch (Model.FormaPago?.ToLower())
+                        {
+                            case "efectivo":
+                                <span class="badge bg-success">💵 Efectivo</span>
+                                break;
+                            case "tarjeta":
+                                <span class="badge bg-primary">💳 Tarjeta</span>
+                                break;
+                            case "cheque":
+                                <span class="badge bg-info">📝 Cheque</span>
+                                break;
+                            case "transferencia":
+                                <span class="badge bg-warning text-dark">🏦 Transferencia</span>
+                                break;
+                            case "deposito":
+                                <span class="badge bg-info">🏧 Depósito</span>
+                                break;
+                            case "planilla":
+                                <span class="badge bg-secondary">📋 Planilla</span>
+                                break;
+                            default:
+                                <span>@Model.FormaPago</span>
+                                break;
+                        }
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="col-md-6">
+                <h5>Pagado por</h5>
+                <dl class="row">
+                    <dt class="col-sm-5">Nombre:</dt>
+                    <dd class="col-sm-7">
+                        <strong>@Model.Residencia?.Propietario?.NombreCompleto</strong>
+                    </dd>
+
+                    <dt class="col-sm-5">Residencia:</dt>
+                    <dd class="col-sm-7">
+                        Casa #<strong>@Model.Residencia?.Numero</strong>
+                    </dd>
+
+                    <dt class="col-sm-5">Cluster:</dt>
+                    <dd class="col-sm-7">
+                        @Model.Residencia?.Cluster?.Nombre
+                        <br />
+                        <small class="text-muted">@Model.Residencia?.Cluster?.Residencial?.Nombre</small>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <hr />
+
+        <h5 class="mb-3">Desglose de Conceptos</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Concepto</th>
+                        <th class="text-center">Cantidad (Meses)</th>
+                        <th class="text-end">Monto Unitario</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (recibo != null)
+                    {
+                        foreach (var detalle in recibo.Detalles)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@detalle.ConceptoPago?.Nombre</strong>
+                                    @if (!string.IsNullOrEmpty(detalle.ConceptoPago?.Descripcion))
+                                    {
+                                        <br />
+                                        <small class="text-muted">@detalle.ConceptoPago.Descripcion</small>
+                                    }
+                                </td>
+                                <td class="text-center">@detalle.Cantidad</td>
+                                <td class="text-end">Q @detalle.MontoUnitario.ToString("N2")</td>
+                                <td class="text-end"><strong>Q @detalle.Subtotal.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot class="table-primary">
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>TOTAL:</strong></td>
+                        <td class="text-end">
+                            <h5 class="mb-0 text-success">Q @Model.Monto.ToString("N2")</h5>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Observaciones))
+        {
+            <div class="mt-3">
+                <h6>Observaciones:</h6>
+                <p class="text-muted">@Model.Observaciones</p>
+            </div>
+        }
+
+        <hr />
+
+        <div class="text-center text-muted">
+            <small>
+                Este recibo certifica el pago de la cuota de mantenimiento correspondiente.<br />
+                Recibo generado el @Model.FechaPago.ToString("dd/MM/yyyy") a las @DateTime.Now.ToString("HH:mm")
+            </small>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdPago">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="text-center mt-4 no-print">
+    <button onclick="window.print()" class="btn btn-primary">
+        🖨️ Imprimir Recibo
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">
+        Volver al Listado
+    </a>
 </div>
+
+<style>
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        #recibo {
+            box-shadow: none !important;
+            border: 1px solid #000;
+        }
+
+        body {
+            background: white;
+        }
+    }
+</style>

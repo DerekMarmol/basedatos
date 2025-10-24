@@ -1,54 +1,85 @@
 ﻿@model ARSAN_Web.Models.ConceptoPago
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Concepto de Pago";
 }
 
-<h1>Edit</h1>
+<div class="mb-4">
+    <h1>Editar Concepto de Pago</h1>
+    <p class="text-muted">Modifique la información del concepto: <strong>@Model.Nombre</strong></p>
+</div>
 
-<h4>ConceptoPago</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="card shadow-sm">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0">Información del Concepto</h5>
+    </div>
+    <div class="card-body">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <input type="hidden" asp-for="IdConceptoPago" />
-            <div class="form-group">
-                <label asp-for="Codigo" class="control-label"></label>
-                <input asp-for="Codigo" class="form-control" />
-                <span asp-validation-for="Codigo" class="text-danger"></span>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Codigo" class="form-label">Código</label>
+                        <input asp-for="Codigo" class="form-control" style="text-transform: uppercase;" />
+                        <span asp-validation-for="Codigo" class="text-danger"></span>
+                        <small class="form-text text-muted">Identificador único del concepto</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Nombre" class="form-label">Nombre del Concepto</label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Monto" class="form-label">Monto (Q)</label>
+                        <input asp-for="Monto" type="number" step="0.01" min="0.01" class="form-control" />
+                        <span asp-validation-for="Monto" class="text-danger"></span>
+                        <small class="form-text text-muted">Monto mensual a cobrar</small>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Descripcion" class="form-label">Descripción (Opcional)</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Activo" class="form-label">Estado del Concepto</label>
+                        <select asp-for="Activo" class="form-select">
+                            <option value="true">✓ Activo (Se cobra en recibos)</option>
+                            <option value="false">✗ Inactivo (No se cobra)</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            Si se marca como "Inactivo", el concepto no se incluirá en nuevos recibos
+                        </small>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Descripcion" class="control-label"></label>
-                <input asp-for="Descripcion" class="form-control" />
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" />
-                <span asp-validation-for="Monto" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-warning">Guardar Cambios</button>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Convertir código a mayúsculas automáticamente
+        document.querySelector('input[name="Codigo"]').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
 }

@@ -1,45 +1,96 @@
 ﻿@model ARSAN_Web.Models.PagoMantenimiento
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar Pago";
+    var recibo = Model.Recibos.FirstOrDefault();
 }
 
-<h1>Delete</h1>
-
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>PagoMantenimiento</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaPago)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaPago)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Monto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Monto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FormaPago)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FormaPago)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Observaciones)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Observaciones)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdPago" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="mb-4">
+    <h1>Eliminar Pago de Mantenimiento</h1>
 </div>
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">⚠️ ¿Está seguro que desea eliminar este pago?</h4>
+    <p>
+        Esta acción no se puede deshacer. Se eliminará:
+    </p>
+    <ul>
+        <li>El registro del pago</li>
+        <li>El recibo asociado</li>
+        <li>El desglose de conceptos</li>
+    </ul>
+    <hr />
+    <p class="mb-0">
+        <strong>Recomendación:</strong> Solo elimine pagos registrados por error.
+        Los pagos válidos deben mantenerse para el historial contable.
+    </p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Información del Pago a Eliminar</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-5">Recibo #:</dt>
+                    <dd class="col-sm-7">
+                        <strong class="text-primary">@recibo?.NumeroRecibo</strong>
+                    </dd>
+
+                    <dt class="col-sm-5">Fecha de Pago:</dt>
+                    <dd class="col-sm-7">
+                        @Model.FechaPago.ToString("dd/MM/yyyy")
+                    </dd>
+
+                    <dt class="col-sm-5">Monto:</dt>
+                    <dd class="col-sm-7">
+                        <strong class="text-success">Q @Model.Monto.ToString("N2")</strong>
+                    </dd>
+
+                    <dt class="col-sm-5">Forma de Pago:</dt>
+                    <dd class="col-sm-7">
+                        @Model.FormaPago
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-5">Propietario:</dt>
+                    <dd class="col-sm-7">
+                        @Model.Residencia?.Propietario?.NombreCompleto
+                    </dd>
+
+                    <dt class="col-sm-5">Residencia:</dt>
+                    <dd class="col-sm-7">
+                        Casa #@Model.Residencia?.Numero
+                    </dd>
+
+                    <dt class="col-sm-5">Cluster:</dt>
+                    <dd class="col-sm-7">
+                        @Model.Residencia?.Cluster?.Nombre
+                        <br />
+                        <small class="text-muted">@Model.Residencia?.Cluster?.Residencial?.Nombre</small>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Observaciones))
+        {
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2">Observaciones:</dt>
+                <dd class="col-sm-10">@Model.Observaciones</dd>
+            </dl>
+        }
+    </div>
+</div>
+
+<form asp-action="Delete" class="mt-4">
+    <input type="hidden" asp-for="IdPago" />
+    <button type="submit" class="btn btn-danger">Sí, Eliminar Pago y Recibo</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

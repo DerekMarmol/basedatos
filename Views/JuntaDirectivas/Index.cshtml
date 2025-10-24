@@ -1,47 +1,236 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.JuntaDirectiva>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Juntas Directivas";
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-people-fill text-primary me-2"></i>Juntas Directivas
+            </h2>
+            <p class="text-muted mb-0">Gestión de juntas directivas por cluster</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Junta Directiva
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AnioInicio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AnioFin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cluster)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AnioInicio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AnioFin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cluster.Nombre)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdJuntaDirectiva">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdJuntaDirectiva">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdJuntaDirectiva">Delete</a>
-            </td>
-        </tr>
+    <!-- Mensajes -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-people fs-3 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Juntas</h6>
+                            <h3 class="mb-0">@Model.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-check-circle fs-3 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Activas</h6>
+                            <h3 class="mb-0 text-success">@Model.Count(j => j.AnioFin == null)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-secondary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-archive fs-3 text-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Finalizadas</h6>
+                            <h3 class="mb-0 text-secondary">@Model.Count(j => j.AnioFin != null)</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Juntas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cluster</th>
+                                <th>Año Inicio</th>
+                                <th>Año Fin</th>
+                                <th>Período</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderByDescending(j => j.AnioInicio))
+                            {
+                                var esActiva = item.AnioFin == null;
+                                var duracion = esActiva ?
+                                (DateTime.Now.Year - item.AnioInicio) :
+                                ((item.AnioFin ?? item.AnioInicio) - item.AnioInicio);
+
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">
+                                            <i class="bi bi-building me-2"></i>@item.Cluster.Nombre
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="bi bi-calendar-check me-1"></i>@item.AnioInicio
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.AnioFin.HasValue)
+                                        {
+                                            <span class="text-muted">
+                                                <i class="bi bi-calendar-x me-1"></i>@item.AnioFin
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success fw-bold">
+                                                <i class="bi bi-infinity me-1"></i>Actual
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            @duracion año@(duracion != 1 ? "s" : "")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (esActiva)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Finalizada
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a asp-action="Details" asp-route-id="@item.IdJuntaDirectiva"
+                                               class="btn btn-sm btn-info text-white"
+                                               title="Ver detalles">
+                                                <i class="bi bi-eye me-1"></i>Ver
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.IdJuntaDirectiva"
+                                               class="btn btn-sm btn-warning text-white"
+                                               title="Editar">
+                                                <i class="bi bi-pencil me-1"></i>Editar
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.IdJuntaDirectiva"
+                                               class="btn btn-sm btn-danger text-white"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3 mb-0">No hay juntas directivas registradas</p>
+                    <a asp-action="Create" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Crear Primera Junta
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Información -->
+    <div class="alert alert-info mt-4" role="alert">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle me-2"></i>Información
+        </h6>
+        <ul class="mb-0 small">
+            <li>Cada cluster debe tener una junta directiva activa</li>
+            <li>Una junta sin año de fin se considera activa</li>
+            <li>Los miembros de la junta se gestionan en "Miembros de Junta"</li>
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-cerrar alertas después de 5 segundos
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
 }
-    </tbody>
-</table>
+
+<style>
+    .table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.875rem;
+    }
+</style>

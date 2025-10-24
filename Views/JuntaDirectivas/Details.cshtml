@@ -1,36 +1,179 @@
 ﻿@model ARSAN_Web.Models.JuntaDirectiva
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de Junta Directiva";
+    var esActiva = !Model.AnioFin.HasValue;
+    var duracion = esActiva ?
+        (DateTime.Now.Year - Model.AnioInicio) :
+        ((Model.AnioFin ?? Model.AnioInicio) - Model.AnioInicio);
 }
 
-<h1>Details</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Juntas Directivas</a></li>
+                        <li class="breadcrumb-item active">Detalles</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2>
+                            <i class="bi bi-file-text text-info me-2"></i>Detalles de Junta Directiva
+                        </h2>
+                        <p class="text-muted mb-0">Información completa de la junta</p>
+                    </div>
+                    @if (esActiva)
+                    {
+                        <span class="badge bg-success fs-6">
+                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activa
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary fs-6">
+                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Finalizada
+                        </span>
+                    }
+                </div>
+            </div>
 
-<div>
-    <h4>JuntaDirectiva</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AnioInicio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AnioInicio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AnioFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AnioFin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cluster)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cluster.Nombre)
-        </dd>
-    </dl>
+            <!-- Información Principal -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Información General
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Cluster</label>
+                            <p class="fs-4 mb-0">
+                                <i class="bi bi-building text-primary me-2"></i>
+                                <strong>@Model.Cluster.Nombre</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Año de Inicio</label>
+                            <p class="fs-5 mb-0">
+                                <i class="bi bi-calendar-check text-success me-2"></i>
+                                @Model.AnioInicio
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Año de Fin</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.AnioFin.HasValue)
+                                {
+                                    <span>
+                                        <i class="bi bi-calendar-x text-secondary me-2"></i>
+                                        @Model.AnioFin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-success fw-bold">
+                                        <i class="bi bi-infinity me-2"></i>
+                                        En funciones
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Duración</label>
+                            <p class="mb-0">
+                                <span class="badge bg-info fs-6">
+                                    @duracion año@(duracion != 1 ? "s" : "")
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">ID de Junta</label>
+                            <p class="mb-0 text-muted">#@Model.IdJuntaDirectiva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado y Estadísticas -->
+            @if (esActiva)
+            {
+                <div class="alert alert-success" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-check-circle me-2"></i>Junta Activa
+                    </h6>
+                    <p class="mb-0">
+                        Esta junta directiva está actualmente en funciones. Lleva @duracion año@(duracion != 1 ? "s" : "") desde su inicio.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-archive me-2"></i>Junta Finalizada
+                    </h6>
+                    <p class="mb-0">
+                        Esta junta directiva finalizó su período en @Model.AnioFin. Estuvo activa durante @duracion año@(duracion != 1 ? "s" : "").
+                    </p>
+                </div>
+            }
+
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+                        </a>
+
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@Model.IdJuntaDirectiva" class="btn btn-warning">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.IdJuntaDirectiva" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="alert alert-info" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-lightbulb me-2"></i>Información
+                </h6>
+                <p class="mb-0 small">
+                    Para gestionar los miembros de esta junta directiva, diríjase al módulo
+                    <strong>"Miembros de Junta"</strong> en el menú de Gestión.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdJuntaDirectiva">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+    }
+
+    hr {
+        opacity: 0.1;
+    }
+</style>

@@ -22,7 +22,19 @@ namespace ARSAN_Web.Controllers
         // GET: ConceptoPago
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ConceptosPago.ToListAsync());
+            var conceptos = await _context.ConceptosPago
+                .OrderBy(c => c.Activo ? 0 : 1) // Activos primero
+                .ThenBy(c => c.Codigo)
+                .ToListAsync();
+
+            // Calcular total de cuota mensual
+            var totalCuotaMensual = await _context.ConceptosPago
+                .Where(c => c.Activo)
+                .SumAsync(c => c.Monto);
+
+            ViewBag.TotalCuotaMensual = totalCuotaMensual;
+
+            return View(conceptos);
         }
 
         // GET: ConceptoPago/Details/5
@@ -35,6 +47,7 @@ namespace ARSAN_Web.Controllers
 
             var conceptoPago = await _context.ConceptosPago
                 .FirstOrDefaultAsync(m => m.IdConceptoPago == id);
+
             if (conceptoPago == null)
             {
                 return NotFound();
@@ -50,18 +63,33 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: ConceptoPago/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdConceptoPago,Codigo,Nombre,Descripcion,Monto,Activo")] ConceptoPago conceptoPago)
         {
+            // Validar si ya existe un concepto con ese código
+            var conceptoExistente = await _context.ConceptosPago
+                .AnyAsync(c => c.Codigo == conceptoPago.Codigo);
+
+            if (conceptoExistente)
+            {
+                ModelState.AddModelError("Codigo", "Ya existe un concepto de pago con este código.");
+            }
+
+            // Validar que el monto sea positivo
+            if (conceptoPago.Monto <= 0)
+            {
+                ModelState.AddModelError("Monto", "El monto debe ser mayor a 0.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(conceptoPago);
                 await _context.SaveChangesAsync();
+                TempData["Success"] = "Concepto de pago creado exitosamente.";
                 return RedirectToAction(nameof(Index));
             }
+
             return View(conceptoPago);
         }
 
@@ -78,12 +106,11 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
             return View(conceptoPago);
         }
 
         // POST: ConceptoPago/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdConceptoPago,Codigo,Nombre,Descripcion,Monto,Activo")] ConceptoPago conceptoPago)
@@ -93,12 +120,28 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
+            // Validar si ya existe otro concepto con ese código
+            var conceptoExistente = await _context.ConceptosPago
+                .AnyAsync(c => c.Codigo == conceptoPago.Codigo && c.IdConceptoPago != id);
+
+            if (conceptoExistente)
+            {
+                ModelState.AddModelError("Codigo", "Ya existe otro concepto de pago con este código.");
+            }
+
+            // Validar que el monto sea positivo
+            if (conceptoPago.Monto <= 0)
+            {
+                ModelState.AddModelError("Monto", "El monto debe ser mayor a 0.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(conceptoPago);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Concepto de pago actualizado exitosamente.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -113,6 +156,7 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             return View(conceptoPago);
         }
 
@@ -126,10 +170,17 @@ namespace ARSAN_Web.Controllers
 
             var conceptoPago = await _context.ConceptosPago
                 .FirstOrDefaultAsync(m => m.IdConceptoPago == id);
+
             if (conceptoPago == null)
             {
                 return NotFound();
             }
+
+            // Verificar si tiene detalles de recibo asociados
+            var tieneDetalles = await _context.DetallesRecibo
+                .AnyAsync(d => d.IdConceptoPago == id);
+
+            ViewBag.TieneDetalles = tieneDetalles;
 
             return View(conceptoPago);
         }
@@ -143,9 +194,10 @@ namespace ARSAN_Web.Controllers
             if (conceptoPago != null)
             {
                 _context.ConceptosPago.Remove(conceptoPago);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Concepto de pago eliminado exitosamente.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

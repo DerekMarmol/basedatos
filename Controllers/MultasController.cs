@@ -20,13 +20,67 @@ namespace ARSAN_Web.Controllers
         }
 
         // GET: Multas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string filtro = "todas", string busqueda = "", string ordenar = "fecha_desc")
         {
-            var multas = await _context.Multas
+            // Query base
+            var query = _context.Multas
                 .Include(m => m.Residencia)
-                    .ThenInclude(r => r.Cluster)  
+                    .ThenInclude(r => r.Cluster)
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Propietario)
                 .Include(m => m.TipoMulta)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Aplicar filtro por estado de pago
+            ViewData["FiltroActual"] = filtro;
+            switch (filtro.ToLower())
+            {
+                case "pendientes":
+                    query = query.Where(m => !m.Pagada);
+                    break;
+                case "pagadas":
+                    query = query.Where(m => m.Pagada);
+                    break;
+                default: // "todas"
+                    break;
+            }
+
+            // Aplicar búsqueda
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.ToLower();
+                query = query.Where(m =>
+                    m.Concepto.ToLower().Contains(busqueda) ||
+                    m.Residencia.Numero.ToString().Contains(busqueda) ||
+                    m.Residencia.Cluster.Nombre.ToLower().Contains(busqueda) ||
+                    m.Residencia.Propietario.NombreCompleto.ToLower().Contains(busqueda)
+                );
+            }
+            ViewData["BusquedaActual"] = busqueda;
+
+            // Aplicar ordenamiento
+            ViewData["OrdenActual"] = ordenar;
+            query = ordenar switch
+            {
+                "fecha_asc" => query.OrderBy(m => m.Fecha),
+                "fecha_desc" => query.OrderByDescending(m => m.Fecha),
+                "monto_asc" => query.OrderBy(m => m.Monto),
+                "monto_desc" => query.OrderByDescending(m => m.Monto),
+                "casa_asc" => query.OrderBy(m => m.Residencia.Cluster.Nombre).ThenBy(m => m.Residencia.Numero),
+                "casa_desc" => query.OrderByDescending(m => m.Residencia.Cluster.Nombre).ThenByDescending(m => m.Residencia.Numero),
+                _ => query.OrderByDescending(m => m.Fecha)
+            };
+
+            var multas = await query.ToListAsync();
+
+            // Calcular estadísticas
+            ViewData["TotalMultas"] = multas.Count;
+            ViewData["MultasPendientes"] = multas.Count(m => !m.Pagada);
+            ViewData["MultasPagadas"] = multas.Count(m => m.Pagada);
+            ViewData["MontoTotal"] = multas.Sum(m => m.Monto);
+            ViewData["MontoPendiente"] = multas.Where(m => !m.Pagada).Sum(m => m.Monto);
+            ViewData["MontoPagado"] = multas.Where(m => m.Pagada).Sum(m => m.Monto);
+
             return View(multas);
         }
 
@@ -40,8 +94,12 @@ namespace ARSAN_Web.Controllers
 
             var multa = await _context.Multas
                 .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Propietario)
                 .Include(m => m.TipoMulta)
                 .FirstOrDefaultAsync(m => m.IdMulta == id);
+
             if (multa == null)
             {
                 return NotFound();
@@ -54,7 +112,7 @@ namespace ARSAN_Web.Controllers
         public IActionResult Create()
         {
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre");
-            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo");
+            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre");
             return View();
         }
 
@@ -75,29 +133,42 @@ namespace ARSAN_Web.Controllers
                 {
                     ModelState.AddModelError("IdCluster", "El cluster especificado no existe.");
                     ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
                     return View(multa);
                 }
 
-                // Verificar que la residencia existe
-                var residenciaExiste = await _context.Residencias
-                    .AnyAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
+                // Verificar que la residencia existe y pertenece al cluster
+                var residencia = await _context.Residencias
+                    .Include(r => r.Cluster)
+                    .Include(r => r.Propietario)
+                    .FirstOrDefaultAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
 
-                if (!residenciaExiste)
+                if (residencia == null)
                 {
                     ModelState.AddModelError("IdResidencia", "La residencia especificada no existe o no pertenece al cluster seleccionado.");
                     ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
+                    return View(multa);
+                }
+
+                // Validar monto
+                if (multa.Monto <= 0)
+                {
+                    ModelState.AddModelError("Monto", "El monto debe ser mayor a cero.");
+                    ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                    ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
                     return View(multa);
                 }
 
                 _context.Add(multa);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Multa creada exitosamente para la casa #{residencia.Numero} del cluster {residencia.Cluster.Nombre}.";
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
             return View(multa);
         }
 
@@ -109,7 +180,10 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            var multa = await _context.Multas.FindAsync(id);
+            var multa = await _context.Multas
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)
+                .FirstOrDefaultAsync(m => m.IdMulta == id);
 
             if (multa == null)
             {
@@ -117,7 +191,7 @@ namespace ARSAN_Web.Controllers
             }
 
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
             return View(multa);
         }
 
@@ -145,24 +219,37 @@ namespace ARSAN_Web.Controllers
                     {
                         ModelState.AddModelError("IdCluster", "El cluster especificado no existe.");
                         ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
                         return View(multa);
                     }
 
                     // Verificar que la residencia existe y pertenece al cluster
-                    var residenciaExiste = await _context.Residencias
-                        .AnyAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
+                    var residencia = await _context.Residencias
+                        .Include(r => r.Cluster)
+                        .Include(r => r.Propietario)
+                        .FirstOrDefaultAsync(r => r.IdResidencia == multa.IdResidencia && r.IdCluster == multa.IdCluster);
 
-                    if (!residenciaExiste)
+                    if (residencia == null)
                     {
                         ModelState.AddModelError("IdResidencia", "La residencia especificada no existe o no pertenece al cluster seleccionado.");
                         ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
+                        return View(multa);
+                    }
+
+                    // Validar monto
+                    if (multa.Monto <= 0)
+                    {
+                        ModelState.AddModelError("Monto", "El monto debe ser mayor a cero.");
+                        ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
+                        ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
                         return View(multa);
                     }
 
                     _context.Update(multa);
                     await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = $"Multa actualizada exitosamente para la casa #{residencia.Numero} del cluster {residencia.Cluster.Nombre}.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -179,7 +266,7 @@ namespace ARSAN_Web.Controllers
             }
 
             ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", multa.IdCluster);
-            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta, "IdTipoMulta", "Codigo", multa.IdTipoMulta);
+            ViewData["IdTipoMulta"] = new SelectList(_context.TiposMulta.Where(t => t.Activo), "IdTipoMulta", "Nombre", multa.IdTipoMulta);
             return View(multa);
         }
 
@@ -193,8 +280,12 @@ namespace ARSAN_Web.Controllers
 
             var multa = await _context.Multas
                 .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Propietario)
                 .Include(m => m.TipoMulta)
                 .FirstOrDefaultAsync(m => m.IdMulta == id);
+
             if (multa == null)
             {
                 return NotFound();
@@ -208,14 +299,62 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var multa = await _context.Multas.FindAsync(id);
+            var multa = await _context.Multas
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)
+                .FirstOrDefaultAsync(m => m.IdMulta == id);
+
             if (multa != null)
             {
+                var infoMulta = $"casa #{multa.Residencia.Numero} del cluster {multa.Residencia.Cluster.Nombre}";
                 _context.Multas.Remove(multa);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Multa eliminada exitosamente ({infoMulta}).";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // Método auxiliar para marcar multa como pagada
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarcarComoPagada(int id)
+        {
+            var multa = await _context.Multas
+                .Include(m => m.Residencia)
+                    .ThenInclude(r => r.Cluster)
+                .FirstOrDefaultAsync(m => m.IdMulta == id);
+
+            if (multa == null)
+            {
+                return NotFound();
+            }
+
+            multa.Pagada = true;
+            _context.Update(multa);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Multa marcada como pagada para la casa #{multa.Residencia.Numero}.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Método auxiliar para cargar residencias por cluster (para AJAX)
+        [HttpGet]
+        public async Task<JsonResult> ObtenerResidenciasPorCluster(int idCluster)
+        {
+            var residencias = await _context.Residencias
+                .Where(r => r.IdCluster == idCluster)
+                .Include(r => r.Propietario)
+                .OrderBy(r => r.Numero)
+                .Select(r => new
+                {
+                    id = r.IdResidencia,
+                    numero = r.Numero,
+                    propietario = r.Propietario.NombreCompleto
+                })
+                .ToListAsync();
+
+            return Json(residencias);
         }
 
         private bool MultaExists(int id)

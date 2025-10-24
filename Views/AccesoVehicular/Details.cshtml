@@ -1,0 +1,209 @@
+﻿@model ARSAN_Web.Models.AccesoVehicular
+
+@{
+    ViewData["Title"] = "Detalles del Acceso";
+    var dentro = !Model.FechaSalida.HasValue;
+    var fechaHoraIngreso = Model.FechaIngreso.Date + Model.HoraIngreso;
+    var fechaHoraSalida = Model.FechaSalida.HasValue
+        ? Model.FechaSalida.Value.Date + (Model.HoraSalida ?? TimeSpan.Zero)
+        : DateTime.Now;
+    var permanencia = fechaHoraSalida - fechaHoraIngreso;
+}
+
+<div class="mb-4">
+    <h1>Detalles del Acceso Vehicular</h1>
+</div>
+
+@if (dentro)
+{
+    <div class="alert alert-success" role="alert">
+        <strong>✓ Vehículo Dentro:</strong> Este vehículo se encuentra actualmente dentro del residencial.
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary" role="alert">
+        <strong>✗ Vehículo Salió:</strong> Este vehículo ya salió del residencial.
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Información del Vehículo</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Placa</dt>
+                    <dd class="col-sm-8">
+                        <strong class="fs-5">@Model.Placa</strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Tipo de Acceso</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.TipoAcceso?.ToLower())
+                        {
+                            case "residente":
+                                <span class="badge bg-primary">🏠 Residente</span>
+                                break;
+                            case "visitante":
+                                <span class="badge bg-info">🚶 Visitante</span>
+                                break;
+                            case "servicio":
+                                <span class="badge bg-warning text-dark">🔧 Servicio</span>
+                                break;
+                            case "proveedor":
+                                <span class="badge bg-secondary">📦 Proveedor</span>
+                                break;
+                            case "emergencia":
+                                <span class="badge bg-danger">🚨 Emergencia</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary">@Model.TipoAcceso</span>
+                                break;
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Propietario</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Vehiculo?.Residencia?.Propietario != null)
+                        {
+                            <div>
+                                <strong>@Model.Vehiculo.Residencia.Propietario.NombreCompleto</strong><br />
+                                <small class="text-muted">Casa #@Model.Vehiculo.Residencia.Numero</small><br />
+                                <small class="text-muted">Tarjeta: @Model.Vehiculo.NumeroTarjeta</small>
+                            </div>
+                        }
+                        else if (Model.Visitante != null)
+                        {
+                            <div>
+                                <strong>@Model.Visitante.NombreCompleto</strong><br />
+                                <small class="text-muted">DPI: @Model.Visitante.Dpi</small><br />
+                                <small class="text-muted">Visitante</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No especificado</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Información de Garita y Guardias</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Garita</dt>
+                    <dd class="col-sm-8">
+                        <strong>@Model.Garita?.Nombre</strong>
+                        @if (Model.Garita?.Cluster?.Residencial != null)
+                        {
+                            <br />
+                            <small class="text-muted">@Model.Garita.Cluster.Residencial.Nombre - @Model.Garita.Cluster.Nombre</small>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Guardia Ingreso</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.GuardiaIngreso != null)
+                        {
+                            <div>
+                                👮 @Model.GuardiaIngreso.NombreCompleto<br />
+                                <small class="text-muted">DPI: @Model.GuardiaIngreso.Dpi</small>
+                            </div>
+                        }
+                    </dd>
+
+                    @if (Model.GuardiaSalida != null)
+                    {
+                        <dt class="col-sm-4">Guardia Salida</dt>
+                        <dd class="col-sm-8">
+                            <div>
+                                👮 @Model.GuardiaSalida.NombreCompleto<br />
+                                <small class="text-muted">DPI: @Model.GuardiaSalida.Dpi</small>
+                            </div>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Registro de Tiempos</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6>📥 Ingreso</h6>
+                <p class="mb-1">
+                    <strong>Fecha:</strong> @Model.FechaIngreso.ToString("dd/MM/yyyy")<br />
+                    <strong>Hora:</strong> @Model.HoraIngreso.ToString(@"hh\:mm")
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6>📤 Salida</h6>
+                @if (Model.FechaSalida.HasValue)
+                {
+                    <p class="mb-1">
+                        <strong>Fecha:</strong> @Model.FechaSalida.Value.ToString("dd/MM/yyyy")<br />
+                        <strong>Hora:</strong> @Model.HoraSalida?.ToString(@"hh\:mm")
+                    </p>
+                }
+                else
+                {
+                    <p class="mb-1">
+                        <span class="badge bg-warning text-dark">Vehículo aún dentro</span>
+                    </p>
+                }
+            </div>
+            <div class="col-md-4">
+                <h6>⏱️ Permanencia</h6>
+                <p class="mb-1">
+                    @if (permanencia.TotalHours < 24)
+                    {
+                        <strong>@((int)permanencia.TotalHours) horas @permanencia.Minutes minutos</strong>
+                    }
+                    else
+                    {
+                        <strong>@((int)permanencia.TotalDays) día(s) @permanencia.Hours horas</strong>
+                    }
+                    @if (!Model.FechaSalida.HasValue)
+                    {
+                        <br />
+                        <small class="text-muted">(contando hasta ahora)</small>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Observaciones))
+{
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Observaciones</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">@Model.Observaciones</p>
+        </div>
+    </div>
+}
+
+<div class="mt-3">
+    @if (dentro)
+    {
+        <a asp-action="RegistrarSalida" asp-route-id="@Model.IdAcceso" class="btn btn-warning">Registrar Salida</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Volver al Listado</a>
+</div>

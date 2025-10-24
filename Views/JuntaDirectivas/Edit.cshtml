@@ -1,44 +1,179 @@
 ﻿@model ARSAN_Web.Models.JuntaDirectiva
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Junta Directiva";
 }
 
-<h1>Edit</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Juntas Directivas</a></li>
+                        <li class="breadcrumb-item active">Editar</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-pencil-square text-warning me-2"></i>Editar Junta Directiva
+                </h2>
+                <p class="text-muted">Modifique los datos de la junta directiva</p>
+            </div>
 
-<h4>JuntaDirectiva</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdJuntaDirectiva" />
-            <div class="form-group">
-                <label asp-for="IdCluster" class="control-label"></label>
-                <select asp-for="IdCluster" class="form-control" asp-items="ViewBag.IdCluster"></select>
-                <span asp-validation-for="IdCluster" class="text-danger"></span>
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="IdJuntaDirectiva" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Cluster -->
+                        <div class="mb-4">
+                            <label asp-for="IdCluster" class="form-label fw-bold">
+                                <i class="bi bi-building me-1"></i>Cluster *
+                            </label>
+                            <select asp-for="IdCluster" class="form-select form-select-lg" asp-items="ViewBag.IdCluster">
+                                <option value="">-- Seleccione un cluster --</option>
+                            </select>
+                            <span asp-validation-for="IdCluster" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Cluster al que pertenece la junta directiva
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Período -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="AnioInicio" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>Año de Inicio *
+                                </label>
+                                <input asp-for="AnioInicio" type="number" class="form-control form-control-lg"
+                                       min="2000" max="2100" />
+                                <span asp-validation-for="AnioInicio" class="text-danger"></span>
+                                <div class="form-text">Año en que inicia el período</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="AnioFin" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-x me-1"></i>Año de Fin
+                                </label>
+                                <input asp-for="AnioFin" type="number" class="form-control form-control-lg"
+                                       min="2000" max="2100" placeholder="Dejar vacío si está activa" />
+                                <span asp-validation-for="AnioFin" class="text-danger"></span>
+                                <div class="form-text">Dejar vacío si la junta está actualmente activa</div>
+                            </div>
+                        </div>
+
+                        <!-- Estado visual -->
+                        <div class="mb-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="mb-2">
+                                        <i class="bi bi-info-circle text-primary me-1"></i>Estado Actual
+                                    </h6>
+                                    <p class="mb-0 text-muted" id="estadoJunta">
+                                        @if (Model.AnioFin.HasValue)
+                                        {
+                                            <span>La junta está <strong class="text-secondary">FINALIZADA</strong> (año fin: @Model.AnioFin)</span>
+                                        }
+                                        else
+                                        {
+                                            <span>La junta está <strong class="text-success">ACTIVA</strong></span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AnioInicio" class="control-label"></label>
-                <input asp-for="AnioInicio" class="form-control" />
-                <span asp-validation-for="AnioInicio" class="text-danger"></span>
+
+            <!-- Advertencia -->
+            <div class="alert alert-warning mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Atención
+                </h6>
+                <ul class="mb-0 small">
+                    <li>Verifique cuidadosamente los datos antes de guardar</li>
+                    <li>Los cambios afectarán los registros relacionados con esta junta</li>
+                    <li>Si cambia el año de fin, puede afectar el estado de la junta (activa/finalizada)</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label asp-for="AnioFin" class="control-label"></label>
-                <input asp-for="AnioFin" class="form-control" />
-                <span asp-validation-for="AnioFin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Actualizar estado según año de fin
+            function actualizarEstado() {
+                var anioFin = $('#AnioFin').val();
+                var estadoTexto = $('#estadoJunta');
+
+                if (anioFin && anioFin.trim() !== '') {
+                    estadoTexto.html('La junta estará <strong class="text-secondary">FINALIZADA</strong> (año fin: ' + anioFin + ')');
+                } else {
+                    estadoTexto.html('La junta estará <strong class="text-success">ACTIVA</strong>');
+                }
+            }
+
+            $('#AnioFin').on('input', actualizarEstado);
+
+            // Validar que año fin sea mayor que año inicio
+            $('form').submit(function(e) {
+                var anioInicio = parseInt($('#AnioInicio').val());
+                var anioFin = $('#AnioFin').val();
+
+                if (anioFin && anioFin.trim() !== '') {
+                    anioFin = parseInt(anioFin);
+
+                    if (anioFin < anioInicio) {
+                        e.preventDefault();
+                        alert('El año de fin debe ser mayor o igual al año de inicio');
+                        $('#AnioFin').focus();
+                        return false;
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .form-label {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }

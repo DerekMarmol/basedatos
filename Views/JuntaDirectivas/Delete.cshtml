@@ -1,39 +1,203 @@
 ﻿@model ARSAN_Web.Models.JuntaDirectiva
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar Junta Directiva";
+    var esActiva = !Model.AnioFin.HasValue;
 }
 
-<h1>Delete</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Juntas Directivas</a></li>
+                        <li class="breadcrumb-item active">Eliminar</li>
+                    </ol>
+                </nav>
+                <h2 class="text-danger">
+                    <i class="bi bi-trash me-2"></i>Eliminar Junta Directiva
+                </h2>
+                <p class="text-muted">Confirme la eliminación de esta junta directiva</p>
+            </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>JuntaDirectiva</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AnioInicio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AnioInicio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AnioFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AnioFin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cluster)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cluster.Nombre)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdJuntaDirectiva" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+            <!-- Alerta de advertencia -->
+            <div class="alert alert-danger border-danger shadow-sm" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>¡Atención!
+                </h5>
+                <p class="mb-0">
+                    Está a punto de eliminar esta junta directiva de forma permanente.
+                    Esta acción <strong>NO</strong> se puede deshacer.
+                </p>
+            </div>
+
+            <!-- Información de la junta a eliminar -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-text me-2"></i>Información de la Junta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">ID de Junta</label>
+                        <p class="fs-5 mb-0 fw-bold text-danger">#@Model.IdJuntaDirectiva</p>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">Cluster</label>
+                        <div class="alert alert-light border mb-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-building fs-3 text-danger me-3"></i>
+                                <div>
+                                    <p class="mb-0 fw-bold fs-5">@Model.Cluster.Nombre</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Año de Inicio</label>
+                            <p class="fs-5 mb-0">
+                                <i class="bi bi-calendar-check text-danger me-2"></i>
+                                @Model.AnioInicio
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Año de Fin</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.AnioFin.HasValue)
+                                {
+                                    <span>
+                                        <i class="bi bi-calendar-x text-danger me-2"></i>
+                                        @Model.AnioFin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-success fw-bold">
+                                        <i class="bi bi-infinity me-2"></i>
+                                        En funciones
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">Estado</label>
+                        <p class="mb-0">
+                            @if (esActiva)
+                            {
+                                <span class="badge bg-success fs-6">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Finalizada
+                                </span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advertencias adicionales -->
+            @if (esActiva)
+            {
+                <div class="alert alert-warning" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-circle me-2"></i>Junta Activa
+                    </h6>
+                    <p class="mb-0">
+                        Esta junta directiva está actualmente activa. Eliminarla puede afectar los registros
+                        y miembros asociados a esta junta.
+                    </p>
+                </div>
+            }
+
+            <div class="alert alert-warning" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Consecuencias
+                </h6>
+                <ul class="mb-0 small">
+                    <li>Se eliminarán todos los registros relacionados con esta junta</li>
+                    <li>Los miembros asociados a esta junta perderán la referencia</li>
+                    <li>Esta acción es permanente y no se puede revertir</li>
+                </ul>
+            </div>
+
+            <!-- Formulario de confirmación -->
+            <div class="card border-danger shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="IdJuntaDirectiva" />
+
+                        <div class="mb-4">
+                            <h5 class="text-danger">¿Está seguro que desea eliminar esta junta directiva?</h5>
+                            <p class="text-muted mb-0">
+                                Esta acción eliminará permanentemente la junta directiva del cluster
+                                <strong>@Model.Cluster.Nombre</strong>.
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>No, Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg px-5">
+                                <i class="bi bi-trash me-2"></i>Sí, Eliminar Junta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Link alternativo -->
+            <div class="text-center mt-4">
+                <a asp-action="Details" asp-route-id="@Model.IdJuntaDirectiva" class="btn btn-link text-decoration-none">
+                    <i class="bi bi-eye me-1"></i>Ver detalles completos de la junta
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+    }
+
+    .alert {
+        border-left: 4px solid;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+
+    .alert-warning {
+        border-left-color: #ffc107;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    hr {
+        opacity: 0.1;
+    }
+</style>

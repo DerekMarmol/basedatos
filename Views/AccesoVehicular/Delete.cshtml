@@ -1,0 +1,120 @@
+﻿@model ARSAN_Web.Models.AccesoVehicular
+
+@{
+    ViewData["Title"] = "Eliminar Acceso";
+    var dentro = !Model.FechaSalida.HasValue;
+}
+
+<div class="mb-4">
+    <h1>Eliminar Registro de Acceso Vehicular</h1>
+</div>
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">⚠️ ¿Está seguro que desea eliminar este registro?</h4>
+    <p class="mb-0">
+        Esta acción no se puede deshacer. Se eliminará permanentemente el registro de acceso vehicular.
+    </p>
+    @if (dentro)
+    {
+        <hr />
+        <p class="mb-0">
+            <strong>⚠️ Advertencia adicional:</strong> Este vehículo AÚN ESTÁ DENTRO del residencial.
+            Se recomienda registrar la salida antes de eliminar el registro.
+        </p>
+    }
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Información del Registro a Eliminar</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Placa</dt>
+            <dd class="col-sm-9">
+                <strong class="fs-5">@Model.Placa</strong>
+            </dd>
+
+            <dt class="col-sm-3">Tipo de Acceso</dt>
+            <dd class="col-sm-9">
+                @Model.TipoAcceso
+            </dd>
+
+            <dt class="col-sm-3">Propietario/Visitante</dt>
+            <dd class="col-sm-9">
+                @if (Model.Vehiculo?.Residencia?.Propietario != null)
+                {
+                    <div>
+                        @Model.Vehiculo.Residencia.Propietario.NombreCompleto
+                        <small class="text-muted">(Casa #@Model.Vehiculo.Residencia.Numero)</small>
+                    </div>
+                }
+                else if (Model.Visitante != null)
+                {
+                    <div>
+                        @Model.Visitante.NombreCompleto
+                        <small class="text-muted">(Visitante)</small>
+                    </div>
+                }
+                else
+                {
+                    <span class="text-muted">No especificado</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Garita</dt>
+            <dd class="col-sm-9">
+                @Model.Garita?.Nombre
+            </dd>
+
+            <dt class="col-sm-3">Fecha/Hora Ingreso</dt>
+            <dd class="col-sm-9">
+                @Model.FechaIngreso.ToString("dd/MM/yyyy") - @Model.HoraIngreso.ToString(@"hh\:mm")
+                <br />
+                <small class="text-muted">Guardia: @Model.GuardiaIngreso?.NombreCompleto</small>
+            </dd>
+
+            <dt class="col-sm-3">Fecha/Hora Salida</dt>
+            <dd class="col-sm-9">
+                @if (Model.FechaSalida.HasValue)
+                {
+                    <div>
+                        @Model.FechaSalida.Value.ToString("dd/MM/yyyy") - @Model.HoraSalida?.ToString(@"hh\:mm")
+                        <br />
+                        <small class="text-muted">Guardia: @Model.GuardiaSalida?.NombreCompleto</small>
+                    </div>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Sin salida registrada</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">
+                @if (dentro)
+                {
+                    <span class="badge bg-success">✓ Dentro del residencial</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">✗ Ya salió</span>
+                }
+            </dd>
+
+            @if (!string.IsNullOrEmpty(Model.Observaciones))
+            {
+                <dt class="col-sm-3">Observaciones</dt>
+                <dd class="col-sm-9">
+                    @Model.Observaciones
+                </dd>
+            }
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete" class="mt-4">
+    <input type="hidden" asp-for="IdAcceso" />
+    <button type="submit" class="btn btn-danger">Sí, Eliminar Registro</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

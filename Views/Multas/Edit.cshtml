@@ -4,72 +4,286 @@
     ViewData["Title"] = "Editar Multa";
 }
 
-<h1>Editar Multa</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Multas</a></li>
+                        <li class="breadcrumb-item active">Editar Multa</li>
+                    </ol>
+                </nav>
+                <h2><i class="bi bi-pencil-square text-warning me-2"></i>Editar Multa</h2>
+                <p class="text-muted">Modifique los datos de la multa</p>
+            </div>
 
-<h4>Modificar Multa</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdMulta" />
-            
-            <div class="form-group mb-3">
-                <label asp-for="IdCluster" class="control-label">Cluster</label>
-                <select asp-for="IdCluster" class="form-control" asp-items="ViewBag.IdCluster">
-                    <option value="">-- Seleccione un cluster --</option>
-                </select>
-                <span asp-validation-for="IdCluster" class="text-danger"></span>
-                <small class="form-text text-muted">Cluster al que pertenece la residencia</small>
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="IdMulta" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Cluster -->
+                        <div class="mb-4">
+                            <label asp-for="IdCluster" class="form-label fw-bold">
+                                <i class="bi bi-building me-1"></i>Cluster *
+                            </label>
+                            <select asp-for="IdCluster" class="form-select form-select-lg" asp-items="ViewBag.IdCluster" id="clusterSelect">
+                                <option value="">-- Seleccione un cluster --</option>
+                            </select>
+                            <span asp-validation-for="IdCluster" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Seleccione primero el cluster para cargar las residencias disponibles
+                            </div>
+                        </div>
+
+                        <!-- Residencia -->
+                        <div class="mb-4">
+                            <label asp-for="IdResidencia" class="form-label fw-bold">
+                                <i class="bi bi-house-door me-1"></i>Residencia *
+                            </label>
+                            <select asp-for="IdResidencia" class="form-select form-select-lg" id="residenciaSelect" disabled>
+                                <option value="">-- Primero seleccione un cluster --</option>
+                            </select>
+                            <span asp-validation-for="IdResidencia" class="text-danger"></span>
+                            <div class="form-text" id="residenciaInfo">
+                                Seleccione la residencia que recibirá la multa
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Tipo de Multa -->
+                        <div class="mb-4">
+                            <label asp-for="IdTipoMulta" class="form-label fw-bold">
+                                <i class="bi bi-tags me-1"></i>Tipo de Multa
+                            </label>
+                            <select asp-for="IdTipoMulta" class="form-select form-select-lg" asp-items="ViewBag.IdTipoMulta" id="tipoMultaSelect">
+                                <option value="">-- Seleccione un tipo (opcional) --</option>
+                            </select>
+                            <span asp-validation-for="IdTipoMulta" class="text-danger"></span>
+                            <div class="form-text">
+                                Categoría de la multa (ruido, basura, mascota, etc.)
+                            </div>
+                        </div>
+
+                        <!-- Concepto -->
+                        <div class="mb-4">
+                            <label asp-for="Concepto" class="form-label fw-bold">
+                                <i class="bi bi-file-text me-1"></i>Concepto/Descripción *
+                            </label>
+                            <textarea asp-for="Concepto" class="form-control" rows="4"
+                                      placeholder="Describa detalladamente el motivo de la multa..."
+                                      maxlength="500"></textarea>
+                            <span asp-validation-for="Concepto" class="text-danger"></span>
+                            <div class="form-text">
+                                Explique claramente la razón de la multa (máximo 500 caracteres)
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Monto -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Monto" class="form-label fw-bold">
+                                    <i class="bi bi-cash-coin me-1"></i>Monto (Q) *
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">Q</span>
+                                    <input asp-for="Monto" type="number" class="form-control"
+                                           step="0.01" min="0.01" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Monto" class="text-danger"></span>
+                            </div>
+
+                            <!-- Fecha -->
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Fecha" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-event me-1"></i>Fecha de la Multa *
+                                </label>
+                                <input asp-for="Fecha" type="date" class="form-control form-control-lg" />
+                                <span asp-validation-for="Fecha" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Estado de pago -->
+                        <div class="mb-4">
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" asp-for="Pagada" id="pagadaCheck" />
+                                        <label class="form-check-label fw-bold" for="pagadaCheck">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Marcar como pagada
+                                        </label>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        Active esta opción para indicar que la multa ha sido pagada
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="IdResidencia" class="control-label">ID Residencia</label>
-                <input asp-for="IdResidencia" class="form-control" type="number" min="1" />
-                <span asp-validation-for="IdResidencia" class="text-danger"></span>
-                <small class="form-text text-muted">ID de la residencia dentro del cluster seleccionado</small>
+
+            <!-- Información -->
+            <div class="alert alert-warning mt-3" role="alert">
+                <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Atención</h6>
+                <ul class="mb-0 small">
+                    <li>Verifique cuidadosamente los datos antes de guardar los cambios</li>
+                    <li>Los cambios afectarán el estado de cuenta de la residencia</li>
+                    <li>Si marca la multa como pagada, considere registrar el pago correspondiente</li>
+                </ul>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Concepto" class="control-label"></label>
-                <textarea asp-for="Concepto" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Concepto" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Monto" class="control-label"></label>
-                <input asp-for="Monto" class="form-control" type="number" step="0.01" min="0" />
-                <span asp-validation-for="Monto" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" type="date" />
-                <span asp-validation-for="Fecha" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group form-check mb-3">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Pagada" /> @Html.DisplayNameFor(model => model.Pagada)
-                </label>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="IdTipoMulta" class="control-label">Tipo de Multa</label>
-                <select asp-for="IdTipoMulta" class="form-control" asp-items="ViewBag.IdTipoMulta">
-                    <option value="">-- Seleccione un tipo --</option>
-                </select>
-                <span asp-validation-for="IdTipoMulta" class="text-danger"></span>
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            var residenciaOriginal = @Model.IdResidencia;
+            var clusterOriginal = @Model.IdCluster;
+
+            // Función para cargar residencias
+            function cargarResidencias(clusterId, residenciaSeleccionada) {
+                var residenciaSelect = $('#residenciaSelect');
+
+                residenciaSelect.empty();
+                residenciaSelect.prop('disabled', true);
+
+                if (clusterId) {
+                    residenciaSelect.append('<option value="">Cargando residencias...</option>');
+
+                    $.ajax({
+                        url: '@Url.Action("ObtenerResidenciasPorCluster", "Multas")',
+                        type: 'GET',
+                        data: { idCluster: clusterId },
+                        success: function(data) {
+                            residenciaSelect.empty();
+
+                            if (data.length > 0) {
+                                residenciaSelect.append('<option value="">-- Seleccione una residencia --</option>');
+
+                                $.each(data, function(index, item) {
+                                    var option = $('<option></option>')
+                                        .val(item.id)
+                                        .text('Casa #' + item.numero + ' - ' + item.propietario);
+
+                                    if (item.id == residenciaSeleccionada) {
+                                        option.prop('selected', true);
+                                    }
+
+                                    residenciaSelect.append(option);
+                                });
+
+                                residenciaSelect.prop('disabled', false);
+                                $('#residenciaInfo').html('<i class="bi bi-check-circle text-success me-1"></i>' + data.length + ' residencia(s) disponible(s) en este cluster');
+                            } else {
+                                residenciaSelect.append('<option value="">No hay residencias en este cluster</option>');
+                                $('#residenciaInfo').html('<i class="bi bi-exclamation-triangle text-warning me-1"></i>No se encontraron residencias en este cluster');
+                            }
+                        },
+                        error: function() {
+                            residenciaSelect.empty();
+                            residenciaSelect.append('<option value="">Error al cargar residencias</option>');
+                            $('#residenciaInfo').html('<i class="bi bi-x-circle text-danger me-1"></i>Error al cargar las residencias. Intente nuevamente.');
+                        }
+                    });
+                } else {
+                    residenciaSelect.append('<option value="">-- Primero seleccione un cluster --</option>');
+                    $('#residenciaInfo').text('Seleccione la residencia que recibirá la multa');
+                }
+            }
+
+            // Cargar residencias al inicio
+            if (clusterOriginal) {
+                cargarResidencias(clusterOriginal, residenciaOriginal);
+            }
+
+            // Cargar residencias cuando cambia el cluster
+            $('#clusterSelect').change(function() {
+                var clusterId = $(this).val();
+                cargarResidencias(clusterId, null);
+            });
+
+            // Contador de caracteres para el concepto
+            $('textarea[name="Concepto"]').on('input', function() {
+                var maxLength = 500;
+                var currentLength = $(this).val().length;
+                var remaining = maxLength - currentLength;
+
+                var counterText = remaining + ' caracteres restantes';
+                if (remaining < 50) {
+                    counterText = '<span class="text-warning">' + counterText + '</span>';
+                }
+
+                if (!$('#conceptoCounter').length) {
+                    $(this).after('<div id="conceptoCounter" class="form-text"></div>');
+                }
+                $('#conceptoCounter').html(counterText);
+            }).trigger('input');
+
+            // Validación del monto en tiempo real
+            $('input[name="Monto"]').on('input', function() {
+                var valor = parseFloat($(this).val());
+                if (valor <= 0 || isNaN(valor)) {
+                    $(this).addClass('is-invalid');
+                    if (!$('#montoError').length) {
+                        $(this).after('<div id="montoError" class="invalid-feedback">El monto debe ser mayor a cero</div>');
+                    }
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $('#montoError').remove();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .form-label {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+    </style>
 }

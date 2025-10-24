@@ -1,62 +1,374 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Multa>
 
 @{
-    ViewData["Title"] = "Multas";
+    ViewData["Title"] = "Gestión de Multas";
+    var filtroActual = ViewData["FiltroActual"]?.ToString() ?? "todas";
+    var busquedaActual = ViewData["BusquedaActual"]?.ToString() ?? "";
+    var ordenActual = ViewData["OrdenActual"]?.ToString() ?? "fecha_desc";
 }
 
-<h1>Multas</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Gestión de Multas</h2>
+            <p class="text-muted mb-0">Administración de multas del residencial</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Multa
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nueva Multa</a>
-</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID Residencia</th>
-            <th>Cluster</th>
-            <th>Número Casa</th>
-            <th>Concepto</th>
-            <th>Monto</th>
-            <th>Fecha</th>
-            <th>Pagada</th>
-            <th>Tipo Multa</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IdResidencia)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Residencia.Cluster.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Residencia.Numero)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Concepto)
-                </td>
-                <td>
-                    Q @Html.DisplayFor(modelItem => item.Monto)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Fecha)
-                </td>
-                <td>
-                    @(item.Pagada ? "Sí" : "No")
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TipoMulta.Codigo)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdMulta" class="btn btn-sm btn-warning">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdMulta" class="btn btn-sm btn-info">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdMulta" class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
-            </tr>
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-exclamation-triangle fs-4 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Multas</h6>
+                            <h3 class="mb-0">@ViewData["TotalMultas"]</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-danger bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-clock-history fs-4 text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Pendientes</h6>
+                            <h3 class="mb-0 text-danger">@ViewData["MultasPendientes"]</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-check-circle fs-4 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Pagadas</h6>
+                            <h3 class="mb-0 text-success">@ViewData["MultasPagadas"]</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-cash-stack fs-4 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Por Cobrar</h6>
+                            <h3 class="mb-0 text-warning">Q @string.Format("{0:N2}", ViewData["MontoPendiente"])</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <!-- Filtro por estado -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Estado de Pago</label>
+                    <select name="filtro" class="form-select" onchange="this.form.submit()">
+                        <option value="todas" selected="@(filtroActual == "todas")">📋 Todas las multas</option>
+                        <option value="pendientes" selected="@(filtroActual == "pendientes")">⏰ Pendientes de pago</option>
+                        <option value="pagadas" selected="@(filtroActual == "pagadas")">✅ Pagadas</option>
+                    </select>
+                </div>
+
+                <!-- Búsqueda -->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Búsqueda</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" name="busqueda" value="@busquedaActual" class="form-control"
+                               placeholder="Buscar por concepto, casa, cluster o propietario...">
+                    </div>
+                </div>
+
+                <!-- Ordenamiento -->
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Ordenar por</label>
+                    <select name="ordenar" class="form-select" onchange="this.form.submit()">
+                        <option value="fecha_desc" selected="@(ordenActual == "fecha_desc")">📅 Fecha (Más reciente)</option>
+                        <option value="fecha_asc" selected="@(ordenActual == "fecha_asc")">📅 Fecha (Más antigua)</option>
+                        <option value="monto_desc" selected="@(ordenActual == "monto_desc")">💰 Monto (Mayor a menor)</option>
+                        <option value="monto_asc" selected="@(ordenActual == "monto_asc")">💰 Monto (Menor a mayor)</option>
+                        <option value="casa_asc" selected="@(ordenActual == "casa_asc")">🏠 Casa (A-Z)</option>
+                        <option value="casa_desc" selected="@(ordenActual == "casa_desc")">🏠 Casa (Z-A)</option>
+                    </select>
+                </div>
+
+                <!-- Botones -->
+                <div class="col-md-2">
+                    <label class="form-label fw-bold d-block">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-1"></i>Filtrar
+                    </button>
+                </div>
+
+                <!-- Limpiar filtros -->
+                @if (!string.IsNullOrEmpty(busquedaActual) || filtroActual != "todas" || ordenActual != "fecha_desc")
+                {
+                    <div class="col-12">
+                        <a asp-action="Index" class="btn btn-link text-decoration-none">
+                            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+                        </a>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de multas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Cluster</th>
+                                <th>Casa</th>
+                                <th>Propietario</th>
+                                <th>Concepto</th>
+                                <th>Tipo</th>
+                                <th class="text-end">Monto</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center" style="min-width: 280px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            @item.Fecha.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>@item.Residencia.Cluster.Nombre</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">Casa #@item.Residencia.Numero</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark">@item.Residencia.Propietario.NombreCompleto</span>
+                                    </td>
+                                    <td>
+                                        <span class="d-inline-block text-truncate" style="max-width: 200px;"
+                                              title="@item.Concepto">
+                                            @item.Concepto
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (item.TipoMulta != null)
+                                        {
+                                            <span class="badge bg-secondary">@item.TipoMulta.Nombre</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <strong class="text-primary">Q @string.Format("{0:N2}", item.Monto)</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.Pagada)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>Pagada
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-clock-history me-1"></i>Pendiente
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a asp-action="Details" asp-route-id="@item.IdMulta"
+                                               class="btn btn-sm btn-info text-white">
+                                                <i class="bi bi-eye me-1"></i>Ver
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.IdMulta"
+                                               class="btn btn-sm btn-warning text-white">
+                                                <i class="bi bi-pencil me-1"></i>Editar
+                                            </a>
+                                            @if (!item.Pagada)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-success"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalPagar"
+                                                        onclick="prepararPago(@item.IdMulta, '@item.Residencia.Cluster.Nombre - Casa #@item.Residencia.Numero', @item.Monto)">
+                                                    <i class="bi bi-check-circle me-1"></i>Pagar
+                                                </button>
+                                            }
+                                            <a asp-action="Delete" asp-route-id="@item.IdMulta"
+                                               class="btn btn-sm btn-danger text-white">
+                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="6" class="text-end"><strong>Totales:</strong></td>
+                                <td class="text-end">
+                                    <strong class="text-primary">Q @string.Format("{0:N2}", Model.Sum(m => m.Monto))</strong>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3 mb-0">No se encontraron multas con los filtros aplicados.</p>
+                    @if (!string.IsNullOrEmpty(busquedaActual) || filtroActual != "todas")
+                    {
+                        <a asp-action="Index" class="btn btn-link">Limpiar filtros</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal para marcar como pagada -->
+<div class="modal fade" id="modalPagar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-check-circle me-2"></i>Marcar Multa como Pagada
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formPagar" method="post" asp-action="MarcarComoPagada">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="multaId" />
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Residencia:</strong> <span id="multaResidencia"></span><br>
+                        <strong>Monto:</strong> Q <span id="multaMonto"></span>
+                    </div>
+                    <p>¿Está seguro de marcar esta multa como pagada?</p>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Esta acción modificará el estado de la multa.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-2"></i>Confirmar Pago
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Preparar modal de pago
+        function prepararPago(id, residencia, monto) {
+            document.getElementById('multaId').value = id;
+            document.getElementById('multaResidencia').textContent = residencia;
+            document.getElementById('multaMonto').textContent = monto.toFixed(2);
         }
-    </tbody>
-</table>
+
+        // Auto-cerrar alertas después de 5 segundos
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+}
+
+<style>
+    .table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.875rem;
+    }
+
+    .d-flex.gap-1 {
+        gap: 0.25rem !important;
+    }
+</style>

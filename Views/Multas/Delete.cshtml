@@ -4,44 +4,206 @@
     ViewData["Title"] = "Eliminar Multa";
 }
 
-<h1>Eliminar Multa</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Multas</a></li>
+                        <li class="breadcrumb-item active">Eliminar</li>
+                    </ol>
+                </nav>
+                <h2 class="text-danger">
+                    <i class="bi bi-trash me-2"></i>Eliminar Multa
+                </h2>
+                <p class="text-muted">Confirme la eliminación de esta multa</p>
+            </div>
 
-<h3>¿Está seguro que desea eliminar esta multa?</h3>
-<div>
-    <h4>Multa</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">ID Residencia</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.IdResidencia)</dd>
+            <!-- Alerta de advertencia -->
+            <div class="alert alert-danger border-danger shadow-sm" role="alert">
+                <h5 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>¡Atención!
+                </h5>
+                <p class="mb-0">
+                    Está a punto de eliminar esta multa de forma permanente.
+                    Esta acción <strong>NO</strong> se puede deshacer.
+                </p>
+            </div>
 
-        <dt class="col-sm-3">Cluster</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Residencia.Cluster.Nombre)</dd>
+            <!-- Información de la multa a eliminar -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-text me-2"></i>Información de la Multa
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">ID de Multa</label>
+                            <p class="fs-5 mb-0 fw-bold text-danger">#@Model.IdMulta</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Fecha</label>
+                            <p class="fs-5 mb-0">
+                                <i class="bi bi-calendar3 text-danger me-1"></i>
+                                @Model.Fecha.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                    </div>
 
-        <dt class="col-sm-3">Número de Casa</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Residencia.Numero)</dd>
+                    <hr>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Concepto)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Concepto)</dd>
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">Residencia Afectada</label>
+                        <div class="alert alert-light border mb-0">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-house-door-fill fs-3 text-danger me-3"></i>
+                                <div>
+                                    <p class="mb-0 fw-bold">@Model.Residencia.Cluster.Nombre - Casa #@Model.Residencia.Numero</p>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person me-1"></i>
+                                        @Model.Residencia.Propietario.NombreCompleto
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Monto)</dt>
-        <dd class="col-sm-9">Q @Html.DisplayFor(model => model.Monto)</dd>
+                    <hr>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Fecha)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Fecha)</dd>
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">Tipo de Multa</label>
+                        <p class="mb-0">
+                            @if (Model.TipoMulta != null)
+                            {
+                                <span class="badge bg-secondary fs-6">@Model.TipoMulta.Nombre</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Sin tipo específico</span>
+                            }
+                        </p>
+                    </div>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Pagada)</dt>
-        <dd class="col-sm-9">@(Model.Pagada ? "Sí" : "No")</dd>
+                    <hr>
 
-        <dt class="col-sm-3">Tipo de Multa</dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.TipoMulta.Nombre)
-            (@Html.DisplayFor(model => model.TipoMulta.Codigo))
-        </dd>
-    </dl>
+                    <div class="mb-3">
+                        <label class="text-muted small fw-bold text-uppercase">Concepto</label>
+                        <div class="alert alert-light border mb-0">
+                            <p class="mb-0">@Model.Concepto</p>
+                        </div>
+                    </div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdMulta" />
-        <input type="submit" value="Eliminar" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-    </form>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-bold text-uppercase">Monto</label>
+                            <p class="fs-3 mb-0 text-danger fw-bold">
+                                <i class="bi bi-cash-coin me-2"></i>Q @string.Format("{0:N2}", Model.Monto)
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-bold text-uppercase">Estado</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.Pagada)
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle me-1"></i>Pagada
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="bi bi-clock-history me-1"></i>Pendiente
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advertencias adicionales -->
+            @if (Model.Pagada)
+            {
+                <div class="alert alert-warning" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-circle me-2"></i>Multa Pagada
+                    </h6>
+                    <p class="mb-0">
+                        Esta multa ya ha sido pagada. Eliminarla afectará el historial de pagos de la residencia.
+                    </p>
+                </div>
+            }
+
+            <!-- Formulario de confirmación -->
+            <div class="card border-danger shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="IdMulta" />
+
+                        <div class="mb-4">
+                            <h5 class="text-danger">¿Está seguro que desea eliminar esta multa?</h5>
+                            <p class="text-muted mb-0">
+                                Una vez eliminada, no podrá recuperar esta información.
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>No, Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg px-5">
+                                <i class="bi bi-trash me-2"></i>Sí, Eliminar Multa
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Link alternativo -->
+            <div class="text-center mt-4">
+                <a asp-action="Details" asp-route-id="@Model.IdMulta" class="btn btn-link text-decoration-none">
+                    <i class="bi bi-eye me-1"></i>Ver detalles completos de la multa
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+    }
+
+    .alert {
+        border-left: 4px solid;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+
+    .alert-warning {
+        border-left-color: #ffc107;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    hr {
+        opacity: 0.1;
+    }
+</style>
