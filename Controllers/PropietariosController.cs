@@ -74,6 +74,15 @@ namespace ARSAN_Web.Controllers
             ModelState.Remove("Residencias");
             ModelState.Remove("MiembrosJunta");
 
+            // Validar si ya existe un propietario con ese DPI
+            var propietarioExistente = await _context.Propietarios
+                .AnyAsync(p => p.Dpi == propietario.Dpi);
+
+            if (propietarioExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe un propietario registrado con este DPI.");
+            }
+
             // Verificar si es persona no grata
             var esNoGrato = await _context.PersonasNoGratas
                 .AnyAsync(p => p.Dpi == propietario.Dpi && p.Activo);
@@ -121,6 +130,15 @@ namespace ARSAN_Web.Controllers
             // Remover validación de navegación
             ModelState.Remove("Residencias");
             ModelState.Remove("MiembrosJunta");
+
+            // Validar si ya existe otro propietario con ese DPI
+            var propietarioExistente = await _context.Propietarios
+                .AnyAsync(p => p.Dpi == propietario.Dpi && p.IdPropietario != id);
+
+            if (propietarioExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe otro propietario registrado con este DPI.");
+            }
 
             if (ModelState.IsValid)
             {

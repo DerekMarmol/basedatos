@@ -80,6 +80,15 @@ namespace ARSAN_Web.Controllers
             ModelState.Remove("Vehiculos");
             ModelState.Remove("Censos");
 
+            // Validar si ya existe una residencia con ese número en ese cluster
+            var residenciaExistente = await _context.Residencias
+                .AnyAsync(r => r.Numero == residencia.Numero && r.IdCluster == residencia.IdCluster);
+
+            if (residenciaExistente)
+            {
+                ModelState.AddModelError("Numero", "Ya existe una residencia con este número en el cluster seleccionado.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(residencia);
@@ -127,6 +136,15 @@ namespace ARSAN_Web.Controllers
             ModelState.Remove("Inquilino");
             ModelState.Remove("Vehiculos");
             ModelState.Remove("Censos");
+
+            // Validar si ya existe otra residencia con ese número en ese cluster
+            var residenciaExistente = await _context.Residencias
+                .AnyAsync(r => r.Numero == residencia.Numero && r.IdCluster == residencia.IdCluster && r.IdResidencia != id);
+
+            if (residenciaExistente)
+            {
+                ModelState.AddModelError("Numero", "Ya existe otra residencia con este número en el cluster seleccionado.");
+            }
 
             if (ModelState.IsValid)
             {

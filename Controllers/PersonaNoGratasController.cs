@@ -24,6 +24,8 @@ namespace ARSAN_Web.Controllers
         {
             var personasNoGratas = await _context.PersonasNoGratas
                 .Include(p => p.Residencial)
+                .OrderByDescending(p => p.Activo)
+                .ThenByDescending(p => p.FechaRegistro)
                 .ToListAsync();
             return View(personasNoGratas);
         }
@@ -61,14 +63,29 @@ namespace ARSAN_Web.Controllers
         {
             // Remover validación de navegación
             ModelState.Remove("Residencial");
-            
+
+            // Validar si ya existe una persona no grata ACTIVA con el mismo DPI
+            var personaNoGrataExistente = await _context.PersonasNoGratas
+                .Include(p => p.Residencial)
+                .FirstOrDefaultAsync(p => p.Dpi == personaNoGrata.Dpi && p.Activo);
+
+            if (personaNoGrataExistente != null)
+            {
+                ModelState.AddModelError("Dpi",
+                    $"Esta persona ya está registrada como NO GRATA (activa) en el residencial '{personaNoGrataExistente.Residencial?.Nombre}'. " +
+                    $"Si desea actualizar la información, edite el registro existente.");
+            }
+
             if (ModelState.IsValid)
             {
+                // Asegurar que se registre como activo
+                personaNoGrata.Activo = true;
+
                 _context.Add(personaNoGrata);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
+
             ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }
@@ -86,7 +103,7 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
-            
+
             ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }
@@ -103,6 +120,17 @@ namespace ARSAN_Web.Controllers
 
             // Remover validación de navegación
             ModelState.Remove("Residencial");
+
+            // Validar si ya existe otra persona no grata ACTIVA con el mismo DPI
+            var personaNoGrataExistente = await _context.PersonasNoGratas
+                .Include(p => p.Residencial)
+                .FirstOrDefaultAsync(p => p.Dpi == personaNoGrata.Dpi && p.Activo && p.IdPNG != id);
+
+            if (personaNoGrataExistente != null && personaNoGrata.Activo)
+            {
+                ModelState.AddModelError("Dpi",
+                    $"Ya existe otra persona no grata activa con este DPI en el residencial '{personaNoGrataExistente.Residencial?.Nombre}'.");
+            }
 
             if (ModelState.IsValid)
             {
@@ -124,7 +152,7 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            
+
             ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }

@@ -73,6 +73,15 @@ namespace ARSAN_Web.Controllers
             // Remover validación de navegación
             ModelState.Remove("Residencias");
 
+            // Validar si ya existe un inquilino con ese DPI
+            var inquilinoExistente = await _context.Inquilinos
+                .AnyAsync(i => i.Dpi == inquilino.Dpi);
+
+            if (inquilinoExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe un inquilino registrado con este DPI.");
+            }
+
             // Verificar si es persona no grata
             var esNoGrato = await _context.PersonasNoGratas
                 .AnyAsync(p => p.Dpi == inquilino.Dpi && p.Activo);
@@ -119,6 +128,15 @@ namespace ARSAN_Web.Controllers
 
             // Remover validación de navegación
             ModelState.Remove("Residencias");
+
+            // Validar si ya existe otro inquilino con ese DPI
+            var inquilinoExistente = await _context.Inquilinos
+                .AnyAsync(i => i.Dpi == inquilino.Dpi && i.IdInquilino != id);
+
+            if (inquilinoExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe otro inquilino registrado con este DPI.");
+            }
 
             if (ModelState.IsValid)
             {
