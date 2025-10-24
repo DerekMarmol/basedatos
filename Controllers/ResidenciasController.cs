@@ -26,6 +26,15 @@ namespace ARSAN_Web.Controllers
                 .Include(r => r.Cluster)
                 .Include(r => r.Inquilino)
                 .Include(r => r.Propietario);
+
+            // Obtener lista de DPIs de personas no gratas activas
+            var dpisNoGratos = await _context.PersonasNoGratas
+                .Where(p => p.Activo)
+                .Select(p => p.Dpi)
+                .ToListAsync();
+
+            ViewBag.DpisNoGratos = dpisNoGratos;
+
             return View(await applicationDbContext.ToListAsync());
         }
 

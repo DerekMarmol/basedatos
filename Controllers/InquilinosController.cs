@@ -22,7 +22,17 @@ namespace ARSAN_Web.Controllers
         // GET: Inquilinos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Inquilinos.ToListAsync());
+            var inquilinos = await _context.Inquilinos.ToListAsync();
+
+            // Obtener lista de DPIs de personas no gratas activas
+            var dpisNoGratos = await _context.PersonasNoGratas
+                .Where(p => p.Activo)
+                .Select(p => p.Dpi)
+                .ToListAsync();
+
+            ViewBag.DpisNoGratos = dpisNoGratos;
+
+            return View(inquilinos);
         }
 
         // GET: Inquilinos/Details/5
@@ -40,6 +50,12 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
+            // Verificar si es persona no grata
+            var esNoGrato = await _context.PersonasNoGratas
+                .AnyAsync(p => p.Dpi == inquilino.Dpi && p.Activo);
+
+            ViewBag.EsNoGrato = esNoGrato;
+
             return View(inquilino);
         }
 
@@ -50,12 +66,22 @@ namespace ARSAN_Web.Controllers
         }
 
         //POST: Inquilinos/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdInquilino,NombreCompleto,Dpi,Telefono,FechaNacimiento,EstadoCivil,TipoLicencia")] Inquilino inquilino)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Residencias");
+
+            // Verificar si es persona no grata
+            var esNoGrato = await _context.PersonasNoGratas
+                .AnyAsync(p => p.Dpi == inquilino.Dpi && p.Activo);
+
+            if (esNoGrato)
+            {
+                ModelState.AddModelError("Dpi", "⚠️ ADVERTENCIA: Esta persona está registrada como NO GRATA en el sistema.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(inquilino);
@@ -82,8 +108,6 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: Inquilinos/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdInquilino,NombreCompleto,Dpi,Telefono,FechaNacimiento,EstadoCivil,TipoLicencia")] Inquilino inquilino)
@@ -92,6 +116,9 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            // Remover validación de navegación
+            ModelState.Remove("Residencias");
 
             if (ModelState.IsValid)
             {

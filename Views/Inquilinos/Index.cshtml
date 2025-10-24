@@ -1,65 +1,79 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Inquilino>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Inquilinos";
+    var dpisNoGratos = ViewBag.DpisNoGratos as List<string> ?? new List<string>();
 }
 
-<h1>Index</h1>
+<h1>Inquilinos</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Crear Nuevo Inquilino</a>
 </p>
-<table class="table">
+
+@if (dpisNoGratos.Any())
+{
+    <div class="alert alert-warning">
+        <strong>⚠️ Advertencia:</strong> Hay personas no gratas registradas en el sistema.
+        Aparecerán marcadas con <span class="badge bg-danger">⚠️ NO GRATO</span>
+    </div>
+}
+
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreCompleto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Dpi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaNacimiento)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EstadoCivil)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoLicencia)
-            </th>
-            <th></th>
+            <th>Nombre Completo</th>
+            <th>DPI</th>
+            <th>Teléfono</th>
+            <th>Fecha Nacimiento</th>
+            <th>Estado Civil</th>
+            <th>Tipo Licencia</th>
+            <th>Estado</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreCompleto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaNacimiento)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EstadoCivil)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoLicencia)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdInquilino">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdInquilino">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdInquilino">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            var esNoGrato = dpisNoGratos.Contains(item.Dpi);
+            <tr class="@(esNoGrato ? "table-danger" : "")">
+                <td>
+                    @Html.DisplayFor(modelItem => item.NombreCompleto)
+                    @if (esNoGrato)
+                    {
+                        <br />
+
+                        <small class="text-danger"><strong>⚠️ PERSONA NO GRATA</strong></small>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Dpi)</td>
+                <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
+                <td>@Html.DisplayFor(modelItem => item.FechaNacimiento)</td>
+                <td>@Html.DisplayFor(modelItem => item.EstadoCivil)</td>
+                <td>@Html.DisplayFor(modelItem => item.TipoLicencia)</td>
+                <td>
+                    @if (esNoGrato)
+                    {
+                        <span class="badge bg-danger">⚠️ NO GRATO</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-warning">Editar</a>
+                    <a asp-action="Details" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-info">Detalles</a>
+                    <a asp-action="Delete" asp-route-id="@item.IdInquilino" class="btn btn-sm btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No hay inquilinos registrados. <a asp-action="Create">Crear el primero</a>
+    </div>
+}

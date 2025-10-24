@@ -22,7 +22,10 @@ namespace ARSAN_Web.Controllers
         // GET: PersonaNoGratas
         public async Task<IActionResult> Index()
         {
-            return View(await _context.PersonasNoGratas.ToListAsync());
+            var personasNoGratas = await _context.PersonasNoGratas
+                .Include(p => p.Residencial)
+                .ToListAsync();
+            return View(personasNoGratas);
         }
 
         // GET: PersonaNoGratas/Details/5
@@ -34,6 +37,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var personaNoGrata = await _context.PersonasNoGratas
+                .Include(p => p.Residencial)
                 .FirstOrDefaultAsync(m => m.IdPNG == id);
             if (personaNoGrata == null)
             {
@@ -46,22 +50,26 @@ namespace ARSAN_Web.Controllers
         // GET: PersonaNoGratas/Create
         public IActionResult Create()
         {
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre");
             return View();
         }
 
         // POST: PersonaNoGratas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdPNG,Dpi,NombreCompleto,Motivo,FechaRegistro,Activo")] PersonaNoGrata personaNoGrata)
+        public async Task<IActionResult> Create([Bind("IdPNG,Dpi,NombreCompleto,Motivo,FechaRegistro,Activo,IdResidencial")] PersonaNoGrata personaNoGrata)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Residencial");
+            
             if (ModelState.IsValid)
             {
                 _context.Add(personaNoGrata);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }
 
@@ -78,20 +86,23 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+            
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }
 
         // POST: PersonaNoGratas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdPNG,Dpi,NombreCompleto,Motivo,FechaRegistro,Activo")] PersonaNoGrata personaNoGrata)
+        public async Task<IActionResult> Edit(int id, [Bind("IdPNG,Dpi,NombreCompleto,Motivo,FechaRegistro,Activo,IdResidencial")] PersonaNoGrata personaNoGrata)
         {
             if (id != personaNoGrata.IdPNG)
             {
                 return NotFound();
             }
+
+            // Remover validación de navegación
+            ModelState.Remove("Residencial");
 
             if (ModelState.IsValid)
             {
@@ -113,6 +124,8 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", personaNoGrata.IdResidencial);
             return View(personaNoGrata);
         }
 
@@ -125,6 +138,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var personaNoGrata = await _context.PersonasNoGratas
+                .Include(p => p.Residencial)
                 .FirstOrDefaultAsync(m => m.IdPNG == id);
             if (personaNoGrata == null)
             {

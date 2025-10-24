@@ -1,59 +1,147 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Residencia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Residencias";
+    var dpisNoGratos = ViewBag.DpisNoGratos as List<string> ?? new List<string>();
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Residencias</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Crear Nueva Residencia
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Numero)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cluster)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Propietario)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Inquilino)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Numero)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cluster.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Propietario.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Inquilino.Dpi)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdResidencia">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdResidencia">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdResidencia">Delete</a>
-            </td>
-        </tr>
+@if (dpisNoGratos.Any())
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>⚠️ Advertencia:</strong> Hay <strong>@dpisNoGratos.Count persona(s) no grata(s)</strong> registradas en el sistema.
+        Las residencias con personas no gratas aparecerán resaltadas.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
-    </tbody>
-</table>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Número</th>
+                        <th>Cluster</th>
+                        <th>Propietario</th>
+                        <th>Inquilino</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var propietarioNoGrato = !string.IsNullOrEmpty(item.Propietario?.Dpi) && dpisNoGratos.Contains(item.Propietario.Dpi);
+                        var inquilinoNoGrato = !string.IsNullOrEmpty(item.Inquilino?.Dpi) && dpisNoGratos.Contains(item.Inquilino.Dpi);
+                        var tieneNoGrato = propietarioNoGrato || inquilinoNoGrato;
+
+                        <tr class="@(tieneNoGrato ? "table-danger" : "")">
+                            <td>
+                                <strong>@Html.DisplayFor(modelItem => item.Numero)</strong>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Cluster.Nombre)
+                            </td>
+                            <td>
+                                @if (item.Propietario != null)
+                                {
+                                    <div>
+                                        @Html.DisplayFor(modelItem => item.Propietario.NombreCompleto)
+                                        @if (propietarioNoGrato)
+                                        {
+                                            <br />
+                                            <span class="badge bg-danger">⚠️ NO GRATO</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">DPI: @item.Propietario.Dpi</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin propietario</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Inquilino != null)
+                                {
+                                    <div>
+                                        @Html.DisplayFor(modelItem => item.Inquilino.NombreCompleto)
+                                        @if (inquilinoNoGrato)
+                                        {
+                                            <br />
+                                            <span class="badge bg-danger">⚠️ NO GRATO</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">DPI: @item.Inquilino.Dpi</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin inquilino</span>
+                                }
+                            </td>
+                            <td>
+                                @switch (item.Estado?.ToLower())
+                                {
+                                    case "ocupada":
+                                        <span class="badge bg-success">Ocupada</span>
+                                        break;
+                                    case "disponible":
+                                        <span class="badge bg-info">Disponible</span>
+                                        break;
+                                    case "mantenimiento":
+                                        <span class="badge bg-warning text-dark">Mantenimiento</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.Estado</span>
+                                        break;
+                                }
+                                @if (tieneNoGrato)
+                                {
+                                    <br />
+                                    <span class="badge bg-danger mt-1">ALERTA</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@item.IdResidencia"
+                                   class="btn btn-sm btn-warning">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.IdResidencia"
+                                   class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdResidencia"
+                                   class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-house-x" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="text-muted mt-3">No hay residencias registradas.</p>
+                <a asp-action="Create" class="btn btn-primary">Crear la primera residencia</a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075);
+    }
+
+    .table-danger:hover {
+        background-color: rgba(220, 53, 69, 0.2) !important;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>

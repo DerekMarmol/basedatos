@@ -22,7 +22,17 @@ namespace ARSAN_Web.Controllers
         // GET: Propietarios
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Propietarios.ToListAsync());
+            var propietarios = await _context.Propietarios.ToListAsync();
+
+            // Obtener lista de DPIs de personas no gratas activas
+            var dpisNoGratos = await _context.PersonasNoGratas
+                .Where(p => p.Activo)
+                .Select(p => p.Dpi)
+                .ToListAsync();
+
+            ViewBag.DpisNoGratos = dpisNoGratos;
+
+            return View(propietarios);
         }
 
         // GET: Propietarios/Details/5
@@ -40,6 +50,12 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
+            // Verificar si es persona no grata
+            var esNoGrato = await _context.PersonasNoGratas
+                .AnyAsync(p => p.Dpi == propietario.Dpi && p.Activo);
+
+            ViewBag.EsNoGrato = esNoGrato;
+
             return View(propietario);
         }
 
@@ -50,12 +66,23 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: Propietarios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdPropietario,NombreCompleto,Dpi,Telefono,FechaNacimiento,EstadoCivil,TipoLicencia")] Propietario propietario)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Residencias");
+            ModelState.Remove("MiembrosJunta");
+
+            // Verificar si es persona no grata
+            var esNoGrato = await _context.PersonasNoGratas
+                .AnyAsync(p => p.Dpi == propietario.Dpi && p.Activo);
+
+            if (esNoGrato)
+            {
+                ModelState.AddModelError("Dpi", "⚠️ ADVERTENCIA: Esta persona está registrada como NO GRATA en el sistema.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(propietario);
@@ -82,8 +109,6 @@ namespace ARSAN_Web.Controllers
         }
 
         // POST: Propietarios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdPropietario,NombreCompleto,Dpi,Telefono,FechaNacimiento,EstadoCivil,TipoLicencia")] Propietario propietario)
@@ -92,6 +117,10 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            // Remover validación de navegación
+            ModelState.Remove("Residencias");
+            ModelState.Remove("MiembrosJunta");
 
             if (ModelState.IsValid)
             {

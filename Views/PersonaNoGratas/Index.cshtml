@@ -1,59 +1,103 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.PersonaNoGrata>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Personas No Gratas";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Personas No Gratas</h1>
+    <a asp-action="Create" class="btn btn-danger">
+        <i class="bi bi-person-x"></i> Registrar Nueva Persona No Grata
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Dpi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreCompleto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Motivo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaRegistro)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Activo)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreCompleto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Motivo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaRegistro)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Activo)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdPNG">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdPNG">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdPNG">Delete</a>
-            </td>
-        </tr>
+@if (Model.Any(p => p.Activo))
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>⚠️ Atención:</strong> Hay <strong>@Model.Count(p => p.Activo) persona(s) no grata(s) activas</strong> en el sistema.
+    </div>
 }
-    </tbody>
-</table>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>DPI</th>
+                        <th>Nombre Completo</th>
+                        <th>Residencial</th>
+                        <th>Motivo</th>
+                        <th>Fecha Registro</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="@(item.Activo ? "table-danger" : "")">
+                            <td>
+                                <strong>@Html.DisplayFor(modelItem => item.Dpi)</strong>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.NombreCompleto)
+                                @if (item.Activo)
+                                {
+                                    <br />
+                                    <span class="badge bg-danger">ACTIVO</span>
+                                }
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Residencial.Nombre)
+                            </td>
+                            <td>
+                                <small>@Html.DisplayFor(modelItem => item.Motivo)</small>
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.FechaRegistro)
+                            </td>
+                            <td>
+                                @if (item.Activo)
+                                {
+                                    <span class="badge bg-danger">⚠️ NO GRATO</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@item.IdPNG"
+                                   class="btn btn-sm btn-warning">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.IdPNG"
+                                   class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdPNG"
+                                   class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-shield-check" style="font-size: 3rem; color: #28a745;"></i>
+                <p class="text-muted mt-3">No hay personas no gratas registradas en el sistema.</p>
+                <p class="text-success">¡El sistema está limpio!</p>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.075);
+    }
+
+    .table-danger:hover {
+        background-color: rgba(220, 53, 69, 0.2) !important;
+    }
+</style>

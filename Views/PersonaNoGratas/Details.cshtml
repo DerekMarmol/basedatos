@@ -1,48 +1,78 @@
 ﻿@model ARSAN_Web.Models.PersonaNoGrata
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles";
 }
 
-<h1>Details</h1>
+<h1>Detalles de Persona No Grata</h1>
+<hr />
 
-<div>
-    <h4>PersonaNoGrata</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Dpi)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Dpi)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreCompleto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreCompleto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Motivo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Motivo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaRegistro)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaRegistro)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Activo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Activo)
-        </dd>
-    </dl>
+@if (Model.Activo)
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>⚠️ ADVERTENCIA:</strong> Esta persona está actualmente registrada como NO GRATA en el sistema.
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary" role="alert">
+        <strong>ℹ️ Información:</strong> Este registro está marcado como <strong>INACTIVO</strong>.
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h4 class="mb-0">Información Personal</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">DPI</dt>
+            <dd class="col-sm-9">
+                <strong>@Html.DisplayFor(model => model.Dpi)</strong>
+            </dd>
+
+            <dt class="col-sm-3">Nombre Completo</dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.NombreCompleto)
+            </dd>
+
+            <dt class="col-sm-3">Residencial</dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Residencial.Nombre)
+            </dd>
+
+            <dt class="col-sm-3">Motivo</dt>
+            <dd class="col-sm-9">
+                <div class="alert alert-warning mb-0">
+                    @Html.DisplayFor(model => model.Motivo)
+                </div>
+            </dd>
+
+            <dt class="col-sm-3">Fecha de Registro</dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.FechaRegistro)
+            </dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">
+                @if (Model.Activo)
+                {
+                    <span class="badge bg-danger fs-6">⚠️ NO GRATO - ACTIVO</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary fs-6">Inactivo</span>
+                }
+            </dd>
+        </dl>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdPNG">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.IdPNG" class="btn btn-warning">
+        <i class="bi bi-pencil"></i> Editar
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver al Listado
+    </a>
 </div>

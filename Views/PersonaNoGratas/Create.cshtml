@@ -1,53 +1,59 @@
 ﻿@model ARSAN_Web.Models.PersonaNoGrata
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Persona No Grata";
 }
 
-<h1>Create</h1>
+<h1>Registrar Persona No Grata</h1>
 
-<h4>PersonaNoGrata</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Dpi" class="control-label"></label>
-                <input asp-for="Dpi" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Dpi" class="control-label">DPI</label>
+                <input asp-for="Dpi" class="form-control" placeholder="Ingrese el DPI" />
                 <span asp-validation-for="Dpi" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="NombreCompleto" class="control-label"></label>
-                <input asp-for="NombreCompleto" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="NombreCompleto" class="control-label">Nombre Completo</label>
+                <input asp-for="NombreCompleto" class="form-control" placeholder="Ingrese el nombre completo" />
                 <span asp-validation-for="NombreCompleto" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Motivo" class="control-label"></label>
-                <input asp-for="Motivo" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Motivo" class="control-label">Motivo</label>
+                <textarea asp-for="Motivo" class="form-control" rows="3" placeholder="Describa el motivo por el cual es persona no grata"></textarea>
                 <span asp-validation-for="Motivo" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaRegistro" class="control-label"></label>
-                <input asp-for="FechaRegistro" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="FechaRegistro" class="control-label">Fecha de Registro</label>
+                <input asp-for="FechaRegistro" type="date" class="form-control" />
                 <span asp-validation-for="FechaRegistro" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
-                </label>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdResidencial" class="control-label">Residencial</label>
+                <select asp-for="IdResidencial" class="form-control" asp-items="ViewBag.IdResidencial">
+                    <option value="">-- Seleccione un Residencial --</option>
+                </select>
+                <span asp-validation-for="IdResidencial" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Registrar" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
