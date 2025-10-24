@@ -22,7 +22,12 @@ namespace ARSAN_Web.Controllers
         // GET: Guardias
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Guardias.ToListAsync());
+            var guardias = await _context.Guardias
+                .Include(g => g.Residencial)
+                .OrderBy(g => g.Activo ? 0 : 1) // Activos primero
+                .ThenBy(g => g.NombreCompleto)
+                .ToListAsync();
+            return View(guardias);
         }
 
         // GET: Guardias/Details/5
@@ -34,6 +39,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var guardia = await _context.Guardias
+                .Include(g => g.Residencial)
                 .FirstOrDefaultAsync(m => m.IdGuardia == id);
             if (guardia == null)
             {
@@ -46,22 +52,38 @@ namespace ARSAN_Web.Controllers
         // GET: Guardias/Create
         public IActionResult Create()
         {
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre");
             return View();
         }
 
         // POST: Guardias/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdGuardia,NombreCompleto,Dpi,Telefono,FechaContratacion,Turno,Activo")] Guardia guardia)
+        public async Task<IActionResult> Create([Bind("IdGuardia,NombreCompleto,Dpi,Telefono,FechaContratacion,Turno,Activo,IdResidencial,Genero")] Guardia guardia)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Residencial");
+            ModelState.Remove("Turnos");
+            ModelState.Remove("AccesosIngreso");
+            ModelState.Remove("AccesosSalida");
+
+            // Validar si ya existe un guardia con ese DPI
+            var guardiaExistente = await _context.Guardias
+                .AnyAsync(g => g.Dpi == guardia.Dpi);
+
+            if (guardiaExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe un guardia registrado con este DPI.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(guardia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", guardia.IdResidencial);
             return View(guardia);
         }
 
@@ -78,19 +100,34 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", guardia.IdResidencial);
             return View(guardia);
         }
 
         // POST: Guardias/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdGuardia,NombreCompleto,Dpi,Telefono,FechaContratacion,Turno,Activo")] Guardia guardia)
+        public async Task<IActionResult> Edit(int id, [Bind("IdGuardia,NombreCompleto,Dpi,Telefono,FechaContratacion,Turno,Activo,IdResidencial,Genero")] Guardia guardia)
         {
             if (id != guardia.IdGuardia)
             {
                 return NotFound();
+            }
+
+            // Remover validación de navegación
+            ModelState.Remove("Residencial");
+            ModelState.Remove("Turnos");
+            ModelState.Remove("AccesosIngreso");
+            ModelState.Remove("AccesosSalida");
+
+            // Validar si ya existe otro guardia con ese DPI
+            var guardiaExistente = await _context.Guardias
+                .AnyAsync(g => g.Dpi == guardia.Dpi && g.IdGuardia != id);
+
+            if (guardiaExistente)
+            {
+                ModelState.AddModelError("Dpi", "Ya existe otro guardia registrado con este DPI.");
             }
 
             if (ModelState.IsValid)
@@ -113,6 +150,8 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["IdResidencial"] = new SelectList(_context.Residenciales, "IdResidencial", "Nombre", guardia.IdResidencial);
             return View(guardia);
         }
 
@@ -125,6 +164,7 @@ namespace ARSAN_Web.Controllers
             }
 
             var guardia = await _context.Guardias
+                .Include(g => g.Residencial)
                 .FirstOrDefaultAsync(m => m.IdGuardia == id);
             if (guardia == null)
             {

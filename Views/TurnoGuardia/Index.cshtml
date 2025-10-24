@@ -1,59 +1,167 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.TurnoGuardia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Turnos de Guardia";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>🕐 Turnos de Guardia</h1>
+        <p class="text-muted">Control y asignación de guardias en garitas</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        Asignar Nuevo Turno
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaInicio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaFin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Observaciones)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Garita)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Guardia)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaInicio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaFin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Observaciones)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Garita.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Guardia.Dpi)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdTurno">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdTurno">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdTurno">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="alert alert-warning">
+    <strong>⚠️ Disposición Municipal:</strong>
+    Por normativa municipal, ningún guardia puede permanecer más de 24 horas continuas en turno.
+    El sistema validará automáticamente esta restricción.
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Guardia</th>
+                        <th>Garita</th>
+                        <th>Fecha/Hora Inicio</th>
+                        <th>Fecha/Hora Fin</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var duracion = item.FechaFin.HasValue
+                        ? (item.FechaFin.Value - item.FechaInicio).TotalHours
+                        : (DateTime.Now - item.FechaInicio).TotalHours;
+
+                        var enTurno = !item.FechaFin.HasValue && item.FechaInicio <= DateTime.Now;
+                        var excede24h = duracion > 24;
+
+                        <tr class="@(excede24h ? "table-danger" : enTurno ? "table-success" : "")">
+                            <td>
+                                <strong>@Html.DisplayFor(modelItem => item.Guardia.NombreCompleto)</strong>
+                                <br />
+                                <small class="text-muted">DPI: @Html.DisplayFor(modelItem => item.Guardia.Dpi)</small>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>@Html.DisplayFor(modelItem => item.Garita.Nombre)</strong>
+                                </div>
+                                @if (item.Garita?.Cluster?.Residencial != null)
+                                {
+                                    <small class="text-muted">
+                                        @item.Garita.Cluster.Residencial.Nombre - @item.Garita.Cluster.Nombre
+                                    </small>
+                                }
+                            </td>
+                            <td>
+                                <div>@item.FechaInicio.ToString("dd/MM/yyyy")</div>
+                                <small class="text-muted">@item.FechaInicio.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                @if (item.FechaFin.HasValue)
+                                {
+                                    <div>@item.FechaFin.Value.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@item.FechaFin.Value.ToString("HH:mm")</small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">En turno</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.FechaFin.HasValue)
+                                {
+                                    var horas = (int)duracion;
+                                    var minutos = (int)((duracion - horas) * 60);
+                                    <span class="@(excede24h ? "text-danger fw-bold" : "")">
+                                        @horas h @minutos min
+                                    </span>
+                                    @if (excede24h)
+                                    {
+                                        <br />
+                            
+                                        <small class="text-danger">⚠️ Excede 24h</small>
+                                    }
+                                }
+                                else
+                                {
+                                    var horas = (int)duracion;
+                                    var minutos = (int)((duracion - horas) * 60);
+                                    <span class="@(excede24h ? "text-danger fw-bold" : "")">
+                                        @horas h @minutos min
+                                    </span>
+                                    @if (excede24h)
+                                    {
+                                        <br />
+                            
+                                        <small class="text-danger">⚠️ Excede 24h</small>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (enTurno)
+                                {
+                                    <span class="badge bg-success">✓ En turno</span>
+                                }
+                                else if (item.FechaFin.HasValue && item.FechaFin.Value < DateTime.Now)
+                                {
+                                    <span class="badge bg-secondary">Finalizado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">Programado</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Observaciones))
+                                {
+                                    <small>@item.Observaciones</small>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Sin observaciones</small>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.IdTurno" class="btn btn-sm btn-warning">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.IdTurno" class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdTurno" class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-clock-history" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="text-muted mt-3">No hay turnos registrados.</p>
+                <a asp-action="Create" class="btn btn-primary">Asignar el primer turno</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <div class="alert alert-info">
+        <strong>ℹ️ Estados de Turno:</strong>
+        <ul class="mb-0 mt-2">
+            <li><span class="badge bg-success">En turno</span> - El guardia está actualmente en servicio</li>
+            <li><span class="badge bg-info">Programado</span> - Turno programado para el futuro</li>
+            <li><span class="badge bg-secondary">Finalizado</span> - Turno completado</li>
+            <li><span class="text-danger">⚠️ Excede 24h</span> - Turno que viola la normativa municipal</li>
+        </ul>
+    </div>
+</div>

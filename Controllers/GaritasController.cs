@@ -22,8 +22,14 @@ namespace ARSAN_Web.Controllers
         // GET: Garitas
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Garitas.Include(g => g.Cluster);
-            return View(await applicationDbContext.ToListAsync());
+            var garitas = await _context.Garitas
+                .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .OrderBy(g => g.Activa ? 0 : 1) // Activas primero
+                .ThenBy(g => g.Nombre)
+                .ToListAsync();
+
+            return View(garitas);
         }
 
         // GET: Garitas/Details/5
@@ -36,7 +42,11 @@ namespace ARSAN_Web.Controllers
 
             var garita = await _context.Garitas
                 .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .Include(g => g.Turnos)
+                    .ThenInclude(t => t.Guardia)
                 .FirstOrDefaultAsync(m => m.IdGarita == id);
+
             if (garita == null)
             {
                 return NotFound();
@@ -48,24 +58,55 @@ namespace ARSAN_Web.Controllers
         // GET: Garitas/Create
         public IActionResult Create()
         {
-            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre");
+            // Obtener clusters con su residencial para mostrar información completa
+            var clusters = _context.Clusters
+                .Include(c => c.Residencial)
+                .Select(c => new
+                {
+                    c.IdCluster,
+                    Texto = c.Residencial.Nombre + " - " + c.Nombre
+                })
+                .ToList();
+
+            ViewData["IdCluster"] = new SelectList(clusters, "IdCluster", "Texto");
             return View();
         }
 
         // POST: Garitas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdGarita,Nombre,IdCluster,Ubicacion,Activa")] Garita garita)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Turnos");
+
+            // Validar que no exista una garita con el mismo nombre
+            var garitaExistente = await _context.Garitas
+                .AnyAsync(g => g.Nombre == garita.Nombre);
+
+            if (garitaExistente)
+            {
+                ModelState.AddModelError("Nombre", "Ya existe una garita con este nombre.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(garita);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", garita.IdCluster);
+
+            var clusters = _context.Clusters
+                .Include(c => c.Residencial)
+                .Select(c => new
+                {
+                    c.IdCluster,
+                    Texto = c.Residencial.Nombre + " - " + c.Nombre
+                })
+                .ToList();
+
+            ViewData["IdCluster"] = new SelectList(clusters, "IdCluster", "Texto", garita.IdCluster);
             return View(garita);
         }
 
@@ -82,13 +123,21 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", garita.IdCluster);
+
+            var clusters = _context.Clusters
+                .Include(c => c.Residencial)
+                .Select(c => new
+                {
+                    c.IdCluster,
+                    Texto = c.Residencial.Nombre + " - " + c.Nombre
+                })
+                .ToList();
+
+            ViewData["IdCluster"] = new SelectList(clusters, "IdCluster", "Texto", garita.IdCluster);
             return View(garita);
         }
 
         // POST: Garitas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdGarita,Nombre,IdCluster,Ubicacion,Activa")] Garita garita)
@@ -96,6 +145,19 @@ namespace ARSAN_Web.Controllers
             if (id != garita.IdGarita)
             {
                 return NotFound();
+            }
+
+            // Remover validación de navegación
+            ModelState.Remove("Cluster");
+            ModelState.Remove("Turnos");
+
+            // Validar que no exista otra garita con el mismo nombre
+            var garitaExistente = await _context.Garitas
+                .AnyAsync(g => g.Nombre == garita.Nombre && g.IdGarita != id);
+
+            if (garitaExistente)
+            {
+                ModelState.AddModelError("Nombre", "Ya existe otra garita con este nombre.");
             }
 
             if (ModelState.IsValid)
@@ -118,7 +180,17 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdCluster"] = new SelectList(_context.Clusters, "IdCluster", "Nombre", garita.IdCluster);
+
+            var clusters = _context.Clusters
+                .Include(c => c.Residencial)
+                .Select(c => new
+                {
+                    c.IdCluster,
+                    Texto = c.Residencial.Nombre + " - " + c.Nombre
+                })
+                .ToList();
+
+            ViewData["IdCluster"] = new SelectList(clusters, "IdCluster", "Texto", garita.IdCluster);
             return View(garita);
         }
 
@@ -132,11 +204,19 @@ namespace ARSAN_Web.Controllers
 
             var garita = await _context.Garitas
                 .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
                 .FirstOrDefaultAsync(m => m.IdGarita == id);
+
             if (garita == null)
             {
                 return NotFound();
             }
+
+            // Verificar si tiene turnos asignados
+            var tieneTurnos = await _context.TurnosGuardia
+                .AnyAsync(t => t.IdGarita == id);
+
+            ViewBag.TieneTurnos = tieneTurnos;
 
             return View(garita);
         }

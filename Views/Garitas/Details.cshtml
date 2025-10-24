@@ -1,42 +1,68 @@
 ﻿@model ARSAN_Web.Models.Garita
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Eliminar Garita";
 }
 
-<h1>Details</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="text-danger">🗑️ Eliminar Garita</h1>
+        <p class="text-muted">Confirma si deseas eliminar esta garita del sistema. Esta acción no se puede deshacer.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        ← Volver al listado
+    </a>
+</div>
 
-<div>
-    <h4>Garita</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Ubicacion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Ubicacion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Activa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Activa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cluster)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cluster.Nombre)
-        </dd>
-    </dl>
+<div class="alert alert-danger">
+    <strong>⚠️ Atención:</strong> Estás a punto de eliminar la siguiente garita. Verifica los datos antes de confirmar.
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdGarita">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="card border-danger shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+        🛡️ Detalles de la Garita
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">🏷️ Nombre</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+
+            <dt class="col-sm-3">📍 Ubicación</dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.Ubicacion))
+                {
+                    @Html.DisplayFor(model => model.Ubicacion)
+                }
+                else
+                {
+                    <span class="text-muted">No especificada</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">✅ Estado</dt>
+            <dd class="col-sm-9">
+                @if (Model.Activa)
+                {
+                    <span class="badge bg-success">Activa</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Inactiva</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">🏘️ Cluster</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Cluster.Nombre)</dd>
+        </dl>
+    </div>
 </div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="IdGarita" />
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-danger">
+            🗑️ Confirmar Eliminación
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </div>
+</form>

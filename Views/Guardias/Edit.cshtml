@@ -1,59 +1,107 @@
 ﻿@model ARSAN_Web.Models.Guardia
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Guardia";
 }
 
-<h1>Edit</h1>
+<div class="mb-4">
+    <h1>Editar Guardia de Seguridad</h1>
+    <p class="text-muted">Modifique los datos del guardia: <strong>@Model.NombreCompleto</strong></p>
+</div>
 
-<h4>Guardia</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="card shadow-sm">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0">Información del Guardia</h5>
+    </div>
+    <div class="card-body">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             <input type="hidden" asp-for="IdGuardia" />
-            <div class="form-group">
-                <label asp-for="NombreCompleto" class="control-label"></label>
-                <input asp-for="NombreCompleto" class="form-control" />
-                <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="NombreCompleto" class="form-label">Nombre Completo</label>
+                        <input asp-for="NombreCompleto" class="form-control" />
+                        <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Dpi" class="form-label">DPI</label>
+                        <input asp-for="Dpi" class="form-control" maxlength="13" />
+                        <span asp-validation-for="Dpi" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Telefono" class="form-label">Teléfono</label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Genero" class="form-label">Género</label>
+                        <select asp-for="Genero" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Femenino</option>
+                        </select>
+                        <span asp-validation-for="Genero" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="IdResidencial" class="form-label">Residencial Asignado</label>
+                        <select asp-for="IdResidencial" class="form-select" asp-items="ViewBag.IdResidencial">
+                            <option value="">-- Seleccione un residencial --</option>
+                        </select>
+                        <span asp-validation-for="IdResidencial" class="text-danger"></span>
+                        <small class="form-text text-muted">Residencial donde prestará servicio</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="FechaContratacion" class="form-label">Fecha de Contratación</label>
+                        <input asp-for="FechaContratacion" type="date" class="form-control" />
+                        <span asp-validation-for="FechaContratacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Turno" class="form-label">Turno Preferente</label>
+                        <select asp-for="Turno" class="form-select">
+                            <option value="">-- Seleccione un turno --</option>
+                            <option value="M">☀️ Matutino (06:00 - 14:00)</option>
+                            <option value="V">🌆 Vespertino (14:00 - 22:00)</option>
+                            <option value="N">🌙 Nocturno (22:00 - 06:00)</option>
+                        </select>
+                        <span asp-validation-for="Turno" class="text-danger"></span>
+                        <small class="form-text text-muted">Turno preferido del guardia</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Activo" class="form-label">Estado del Guardia</label>
+                        <select asp-for="Activo" class="form-select">
+                            <option value="true">✓ Activo (Disponible para trabajar)</option>
+                            <option value="false">✗ Inactivo (No disponible / Dado de baja)</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            Si marca como "Inactivo", el guardia no podrá ser asignado a nuevos turnos
+                        </small>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Dpi" class="control-label"></label>
-                <input asp-for="Dpi" class="form-control" />
-                <span asp-validation-for="Dpi" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaContratacion" class="control-label"></label>
-                <input asp-for="FechaContratacion" class="form-control" />
-                <span asp-validation-for="FechaContratacion" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Turno" class="control-label"></label>
-                <input asp-for="Turno" class="form-control" />
-                <span asp-validation-for="Turno" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-warning">Guardar Cambios</button>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

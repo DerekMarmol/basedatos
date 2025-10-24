@@ -22,8 +22,15 @@ namespace ARSAN_Web.Controllers
         // GET: TurnoGuardia
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.TurnosGuardia.Include(t => t.Garita).Include(t => t.Guardia);
-            return View(await applicationDbContext.ToListAsync());
+            var turnos = await _context.TurnosGuardia
+                .Include(t => t.Garita)
+                    .ThenInclude(g => g.Cluster)
+                        .ThenInclude(c => c.Residencial)
+                .Include(t => t.Guardia)
+                .OrderByDescending(t => t.FechaInicio)
+                .ToListAsync();
+
+            return View(turnos);
         }
 
         // GET: TurnoGuardia/Details/5
@@ -36,8 +43,11 @@ namespace ARSAN_Web.Controllers
 
             var turnoGuardia = await _context.TurnosGuardia
                 .Include(t => t.Garita)
+                    .ThenInclude(g => g.Cluster)
+                        .ThenInclude(c => c.Residencial)
                 .Include(t => t.Guardia)
                 .FirstOrDefaultAsync(m => m.IdTurno == id);
+
             if (turnoGuardia == null)
             {
                 return NotFound();
@@ -49,26 +59,120 @@ namespace ARSAN_Web.Controllers
         // GET: TurnoGuardia/Create
         public IActionResult Create()
         {
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre");
-            ViewData["IdGuardia"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi");
+            // Obtener solo garitas activas
+            var garitas = _context.Garitas
+                .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .Where(g => g.Activa)
+                .Select(g => new
+                {
+                    g.IdGarita,
+                    Texto = g.Cluster.Residencial.Nombre + " - " + g.Cluster.Nombre + " - " + g.Nombre
+                })
+                .ToList();
+
+            // Obtener solo guardias activos
+            var guardias = _context.Guardias
+                .Where(g => g.Activo)
+                .Select(g => new
+                {
+                    g.IdGuardia,
+                    Texto = g.NombreCompleto + " - DPI: " + g.Dpi
+                })
+                .ToList();
+
+            ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Texto");
+            ViewData["IdGuardia"] = new SelectList(guardias, "IdGuardia", "Texto");
+
             return View();
         }
 
         // POST: TurnoGuardia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdTurno,IdGarita,IdGuardia,FechaInicio,FechaFin,Observaciones")] TurnoGuardia turnoGuardia)
         {
+            // Remover validación de navegación
+            ModelState.Remove("Garita");
+            ModelState.Remove("Guardia");
+
+            // Validación 1: Verificar que el guardia esté activo
+            var guardia = await _context.Guardias.FindAsync(turnoGuardia.IdGuardia);
+            if (guardia == null || !guardia.Activo)
+            {
+                ModelState.AddModelError("IdGuardia", "El guardia seleccionado no está activo o no existe.");
+            }
+
+            // Validación 2: Verificar que la garita esté activa
+            var garita = await _context.Garitas.FindAsync(turnoGuardia.IdGarita);
+            if (garita == null || !garita.Activa)
+            {
+                ModelState.AddModelError("IdGarita", "La garita seleccionada no está activa o no existe.");
+            }
+
+            // Validación 3: Si hay FechaFin, validar que no exceda 24 horas
+            if (turnoGuardia.FechaFin.HasValue)
+            {
+                var duracion = turnoGuardia.FechaFin.Value - turnoGuardia.FechaInicio;
+                if (duracion.TotalHours > 24)
+                {
+                    ModelState.AddModelError("FechaFin", "El turno no puede exceder 24 horas según disposiciones municipales.");
+                }
+
+                if (turnoGuardia.FechaFin.Value < turnoGuardia.FechaInicio)
+                {
+                    ModelState.AddModelError("FechaFin", "La fecha de fin no puede ser anterior a la fecha de inicio.");
+                }
+            }
+
+            // Validación 4: Verificar que el guardia no tenga otro turno en el mismo período
+            var turnoTraslape = await _context.TurnosGuardia
+                .Where(t => t.IdGuardia == turnoGuardia.IdGuardia && t.IdTurno != turnoGuardia.IdTurno)
+                .Where(t =>
+                    // Turno sin fin (aún activo) que inicia antes o durante el nuevo turno
+                    (!t.FechaFin.HasValue && t.FechaInicio <= turnoGuardia.FechaInicio) ||
+                    // Turno con fin que se traslapa
+                    (t.FechaFin.HasValue &&
+                        ((t.FechaInicio <= turnoGuardia.FechaInicio && t.FechaFin.Value >= turnoGuardia.FechaInicio) ||
+                         (turnoGuardia.FechaFin.HasValue && t.FechaInicio <= turnoGuardia.FechaFin.Value && t.FechaFin.Value >= turnoGuardia.FechaInicio))))
+                .AnyAsync();
+
+            if (turnoTraslape)
+            {
+                ModelState.AddModelError("IdGuardia", "El guardia ya tiene un turno asignado en este período de tiempo.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(turnoGuardia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", turnoGuardia.IdGarita);
-            ViewData["IdGuardia"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", turnoGuardia.IdGuardia);
+
+            // Recargar datos para el dropdown
+            var garitas = _context.Garitas
+                .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .Where(g => g.Activa)
+                .Select(g => new
+                {
+                    g.IdGarita,
+                    Texto = g.Cluster.Residencial.Nombre + " - " + g.Cluster.Nombre + " - " + g.Nombre
+                })
+                .ToList();
+
+            var guardias = _context.Guardias
+                .Where(g => g.Activo)
+                .Select(g => new
+                {
+                    g.IdGuardia,
+                    Texto = g.NombreCompleto + " - DPI: " + g.Dpi
+                })
+                .ToList();
+
+            ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Texto", turnoGuardia.IdGarita);
+            ViewData["IdGuardia"] = new SelectList(guardias, "IdGuardia", "Texto", turnoGuardia.IdGuardia);
+
             return View(turnoGuardia);
         }
 
@@ -85,14 +189,34 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", turnoGuardia.IdGarita);
-            ViewData["IdGuardia"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", turnoGuardia.IdGuardia);
+
+            var garitas = _context.Garitas
+                .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .Where(g => g.Activa)
+                .Select(g => new
+                {
+                    g.IdGarita,
+                    Texto = g.Cluster.Residencial.Nombre + " - " + g.Cluster.Nombre + " - " + g.Nombre
+                })
+                .ToList();
+
+            var guardias = _context.Guardias
+                .Where(g => g.Activo)
+                .Select(g => new
+                {
+                    g.IdGuardia,
+                    Texto = g.NombreCompleto + " - DPI: " + g.Dpi
+                })
+                .ToList();
+
+            ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Texto", turnoGuardia.IdGarita);
+            ViewData["IdGuardia"] = new SelectList(guardias, "IdGuardia", "Texto", turnoGuardia.IdGuardia);
+
             return View(turnoGuardia);
         }
 
         // POST: TurnoGuardia/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("IdTurno,IdGarita,IdGuardia,FechaInicio,FechaFin,Observaciones")] TurnoGuardia turnoGuardia)
@@ -100,6 +224,40 @@ namespace ARSAN_Web.Controllers
             if (id != turnoGuardia.IdTurno)
             {
                 return NotFound();
+            }
+
+            // Remover validación de navegación
+            ModelState.Remove("Garita");
+            ModelState.Remove("Guardia");
+
+            // Validación 1: Si hay FechaFin, validar que no exceda 24 horas
+            if (turnoGuardia.FechaFin.HasValue)
+            {
+                var duracion = turnoGuardia.FechaFin.Value - turnoGuardia.FechaInicio;
+                if (duracion.TotalHours > 24)
+                {
+                    ModelState.AddModelError("FechaFin", "El turno no puede exceder 24 horas según disposiciones municipales.");
+                }
+
+                if (turnoGuardia.FechaFin.Value < turnoGuardia.FechaInicio)
+                {
+                    ModelState.AddModelError("FechaFin", "La fecha de fin no puede ser anterior a la fecha de inicio.");
+                }
+            }
+
+            // Validación 2: Verificar que el guardia no tenga otro turno en el mismo período
+            var turnoTraslape = await _context.TurnosGuardia
+                .Where(t => t.IdGuardia == turnoGuardia.IdGuardia && t.IdTurno != id)
+                .Where(t =>
+                    (!t.FechaFin.HasValue && t.FechaInicio <= turnoGuardia.FechaInicio) ||
+                    (t.FechaFin.HasValue &&
+                        ((t.FechaInicio <= turnoGuardia.FechaInicio && t.FechaFin.Value >= turnoGuardia.FechaInicio) ||
+                         (turnoGuardia.FechaFin.HasValue && t.FechaInicio <= turnoGuardia.FechaFin.Value && t.FechaFin.Value >= turnoGuardia.FechaInicio))))
+                .AnyAsync();
+
+            if (turnoTraslape)
+            {
+                ModelState.AddModelError("IdGuardia", "El guardia ya tiene un turno asignado en este período de tiempo.");
             }
 
             if (ModelState.IsValid)
@@ -122,8 +280,30 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", turnoGuardia.IdGarita);
-            ViewData["IdGuardia"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", turnoGuardia.IdGuardia);
+
+            var garitas = _context.Garitas
+                .Include(g => g.Cluster)
+                    .ThenInclude(c => c.Residencial)
+                .Where(g => g.Activa)
+                .Select(g => new
+                {
+                    g.IdGarita,
+                    Texto = g.Cluster.Residencial.Nombre + " - " + g.Cluster.Nombre + " - " + g.Nombre
+                })
+                .ToList();
+
+            var guardias = _context.Guardias
+                .Where(g => g.Activo)
+                .Select(g => new
+                {
+                    g.IdGuardia,
+                    Texto = g.NombreCompleto + " - DPI: " + g.Dpi
+                })
+                .ToList();
+
+            ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Texto", turnoGuardia.IdGarita);
+            ViewData["IdGuardia"] = new SelectList(guardias, "IdGuardia", "Texto", turnoGuardia.IdGuardia);
+
             return View(turnoGuardia);
         }
 
@@ -137,8 +317,11 @@ namespace ARSAN_Web.Controllers
 
             var turnoGuardia = await _context.TurnosGuardia
                 .Include(t => t.Garita)
+                    .ThenInclude(g => g.Cluster)
+                        .ThenInclude(c => c.Residencial)
                 .Include(t => t.Guardia)
                 .FirstOrDefaultAsync(m => m.IdTurno == id);
+
             if (turnoGuardia == null)
             {
                 return NotFound();

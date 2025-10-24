@@ -1,47 +1,71 @@
 ﻿@model ARSAN_Web.Models.Garita
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Registrar Garita";
 }
 
-<h1>Create</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>🛡️ Registrar Nueva Garita</h1>
+        <p class="text-muted">Completa los datos para agregar una nueva garita de seguridad al residencial</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        ← Volver al listado
+    </a>
+</div>
 
-<h4>Garita</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="alert alert-warning">
+    <strong>📌 Recomendaciones:</strong>
+    <ul class="mb-0 mt-2">
+        <li>El nombre debe ser claro y representativo (ej. "Garita Principal", "Garita Norte")</li>
+        <li>Selecciona el cluster correspondiente para ubicarla correctamente</li>
+        <li>La ubicación puede incluir referencias como calles o puntos cercanos</li>
+        <li>Marca como activa si ya está en funcionamiento</li>
+    </ul>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label">🏷️ Nombre de la Garita</label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ej. Garita Principal" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="IdCluster" class="control-label"></label>
-                <select asp-for="IdCluster" class ="form-control" asp-items="ViewBag.IdCluster"></select>
+
+            <div class="mb-3">
+                <label asp-for="IdCluster" class="form-label">📍 Cluster Asociado</label>
+                <select asp-for="IdCluster" class="form-select" asp-items="ViewBag.IdCluster">
+                    <option value="">-- Selecciona un Cluster --</option>
+                </select>
+                <span asp-validation-for="IdCluster" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Ubicacion" class="control-label"></label>
-                <input asp-for="Ubicacion" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="Ubicacion" class="form-label">🗺️ Ubicación</label>
+                <input asp-for="Ubicacion" class="form-control" placeholder="Ej. Entrada por Calle 5" />
                 <span asp-validation-for="Ubicacion" class="text-danger"></span>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activa" /> @Html.DisplayNameFor(model => model.Activa)
-                </label>
+
+            <div class="form-check mb-4">
+                <input class="form-check-input" asp-for="Activa" />
+                <label class="form-check-label" asp-for="Activa">✅ ¿Está activa?</label>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-success">
+                    💾 Guardar Garita
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

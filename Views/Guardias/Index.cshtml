@@ -1,65 +1,112 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Guardia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Guardias de Seguridad";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>👮 Guardias de Seguridad</h1>
+        <p class="text-muted">Personal de seguridad del residencial</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        Registrar Nuevo Guardia
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreCompleto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Dpi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaContratacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Turno)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Activo)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreCompleto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaContratacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Turno)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Activo)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdGuardia">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdGuardia">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdGuardia">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>DPI</th>
+                        <th>Teléfono</th>
+                        <th>Residencial</th>
+                        <th>Fecha Contratación</th>
+                        <th>Turno</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="@(!item.Activo ? "table-secondary" : "")">
+                            <td>
+                                <strong>@Html.DisplayFor(modelItem => item.NombreCompleto)</strong>
+                                @if (!item.Activo)
+                                {
+                                    <br />
+                                    <small class="text-muted">Inactivo</small>
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.Dpi)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Residencial.Nombre)</td>
+                            <td>
+                                @if (item.FechaContratacion.HasValue)
+                                {
+                                    @item.FechaContratacion.Value.ToString("dd/MM/yyyy")
+                                }
+                            </td>
+                            <td>
+                                @switch (item.Turno?.ToUpper())
+                                {
+                                    case "M":
+                                        <span class="badge bg-warning text-dark">☀️ Matutino</span>
+                                        break;
+                                    case "V":
+                                        <span class="badge bg-primary">🌆 Vespertino</span>
+                                        break;
+                                    case "N":
+                                        <span class="badge bg-dark">🌙 Nocturno</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.Turno</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (item.Activo)
+                                {
+                                    <span class="badge bg-success">✓ Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">✗ Inactivo</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.IdGuardia" class="btn btn-sm btn-warning">Editar</a>
+                                <a asp-action="Details" asp-route-id="@item.IdGuardia" class="btn btn-sm btn-info">Detalles</a>
+                                <a asp-action="Delete" asp-route-id="@item.IdGuardia" class="btn btn-sm btn-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-shield-x" style="font-size: 3rem; color: #6c757d;"></i>
+                <p class="text-muted mt-3">No hay guardias registrados.</p>
+                <a asp-action="Create" class="btn btn-primary">Registrar el primer guardia</a>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong>
+        <ul class="mb-0 mt-2">
+            <li><strong>Activo:</strong> El guardia está disponible para asignar turnos</li>
+            <li><strong>Inactivo:</strong> El guardia ya no trabaja o está de baja temporal</li>
+            <li><strong>Turnos:</strong> M = Matutino, V = Vespertino, N = Nocturno (máx 24h seguidas)</li>
+        </ul>
+    </div>
+</div>
