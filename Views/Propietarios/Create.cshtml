@@ -1,58 +1,75 @@
 ﻿@model ARSAN_Web.Models.Propietario
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Crear Propietario";
 }
 
-<h1>Create</h1>
+<div class="container mt-4">
+    <h1 class="mb-4">Crear Propietario</h1>
 
-<h4>Propietario</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="NombreCompleto" class="control-label"></label>
-                <input asp-for="NombreCompleto" class="form-control" />
-                <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Nuevo Propietario</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NombreCompleto" class="control-label font-weight-bold">Nombre Completo</label>
+                            <input asp-for="NombreCompleto" class="form-control" placeholder="Ingrese el nombre completo" />
+                            <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Dpi" class="control-label font-weight-bold">DPI</label>
+                            <input asp-for="Dpi" class="form-control" placeholder="Ingrese el DPI" />
+                            <span asp-validation-for="Dpi" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Telefono" class="control-label font-weight-bold">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control" placeholder="Ingrese el teléfono" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="FechaNacimiento" class="control-label font-weight-bold">Fecha de Nacimiento</label>
+                            <input asp-for="FechaNacimiento" class="form-control" type="date" />
+                            <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="EstadoCivil" class="control-label font-weight-bold">Estado Civil</label>
+                            <input asp-for="EstadoCivil" class="form-control" placeholder="Ingrese el estado civil" />
+                            <span asp-validation-for="EstadoCivil" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="TipoLicencia" class="control-label font-weight-bold">Tipo de Licencia</label>
+                            <input asp-for="TipoLicencia" class="form-control" placeholder="Ingrese el tipo de licencia" />
+                            <span asp-validation-for="TipoLicencia" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Crear Propietario
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Dpi" class="control-label"></label>
-                <input asp-for="Dpi" class="form-control" />
-                <span asp-validation-for="Dpi" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaNacimiento" class="control-label"></label>
-                <input asp-for="FechaNacimiento" class="form-control" />
-                <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EstadoCivil" class="control-label"></label>
-                <input asp-for="EstadoCivil" class="form-control" />
-                <span asp-validation-for="EstadoCivil" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoLicencia" class="control-label"></label>
-                <input asp-for="TipoLicencia" class="form-control" />
-                <span asp-validation-for="TipoLicencia" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

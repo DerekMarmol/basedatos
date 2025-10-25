@@ -1,59 +1,332 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.Visitante>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Visitantes";
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-person-badge text-primary me-2"></i>Visitantes
+            </h2>
+            <p class="text-muted mb-0">Catálogo de visitantes registrados en el sistema</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Nuevo Visitante
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NombreCompleto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Dpi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Placa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Empresa)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreCompleto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Placa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Empresa)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdVisitante">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdVisitante">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdVisitante">Delete</a>
-            </td>
-        </tr>
+    <!-- Mensajes -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-people fs-3 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Visitantes</h6>
+                            <h3 class="mb-0">@Model.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-car-front fs-3 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Con Vehículo</h6>
+                            <h3 class="mb-0 text-success">@Model.Count(v => !string.IsNullOrEmpty(v.Placa))</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-building fs-3 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">De Empresas</h6>
+                            <h3 class="mb-0 text-info">@Model.Count(v => !string.IsNullOrEmpty(v.Empresa))</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-person fs-3 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Personales</h6>
+                            <h3 class="mb-0 text-warning">@Model.Count(v => string.IsNullOrEmpty(v.Empresa))</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="buscarNombre" placeholder="Buscar por nombre...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                        <input type="text" class="form-control" id="buscarDPI" placeholder="Buscar por DPI...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <input type="text" class="form-control" id="buscarEmpresa" placeholder="Buscar por empresa...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                        <i class="bi bi-x-circle me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Visitantes -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="tablaVisitantes">
+                        <thead class="table-light">
+                            <tr>
+                                <th>
+                                    <i class="bi bi-person me-1"></i>Nombre Completo
+                                </th>
+                                <th>
+                                    <i class="bi bi-card-text me-1"></i>DPI
+                                </th>
+                                <th>
+                                    <i class="bi bi-telephone me-1"></i>Teléfono
+                                </th>
+                                <th>
+                                    <i class="bi bi-car-front me-1"></i>Placa
+                                </th>
+                                <th>
+                                    <i class="bi bi-building me-1"></i>Empresa
+                                </th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderBy(v => v.NombreCompleto))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@item.NombreCompleto</strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            @(string.IsNullOrEmpty(item.Dpi) ? "-" : item.Dpi)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Telefono))
+                                        {
+                                            <a href="tel:@item.Telefono" class="text-decoration-none">
+                                                <i class="bi bi-telephone-fill text-success me-1"></i>@item.Telefono
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Placa))
+                                        {
+                                            <span class="badge bg-info">
+                                                <i class="bi bi-car-front-fill me-1"></i>@item.Placa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin vehículo</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Empresa))
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-building me-1"></i>@item.Empresa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark">Personal</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.IdVisitante"
+                                               class="btn btn-info text-white"
+                                               title="Ver detalles">
+                                                <i class="bi bi-eye">Detalles</i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.IdVisitante"
+                                               class="btn btn-warning text-white"
+                                               title="Editar">
+                                                <i class="bi bi-pencil">Editar</i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.IdVisitante"
+                                               class="btn btn-danger text-white"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash">Eliminar</i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3 mb-0">No hay visitantes registrados</p>
+                    <a asp-action="Create" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar Primer Visitante
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Información -->
+    <div class="alert alert-info mt-4" role="alert">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle me-2"></i>Información
+        </h6>
+        <ul class="mb-0 small">
+            <li>Este es el catálogo de visitantes frecuentes o registrados en el sistema</li>
+            <li>Para registrar una nueva visita, vaya al módulo "Registro de Visitas"</li>
+            <li>Los visitantes con placa registrada agilizarán el proceso de ingreso</li>
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Filtro en tiempo real por nombre
+            $('#buscarNombre').on('keyup', function() {
+                filtrarTabla();
+            });
+
+            // Filtro en tiempo real por DPI
+            $('#buscarDPI').on('keyup', function() {
+                filtrarTabla();
+            });
+
+            // Filtro en tiempo real por empresa
+            $('#buscarEmpresa').on('keyup', function() {
+                filtrarTabla();
+            });
+
+            function filtrarTabla() {
+                var nombre = $('#buscarNombre').val().toLowerCase();
+                var dpi = $('#buscarDPI').val().toLowerCase();
+                var empresa = $('#buscarEmpresa').val().toLowerCase();
+
+                $('#tablaVisitantes tbody tr').each(function() {
+                    var row = $(this);
+                    var textoNombre = row.find('td:eq(0)').text().toLowerCase();
+                    var textoDPI = row.find('td:eq(1)').text().toLowerCase();
+                    var textoEmpresa = row.find('td:eq(4)').text().toLowerCase();
+
+                    var mostrar = textoNombre.includes(nombre) &&
+                                  textoDPI.includes(dpi) &&
+                                  textoEmpresa.includes(empresa);
+
+                    row.toggle(mostrar);
+                });
+            }
+        });
+
+        function limpiarFiltros() {
+            $('#buscarNombre').val('');
+            $('#buscarDPI').val('');
+            $('#buscarEmpresa').val('');
+            $('#tablaVisitantes tbody tr').show();
+        }
+
+        // Auto-cerrar alertas después de 5 segundos
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert-success');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+
+    <style>
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(0, 123, 255, 0.05);
+            }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.35rem 0.55rem;
+        }
+
+        .btn-group-sm .btn {
+            padding: 0.35rem 0.5rem;
+        }
+    </style>
 }
-    </tbody>
-</table>

@@ -1,48 +1,110 @@
 ﻿@model ARSAN_Web.Models.VehiculoNoPermitido
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Agregar Vehículo No Permitido";
 }
 
-<h1>Create</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-car-front-fill me-2"></i>
+                        Registrar Vehículo No Permitido
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-<h4>VehiculoNoPermitido</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Placa" class="control-label"></label>
-                <input asp-for="Placa" class="form-control" />
-                <span asp-validation-for="Placa" class="text-danger"></span>
+                        <div class="row g-3">
+                            <!-- Placa -->
+                            <div class="col-md-6">
+                                <label asp-for="Placa" class="form-label fw-bold">
+                                    <i class="bi bi-credit-card-2-front text-danger"></i> Placa del Vehículo
+                                </label>
+                                <input asp-for="Placa" class="form-control form-control-lg" placeholder="Ej: P123ABC"
+                                       style="text-transform: uppercase;" maxlength="10" required />
+                                <span asp-validation-for="Placa" class="text-danger small"></span>
+                            </div>
+
+                            <!-- IdResidencial -->
+                            <div class="col-md-6">
+                                <label asp-for="IdResidencial" class="form-label fw-bold">
+                                    <i class="bi bi-building text-primary"></i> Residencial
+                                </label>
+                                <select asp-for="IdResidencial" class="form-select form-select-lg"
+                                        asp-items="ViewBag.IdResidencial" required>
+                                    <option value="">-- Seleccione un residencial --</option>
+                                </select>
+                                <span asp-validation-for="IdResidencial" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Motivo -->
+                            <div class="col-12">
+                                <label asp-for="Motivo" class="form-label fw-bold">
+                                    <i class="bi bi-exclamation-triangle text-warning"></i> Motivo de Restricción
+                                </label>
+                                <textarea asp-for="Motivo" class="form-control" rows="3"
+                                          placeholder="Describa el motivo por el cual este vehículo no está permitido..."
+                                          maxlength="500" required></textarea>
+                                <span asp-validation-for="Motivo" class="text-danger small"></span>
+                                <div class="form-text">Máximo 500 caracteres</div>
+                            </div>
+
+                            <!-- Fecha de Registro -->
+                            <div class="col-md-6">
+                                <label asp-for="FechaRegistro" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-event text-info"></i> Fecha de Registro
+                                </label>
+                                <input asp-for="FechaRegistro" type="date" class="form-control form-control-lg"
+                                       value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                                <span asp-validation-for="FechaRegistro" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Estado Activo -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold d-block">
+                                    <i class="bi bi-toggle-on text-success"></i> Estado
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="Activo"
+                                           checked style="width: 3em; height: 1.5em;" />
+                                    <label class="form-check-label ms-2" asp-for="Activo">
+                                        Restricción Activa
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones de Acción -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg px-5">
+                                <i class="bi bi-save"></i> Registrar Vehículo
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Motivo" class="control-label"></label>
-                <input asp-for="Motivo" class="form-control" />
-                <span asp-validation-for="Motivo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaRegistro" class="control-label"></label>
-                <input asp-for="FechaRegistro" class="form-control" />
-                <span asp-validation-for="FechaRegistro" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Convertir placa a mayúsculas automáticamente
+        document.querySelector('input[name="Placa"]').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+        });
+    </script>
 }

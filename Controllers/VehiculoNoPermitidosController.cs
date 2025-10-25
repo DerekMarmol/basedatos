@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ARSAN_Web.Data;
@@ -19,13 +15,15 @@ namespace ARSAN_Web.Controllers
             _context = context;
         }
 
-        // GET: VehiculoNoPermitidoes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.VehiculosNoPermitidos.ToListAsync());
+            var vehiculos = await _context.VehiculosNoPermitidos
+                .Include(v => v.Residencial)
+                .OrderByDescending(v => v.FechaRegistro)
+                .ToListAsync();
+            return View(vehiculos);
         }
 
-        // GET: VehiculoNoPermitidoes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,7 +32,9 @@ namespace ARSAN_Web.Controllers
             }
 
             var vehiculoNoPermitido = await _context.VehiculosNoPermitidos
+                .Include(v => v.Residencial)
                 .FirstOrDefaultAsync(m => m.IdVNP == id);
+
             if (vehiculoNoPermitido == null)
             {
                 return NotFound();
@@ -43,29 +43,41 @@ namespace ARSAN_Web.Controllers
             return View(vehiculoNoPermitido);
         }
 
-        // GET: VehiculoNoPermitidoes/Create
         public IActionResult Create()
         {
+            ViewBag.IdResidencial = new SelectList(
+                _context.Residenciales.OrderBy(r => r.Nombre),
+                "IdResidencial",
+                "Nombre");
             return View();
         }
 
-        // POST: VehiculoNoPermitidoes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdVNP,Placa,Motivo,FechaRegistro,Activo")] VehiculoNoPermitido vehiculoNoPermitido)
+        public async Task<IActionResult> Create(VehiculoNoPermitido vehiculoNoPermitido)
         {
+            if (vehiculoNoPermitido.IdResidencial == 0)
+            {
+                vehiculoNoPermitido.IdResidencial = null;
+            }
+
+            ModelState.Remove("Residencial");
+
             if (ModelState.IsValid)
             {
                 _context.Add(vehiculoNoPermitido);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.IdResidencial = new SelectList(
+                _context.Residenciales.OrderBy(r => r.Nombre),
+                "IdResidencial",
+                "Nombre",
+                vehiculoNoPermitido.IdResidencial);
             return View(vehiculoNoPermitido);
         }
 
-        // GET: VehiculoNoPermitidoes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -78,20 +90,30 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
+
+            ViewBag.IdResidencial = new SelectList(
+                _context.Residenciales.OrderBy(r => r.Nombre),
+                "IdResidencial",
+                "Nombre",
+                vehiculoNoPermitido.IdResidencial);
             return View(vehiculoNoPermitido);
         }
 
-        // POST: VehiculoNoPermitidoes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdVNP,Placa,Motivo,FechaRegistro,Activo")] VehiculoNoPermitido vehiculoNoPermitido)
+        public async Task<IActionResult> Edit(int id, VehiculoNoPermitido vehiculoNoPermitido)
         {
             if (id != vehiculoNoPermitido.IdVNP)
             {
                 return NotFound();
             }
+
+            if (vehiculoNoPermitido.IdResidencial == 0)
+            {
+                vehiculoNoPermitido.IdResidencial = null;
+            }
+
+            ModelState.Remove("Residencial");
 
             if (ModelState.IsValid)
             {
@@ -113,10 +135,15 @@ namespace ARSAN_Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.IdResidencial = new SelectList(
+                _context.Residenciales.OrderBy(r => r.Nombre),
+                "IdResidencial",
+                "Nombre",
+                vehiculoNoPermitido.IdResidencial);
             return View(vehiculoNoPermitido);
         }
 
-        // GET: VehiculoNoPermitidoes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -125,7 +152,9 @@ namespace ARSAN_Web.Controllers
             }
 
             var vehiculoNoPermitido = await _context.VehiculosNoPermitidos
+                .Include(v => v.Residencial)
                 .FirstOrDefaultAsync(m => m.IdVNP == id);
+
             if (vehiculoNoPermitido == null)
             {
                 return NotFound();
@@ -134,7 +163,6 @@ namespace ARSAN_Web.Controllers
             return View(vehiculoNoPermitido);
         }
 
-        // POST: VehiculoNoPermitidoes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -143,9 +171,9 @@ namespace ARSAN_Web.Controllers
             if (vehiculoNoPermitido != null)
             {
                 _context.VehiculosNoPermitidos.Remove(vehiculoNoPermitido);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
