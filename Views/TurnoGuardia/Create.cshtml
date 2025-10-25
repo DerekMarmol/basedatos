@@ -1,51 +1,168 @@
 ﻿@model ARSAN_Web.Models.TurnoGuardia
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Registrar Turno";
 }
 
-<h1>Create</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Turnos de Guardia</a></li>
+                        <li class="breadcrumb-item active">Nuevo Turno</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-calendar-plus text-primary me-2"></i>Registrar Turno de Guardia
+                </h2>
+                <p class="text-muted">Asigne un guardia a una garita en un período específico</p>
+            </div>
 
-<h4>TurnoGuardia</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdGarita" class="control-label"></label>
-                <select asp-for="IdGarita" class ="form-control" asp-items="ViewBag.IdGarita"></select>
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Asignación -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-badge text-primary me-2"></i>Asignación
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGarita" class="form-label fw-bold">
+                                    <i class="bi bi-door-closed me-1"></i>Garita *
+                                </label>
+                                <select asp-for="IdGarita" class="form-select form-select-lg" asp-items="ViewBag.IdGarita">
+                                    <option value="">-- Seleccione una garita --</option>
+                                </select>
+                                <span asp-validation-for="IdGarita" class="text-danger"></span>
+                                <div class="form-text">Garita donde prestará servicio</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGuardia" class="form-label fw-bold">
+                                    <i class="bi bi-shield-check me-1"></i>Guardia *
+                                </label>
+                                <select asp-for="IdGuardia" class="form-select form-select-lg" asp-items="ViewBag.IdGuardia">
+                                    <option value="">-- Seleccione un guardia --</option>
+                                </select>
+                                <span asp-validation-for="IdGuardia" class="text-danger"></span>
+                                <div class="form-text">Guardia asignado al turno</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Período -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-range text-primary me-2"></i>Período del Turno
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaInicio" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Inicio *
+                                </label>
+                                <input asp-for="FechaInicio" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                                <div class="form-text">Inicio del turno</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaFin" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-x me-1"></i>Fecha y Hora de Fin *
+                                </label>
+                                <input asp-for="FechaFin" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaFin" class="text-danger"></span>
+                                <div class="form-text">Fin del turno</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Observaciones -->
+                        <div class="mb-4">
+                            <label asp-for="Observaciones" class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text me-1"></i>Observaciones
+                            </label>
+                            <textarea asp-for="Observaciones" class="form-control" rows="3"
+                                      placeholder="Información adicional sobre el turno..."></textarea>
+                            <span asp-validation-for="Observaciones" class="text-danger"></span>
+                            <div class="form-text">Información adicional (opcional)</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-save me-2"></i>Registrar Turno
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="IdGuardia" class="control-label"></label>
-                <select asp-for="IdGuardia" class ="form-control" asp-items="ViewBag.IdGuardia"></select>
+
+            <!-- Ayuda -->
+            <div class="alert alert-info mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-lightbulb me-2"></i>Información
+                </h6>
+                <ul class="mb-0 small">
+                    <li>Los campos marcados con * son obligatorios</li>
+                    <li>La fecha de fin debe ser posterior a la fecha de inicio</li>
+                    <li>Verifique que el guardia esté disponible en el período seleccionado</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
-                <span asp-validation-for="FechaInicio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaFin" class="control-label"></label>
-                <input asp-for="FechaFin" class="form-control" />
-                <span asp-validation-for="FechaFin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Observaciones" class="control-label"></label>
-                <input asp-for="Observaciones" class="form-control" />
-                <span asp-validation-for="Observaciones" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Establecer fecha/hora actual como inicio por defecto
+            var ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            $('#FechaInicio').val(ahora.toISOString().slice(0, 16));
+
+            // Validar fechas
+            $('form').submit(function(e) {
+                var fechaInicio = new Date($('#FechaInicio').val());
+                var fechaFin = new Date($('#FechaFin').val());
+
+                if (fechaFin <= fechaInicio) {
+                    e.preventDefault();
+                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                    $('#FechaFin').focus();
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }

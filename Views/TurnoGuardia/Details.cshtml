@@ -1,48 +1,156 @@
 ﻿@model ARSAN_Web.Models.TurnoGuardia
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Turno";
 }
 
-<h1>Details</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Turnos de Guardia</a></li>
+                        <li class="breadcrumb-item active">Detalles</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-file-text text-info me-2"></i>Detalles del Turno
+                </h2>
+                <p class="text-muted">Información completa del turno</p>
+            </div>
 
-<div>
-    <h4>TurnoGuardia</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaInicio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaInicio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Observaciones)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Observaciones)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Garita)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Garita.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Guardia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Guardia.Dpi)
-        </dd>
-    </dl>
+            <!-- Información Principal -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Asignación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Guardia</label>
+                            <p class="fs-4 mb-0">
+                                <i class="bi bi-shield-check text-primary me-2"></i>
+                                <strong>@Model.Guardia.NombreCompleto</strong>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Garita</label>
+                            <p class="fs-4 mb-0">
+                                <i class="bi bi-door-closed text-info me-2"></i>
+                                <strong>@Model.Garita.Nombre</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Período -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-range me-2"></i>Período del Turno
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Fecha y Hora de Inicio</label>
+                            <p class="fs-5 mb-0">
+                                <i class="bi bi-calendar-check text-success me-2"></i>
+                                @Model.FechaInicio.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Fecha y Hora de Fin</label>
+                            <p class="fs-5 mb-0">
+                                @if (Model.FechaFin.HasValue)
+                                {
+                                    <span>
+                                        <i class="bi bi-calendar-x text-danger me-2"></i>
+                                        @Model.FechaFin.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No finalizado</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.FechaFin.HasValue)
+                    {
+                        <hr>
+                        <div class="mb-0">
+                            <label class="text-muted small fw-bold text-uppercase">Duración del Turno</label>
+                            <p class="mb-0">
+                                @{
+                                    var duracion = Model.FechaFin.Value - Model.FechaInicio;
+                                    var horas = (int)duracion.TotalHours;
+                                    var minutos = duracion.Minutes;
+                                }
+                                <span class="badge bg-info fs-6">
+                                    <i class="bi bi-clock me-1"></i>
+                                    @horas horas @minutos minutos
+                                </span>
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            @if (!string.IsNullOrEmpty(Model.Observaciones))
+            {
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-chat-left-text me-2"></i>Observaciones
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@Model.Observaciones</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+                        </a>
+
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@Model.IdTurno" class="btn btn-warning">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.IdTurno" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-muted small">
+                <p class="mb-0">ID de Turno: #@Model.IdTurno</p>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdTurno">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+    }
+
+    hr {
+        opacity: 0.1;
+    }
+</style>

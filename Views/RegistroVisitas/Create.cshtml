@@ -1,59 +1,226 @@
 ﻿@model ARSAN_Web.Models.RegistroVisita
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Registrar Nueva Visita";
 }
 
-<h1>Create</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Registro de Visitas</a></li>
+                        <li class="breadcrumb-item active">Nueva Visita</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-clipboard-plus text-primary me-2"></i>Registrar Nueva Visita
+                </h2>
+                <p class="text-muted">Complete la información del visitante y su destino</p>
+            </div>
 
-<h4>RegistroVisita</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdVisitante" class="control-label"></label>
-                <select asp-for="IdVisitante" class ="form-control" asp-items="ViewBag.IdVisitante"></select>
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Información del Visitante -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-badge text-primary me-2"></i>Información del Visitante
+                        </h5>
+
+                        <div class="mb-4">
+                            <label asp-for="IdVisitante" class="form-label fw-bold">
+                                <i class="bi bi-person me-1"></i>Visitante *
+                            </label>
+                            <select asp-for="IdVisitante" class="form-select form-select-lg" asp-items="ViewBag.IdVisitante">
+                                <option value="">-- Seleccione un visitante --</option>
+                            </select>
+                            <span asp-validation-for="IdVisitante" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Si el visitante no existe, puede <a asp-controller="Visitantes" asp-action="Create" target="_blank">registrarlo aquí</a>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Destino -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-geo-alt text-primary me-2"></i>Destino
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdCasa" class="form-label fw-bold">
+                                    <i class="bi bi-house-door me-1"></i>Residencia de Destino *
+                                </label>
+                                <select asp-for="IdCasa" class="form-select form-select-lg" asp-items="ViewBag.IdCasa">
+                                    <option value="">-- Seleccione una residencia --</option>
+                                </select>
+                                <span asp-validation-for="IdCasa" class="text-danger"></span>
+                                <div class="form-text">Casa o residencia que visitará</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Motivo" class="form-label fw-bold">
+                                    <i class="bi bi-chat-left-text me-1"></i>Motivo de la Visita
+                                </label>
+                                <input asp-for="Motivo" class="form-control form-control-lg"
+                                       placeholder="Ej: Visita familiar, Entrega de paquete, etc." maxlength="200" />
+                                <span asp-validation-for="Motivo" class="text-danger"></span>
+                                <div class="form-text">Descripción breve del motivo (opcional)</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Fecha y Hora de Ingreso -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-event text-primary me-2"></i>Información de Ingreso
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaIngreso" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Ingreso *
+                                </label>
+                                <input asp-for="FechaIngreso" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Por defecto se establece la fecha y hora actual
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGuardiaIngreso" class="form-label fw-bold">
+                                    <i class="bi bi-shield-check me-1"></i>Guardia de Ingreso *
+                                </label>
+                                <select asp-for="IdGuardiaIngreso" class="form-select form-select-lg" asp-items="ViewBag.IdGuardiaIngreso">
+                                    <option value="">-- Seleccione el guardia --</option>
+                                </select>
+                                <span asp-validation-for="IdGuardiaIngreso" class="text-danger"></span>
+                                <div class="form-text">Guardia que registra el ingreso</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información de Salida (Opcional) -->
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-door-open text-secondary me-2"></i>Información de Salida (Opcional)
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Puede dejar estos campos vacíos y registrar la salida después
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="FechaSalida" class="form-label fw-bold">
+                                            <i class="bi bi-calendar-x me-1"></i>Fecha y Hora de Salida
+                                        </label>
+                                        <input asp-for="FechaSalida" type="datetime-local" class="form-control" />
+                                        <span asp-validation-for="FechaSalida" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="IdGuardiaSalida" class="form-label fw-bold">
+                                            <i class="bi bi-shield-x me-1"></i>Guardia de Salida
+                                        </label>
+                                        <select asp-for="IdGuardiaSalida" class="form-select" asp-items="ViewBag.IdGuardiaSalida">
+                                            <option value="">-- Seleccione el guardia --</option>
+                                        </select>
+                                        <span asp-validation-for="IdGuardiaSalida" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-save me-2"></i>Registrar Visita
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="IdCasa" class="control-label"></label>
-                <select asp-for="IdCasa" class ="form-control" asp-items="ViewBag.IdCasa"></select>
+
+            <!-- Ayuda -->
+            <div class="alert alert-info mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-lightbulb me-2"></i>Información importante
+                </h6>
+                <ul class="mb-0 small">
+                    <li>Los campos marcados con * son obligatorios</li>
+                    <li>La fecha y hora de ingreso se establece automáticamente al momento actual</li>
+                    <li>Puede dejar los campos de salida vacíos y completarlos después</li>
+                    <li>Si el visitante no existe, puede registrarlo desde el módulo "Visitantes"</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaIngreso" class="control-label"></label>
-                <input asp-for="FechaIngreso" class="form-control" />
-                <span asp-validation-for="FechaIngreso" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaSalida" class="control-label"></label>
-                <input asp-for="FechaSalida" class="form-control" />
-                <span asp-validation-for="FechaSalida" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdGuardiaIngreso" class="control-label"></label>
-                <select asp-for="IdGuardiaIngreso" class ="form-control" asp-items="ViewBag.IdGuardiaIngreso"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdGuardiaSalida" class="control-label"></label>
-                <select asp-for="IdGuardiaSalida" class ="form-control" asp-items="ViewBag.IdGuardiaSalida"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Motivo" class="control-label"></label>
-                <input asp-for="Motivo" class="form-control" />
-                <span asp-validation-for="Motivo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Establecer fecha y hora actual por defecto
+            var ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            $('#FechaIngreso').val(ahora.toISOString().slice(0, 16));
+
+            // Validar que la fecha de salida sea posterior a la de ingreso
+            $('form').submit(function(e) {
+                var fechaIngreso = new Date($('#FechaIngreso').val());
+                var fechaSalida = $('#FechaSalida').val();
+
+                if (fechaSalida && fechaSalida.trim() !== '') {
+                    fechaSalida = new Date(fechaSalida);
+
+                    if (fechaSalida <= fechaIngreso) {
+                        e.preventDefault();
+                        alert('La fecha de salida debe ser posterior a la fecha de ingreso');
+                        $('#FechaSalida').focus();
+                        return false;
+                    }
+                }
+            });
+
+            // Mejorar búsqueda en select de visitantes
+            $('#IdVisitante').select2({
+                placeholder: '-- Buscar visitante --',
+                allowClear: true
+            });
+        });
+    </script>
+
+    <style>
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }

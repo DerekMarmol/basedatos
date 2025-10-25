@@ -1,54 +1,137 @@
 ﻿@model ARSAN_Web.Models.TurnoGuardia
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Turno";
 }
 
-<h1>Edit</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Turnos de Guardia</a></li>
+                        <li class="breadcrumb-item active">Editar</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-pencil-square text-warning me-2"></i>Editar Turno de Guardia
+                </h2>
+                <p class="text-muted">Modifique los datos del turno</p>
+            </div>
 
-<h4>TurnoGuardia</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdTurno" />
-            <div class="form-group">
-                <label asp-for="IdGarita" class="control-label"></label>
-                <select asp-for="IdGarita" class="form-control" asp-items="ViewBag.IdGarita"></select>
-                <span asp-validation-for="IdGarita" class="text-danger"></span>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="IdTurno" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-badge text-primary me-2"></i>Asignación
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGarita" class="form-label fw-bold">
+                                    <i class="bi bi-door-closed me-1"></i>Garita *
+                                </label>
+                                <select asp-for="IdGarita" class="form-select form-select-lg" asp-items="ViewBag.IdGarita"></select>
+                                <span asp-validation-for="IdGarita" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGuardia" class="form-label fw-bold">
+                                    <i class="bi bi-shield-check me-1"></i>Guardia *
+                                </label>
+                                <select asp-for="IdGuardia" class="form-select form-select-lg" asp-items="ViewBag.IdGuardia"></select>
+                                <span asp-validation-for="IdGuardia" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-range text-primary me-2"></i>Período del Turno
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaInicio" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Inicio *
+                                </label>
+                                <input asp-for="FechaInicio" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaFin" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-x me-1"></i>Fecha y Hora de Fin *
+                                </label>
+                                <input asp-for="FechaFin" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaFin" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <label asp-for="Observaciones" class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text me-1"></i>Observaciones
+                            </label>
+                            <textarea asp-for="Observaciones" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Observaciones" class="text-danger"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="IdGuardia" class="control-label"></label>
-                <select asp-for="IdGuardia" class="form-control" asp-items="ViewBag.IdGuardia"></select>
-                <span asp-validation-for="IdGuardia" class="text-danger"></span>
+
+            <div class="alert alert-warning mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Atención
+                </h6>
+                <p class="mb-0 small">
+                    Los cambios afectarán el registro de este turno.
+                </p>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
-                <span asp-validation-for="FechaInicio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaFin" class="control-label"></label>
-                <input asp-for="FechaFin" class="form-control" />
-                <span asp-validation-for="FechaFin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Observaciones" class="control-label"></label>
-                <input asp-for="Observaciones" class="form-control" />
-                <span asp-validation-for="Observaciones" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            $('form').submit(function(e) {
+                var fechaInicio = new Date($('#FechaInicio').val());
+                var fechaFin = new Date($('#FechaFin').val());
+
+                if (fechaFin <= fechaInicio) {
+                    e.preventDefault();
+                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }

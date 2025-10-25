@@ -1,65 +1,358 @@
 ﻿@model IEnumerable<ARSAN_Web.Models.RegistroVisita>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Registro de Visitas";
+    var visitasActivas = Model.Where(v => v.FechaSalida == null);
+    var visitasFinalizadas = Model.Where(v => v.FechaSalida != null);
+    var visitasHoy = Model.Where(v => v.FechaIngreso.Date == DateTime.Today);
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-clipboard-check text-primary me-2"></i>Registro de Visitas
+            </h2>
+            <p class="text-muted mb-0">Control de entrada y salida de visitantes</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Registrar Nueva Visita
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaIngreso)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaSalida)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Motivo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Visitante)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GuardiaIngreso)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GuardiaSalida)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaIngreso)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaSalida)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Motivo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Visitante.NombreCompleto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GuardiaIngreso.Dpi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GuardiaSalida.Dpi)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdRegistro">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdRegistro">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdRegistro">Delete</a>
-            </td>
-        </tr>
+    <!-- Mensajes -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-clipboard-data fs-3 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Total Visitas</h6>
+                            <h3 class="mb-0">@Model.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-door-open fs-3 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Visitas Activas</h6>
+                            <h3 class="mb-0 text-success">@visitasActivas.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-calendar-check fs-3 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Visitas Hoy</h6>
+                            <h3 class="mb-0 text-info">@visitasHoy.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-secondary bg-opacity-10 p-3 rounded">
+                                <i class="bi bi-door-closed fs-3 text-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Finalizadas</h6>
+                            <h3 class="mb-0 text-secondary">@visitasFinalizadas.Count()</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Estado</label>
+                    <select class="form-select" id="filtroEstado">
+                        <option value="">Todos</option>
+                        <option value="activa">Activas (Sin salida)</option>
+                        <option value="finalizada">Finalizadas</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Fecha</label>
+                    <select class="form-select" id="filtroFecha">
+                        <option value="">Todas</option>
+                        <option value="hoy">Hoy</option>
+                        <option value="semana">Esta semana</option>
+                        <option value="mes">Este mes</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Buscar visitante</label>
+                    <input type="text" class="form-control" id="buscarVisitante" placeholder="Nombre del visitante...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                        <i class="bi bi-x-circle me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Visitas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="tablaVisitas">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="bi bi-calendar3 me-1"></i>Fecha/Hora Ingreso</th>
+                                <th><i class="bi bi-calendar-x me-1"></i>Fecha/Hora Salida</th>
+                                <th><i class="bi bi-person-badge me-1"></i>Visitante</th>
+                                <th><i class="bi bi-house-door me-1"></i>Residencia</th>
+                                <th><i class="bi bi-chat-left-text me-1"></i>Motivo</th>
+                                <th class="text-center"><i class="bi bi-shield-check me-1"></i>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderByDescending(v => v.FechaIngreso))
+                            {
+                                var esActiva = item.FechaSalida == null;
+                                var duracion = esActiva ?
+                                (DateTime.Now - item.FechaIngreso) :
+                                (item.FechaSalida.Value - item.FechaIngreso);
+
+                                <tr data-estado="@(esActiva ? "activa" : "finalizada")"
+                                    data-fecha="@item.FechaIngreso.ToString("yyyy-MM-dd")">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-calendar-event text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">@item.FechaIngreso.ToString("dd/MM/yyyy")</div>
+                                                <small class="text-muted">@item.FechaIngreso.ToString("HH:mm")</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.FechaSalida.HasValue)
+                                        {
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-calendar-check text-success me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">@item.FechaSalida.Value.ToString("dd/MM/yyyy")</div>
+                                                    <small class="text-muted">@item.FechaSalida.Value.ToString("HH:mm")</small>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-arrow-right-circle me-1"></i>En el residencial
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">@item.Visitante.NombreCompleto</strong>
+                                        @if (!string.IsNullOrEmpty(item.Visitante.Empresa))
+                                        {
+                                            <br>
+                                
+                                            <small class="text-muted">@item.Visitante.Empresa</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-house-door-fill me-1"></i>#@item.IdCasa
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@(string.IsNullOrEmpty(item.Motivo) ? "-" : item.Motivo.Substring(0, Math.Min(30, item.Motivo.Length)) + (item.Motivo.Length > 30 ? "..." : ""))</small>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (esActiva)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activa
+                                            </span>
+                                            <br>
+
+                                            <small class="text-muted">@((int)duracion.TotalHours)h @duracion.Minutes min</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Finalizada
+                                            </span>
+                                            <br>
+
+                                            <small class="text-muted">@((int)duracion.TotalHours)h @duracion.Minutes min</small>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.IdRegistro"
+                                               class="btn btn-info text-white" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.IdRegistro"
+                                               class="btn btn-warning text-white" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.IdRegistro"
+                                               class="btn btn-danger text-white" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3 mb-0">No hay visitas registradas</p>
+                    <a asp-action="Create" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar Primera Visita
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Información -->
+    <div class="alert alert-info mt-4" role="alert">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle me-2"></i>Información
+        </h6>
+        <ul class="mb-0 small">
+            <li>Las visitas "Activas" son aquellas que no tienen fecha de salida registrada</li>
+            <li>Use los filtros para encontrar visitas específicas</li>
+            <li>El tiempo de duración se calcula automáticamente</li>
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            function aplicarFiltros() {
+                var estado = $('#filtroEstado').val();
+                var fecha = $('#filtroFecha').val();
+                var visitante = $('#buscarVisitante').val().toLowerCase();
+                var hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+
+                $('#tablaVisitas tbody tr').each(function() {
+                    var row = $(this);
+                    var mostrar = true;
+
+                    // Filtro por estado
+                    if (estado && row.data('estado') !== estado) {
+                        mostrar = false;
+                    }
+
+                    // Filtro por fecha
+                    if (fecha && mostrar) {
+                        var fechaRegistro = new Date(row.data('fecha'));
+                        fechaRegistro.setHours(0, 0, 0, 0);
+
+                        if (fecha === 'hoy') {
+                            mostrar = fechaRegistro.getTime() === hoy.getTime();
+                        } else if (fecha === 'semana') {
+                            var semanaAtras = new Date(hoy);
+                            semanaAtras.setDate(hoy.getDate() - 7);
+                            mostrar = fechaRegistro >= semanaAtras;
+                        } else if (fecha === 'mes') {
+                            var mesAtras = new Date(hoy);
+                            mesAtras.setMonth(hoy.getMonth() - 1);
+                            mostrar = fechaRegistro >= mesAtras;
+                        }
+                    }
+
+                    // Filtro por visitante
+                    if (visitante && mostrar) {
+                        var nombreVisitante = row.find('td:eq(2)').text().toLowerCase();
+                        mostrar = nombreVisitante.includes(visitante);
+                    }
+
+                    row.toggle(mostrar);
+                });
+            }
+
+            $('#filtroEstado, #filtroFecha').change(aplicarFiltros);
+            $('#buscarVisitante').on('keyup', aplicarFiltros);
+        });
+
+        function limpiarFiltros() {
+            $('#filtroEstado').val('');
+            $('#filtroFecha').val('');
+            $('#buscarVisitante').val('');
+            $('#tablaVisitas tbody tr').show();
+        }
+
+        // Auto-cerrar alertas
+        setTimeout(function() {
+            $('.alert-success').fadeOut();
+        }, 5000);
+    </script>
+
+    <style>
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+            .table tbody tr:hover {
+                background-color: rgba(0, 123, 255, 0.05);
+            }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.35rem 0.55rem;
+        }
+    </style>
 }
-    </tbody>
-</table>

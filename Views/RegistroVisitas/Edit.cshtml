@@ -1,64 +1,219 @@
 ﻿@model ARSAN_Web.Models.RegistroVisita
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Registro de Visita";
+    var esActiva = !Model.FechaSalida.HasValue;
 }
 
-<h1>Edit</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Registro de Visitas</a></li>
+                        <li class="breadcrumb-item active">Editar</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-pencil-square text-warning me-2"></i>Editar Registro de Visita
+                </h2>
+                <p class="text-muted">
+                    @if (esActiva)
+                    {
+                        <span>Registre la salida o modifique los datos de la visita</span>
+                    }
+                    else
+                    {
+                        <span>Modifique los datos del registro</span>
+                    }
+                </p>
+            </div>
 
-<h4>RegistroVisita</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdRegistro" />
-            <div class="form-group">
-                <label asp-for="IdVisitante" class="control-label"></label>
-                <select asp-for="IdVisitante" class="form-control" asp-items="ViewBag.IdVisitante"></select>
-                <span asp-validation-for="IdVisitante" class="text-danger"></span>
+            @if (esActiva)
+            {
+                <div class="alert alert-success" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-info-circle me-2"></i>Visita Activa
+                    </h6>
+                    <p class="mb-0">
+                        Esta visita está actualmente activa. Complete los datos de salida para finalizarla.
+                    </p>
+                </div>
+            }
+
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="IdRegistro" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Información del Visitante -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-badge text-primary me-2"></i>Información del Visitante
+                        </h5>
+
+                        <div class="mb-4">
+                            <label asp-for="IdVisitante" class="form-label fw-bold">
+                                <i class="bi bi-person me-1"></i>Visitante *
+                            </label>
+                            <select asp-for="IdVisitante" class="form-select form-select-lg" asp-items="ViewBag.IdVisitante"></select>
+                            <span asp-validation-for="IdVisitante" class="text-danger"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Destino -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-geo-alt text-primary me-2"></i>Destino
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdCasa" class="form-label fw-bold">
+                                    <i class="bi bi-house-door me-1"></i>Residencia de Destino *
+                                </label>
+                                <select asp-for="IdCasa" class="form-select form-select-lg" asp-items="ViewBag.IdCasa"></select>
+                                <span asp-validation-for="IdCasa" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Motivo" class="form-label fw-bold">
+                                    <i class="bi bi-chat-left-text me-1"></i>Motivo de la Visita
+                                </label>
+                                <input asp-for="Motivo" class="form-control form-control-lg" maxlength="200" />
+                                <span asp-validation-for="Motivo" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Fecha y Hora de Ingreso -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-event text-primary me-2"></i>Información de Ingreso
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FechaIngreso" class="form-label fw-bold">
+                                    <i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Ingreso *
+                                </label>
+                                <input asp-for="FechaIngreso" type="datetime-local" class="form-control form-control-lg" />
+                                <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="IdGuardiaIngreso" class="form-label fw-bold">
+                                    <i class="bi bi-shield-check me-1"></i>Guardia de Ingreso *
+                                </label>
+                                <select asp-for="IdGuardiaIngreso" class="form-select form-select-lg" asp-items="ViewBag.IdGuardiaIngreso"></select>
+                                <span asp-validation-for="IdGuardiaIngreso" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información de Salida -->
+                        <div class="card @(esActiva ? "bg-success" : "bg-light") bg-opacity-10 border-0 mb-4">
+                            <div class="card-body">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-door-open @(esActiva ? "text-success" : "text-secondary") me-2"></i>
+                                    Información de Salida @(esActiva ? "(Registrar ahora)" : "")
+                                </h6>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="FechaSalida" class="form-label fw-bold">
+                                            <i class="bi bi-calendar-x me-1"></i>Fecha y Hora de Salida
+                                        </label>
+                                        <input asp-for="FechaSalida" type="datetime-local" class="form-control form-control-lg" />
+                                        <span asp-validation-for="FechaSalida" class="text-danger"></span>
+                                        @if (esActiva)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-success mt-2" onclick="establecerAhora()">
+                                                <i class="bi bi-clock me-1"></i>Establecer Ahora
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="IdGuardiaSalida" class="form-label fw-bold">
+                                            <i class="bi bi-shield-x me-1"></i>Guardia de Salida
+                                        </label>
+                                        <select asp-for="IdGuardiaSalida" class="form-select form-select-lg" asp-items="ViewBag.IdGuardiaSalida">
+                                            <option value="">-- Seleccione el guardia --</option>
+                                        </select>
+                                        <span asp-validation-for="IdGuardiaSalida" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg px-5 text-white">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="IdCasa" class="control-label"></label>
-                <select asp-for="IdCasa" class="form-control" asp-items="ViewBag.IdCasa"></select>
-                <span asp-validation-for="IdCasa" class="text-danger"></span>
+
+            <!-- Advertencia -->
+            <div class="alert alert-warning mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Atención
+                </h6>
+                <p class="mb-0 small">
+                    Los cambios afectarán el registro histórico de esta visita.
+                </p>
             </div>
-            <div class="form-group">
-                <label asp-for="FechaIngreso" class="control-label"></label>
-                <input asp-for="FechaIngreso" class="form-control" />
-                <span asp-validation-for="FechaIngreso" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaSalida" class="control-label"></label>
-                <input asp-for="FechaSalida" class="form-control" />
-                <span asp-validation-for="FechaSalida" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdGuardiaIngreso" class="control-label"></label>
-                <select asp-for="IdGuardiaIngreso" class="form-control" asp-items="ViewBag.IdGuardiaIngreso"></select>
-                <span asp-validation-for="IdGuardiaIngreso" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdGuardiaSalida" class="control-label"></label>
-                <select asp-for="IdGuardiaSalida" class="form-control" asp-items="ViewBag.IdGuardiaSalida"></select>
-                <span asp-validation-for="IdGuardiaSalida" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Motivo" class="control-label"></label>
-                <input asp-for="Motivo" class="form-control" />
-                <span asp-validation-for="Motivo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function establecerAhora() {
+            var ahora = new Date();
+            ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+            $('#FechaSalida').val(ahora.toISOString().slice(0, 16));
+        }
+
+        $(document).ready(function() {
+            // Validar fechas
+            $('form').submit(function(e) {
+                var fechaIngreso = new Date($('#FechaIngreso').val());
+                var fechaSalida = $('#FechaSalida').val();
+
+                if (fechaSalida && fechaSalida.trim() !== '') {
+                    fechaSalida = new Date(fechaSalida);
+
+                    if (fechaSalida <= fechaIngreso) {
+                        e.preventDefault();
+                        alert('La fecha de salida debe ser posterior a la fecha de ingreso');
+                        return false;
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }

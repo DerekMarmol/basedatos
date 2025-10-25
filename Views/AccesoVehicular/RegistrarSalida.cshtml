@@ -1,103 +1,78 @@
 ﻿@model ARSAN_Web.Models.AccesoVehicular
 
 @{
-    ViewData["Title"] = "Registrar Ingreso Vehicular";
+    ViewData["Title"] = "Registrar Salida";
+    var fechaHoraIngreso = Model.FechaIngreso.Date + Model.HoraIngreso;
+    var permanencia = DateTime.Now - fechaHoraIngreso;
 }
 
 <div class="mb-4">
-    <h1>Registrar Ingreso de Vehículo</h1>
-    <p class="text-muted">Complete los datos del vehículo que ingresa</p>
+    <h1>Registrar Salida de Vehículo</h1>
+    <p class="text-muted">Complete los datos de salida del vehículo</p>
+</div>
+
+<div class="alert alert-info mb-4">
+    <h5>📋 Información del Ingreso</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <strong>Placa:</strong> @Model.Placa<br />
+            <strong>Tipo:</strong> @Model.TipoAcceso<br />
+            <strong>Garita Ingreso:</strong> @Model.Garita?.Nombre
+        </div>
+        <div class="col-md-6">
+            <strong>Fecha/Hora Ingreso:</strong> @Model.FechaIngreso.ToString("dd/MM/yyyy") @Model.HoraIngreso.ToString(@"hh\:mm")<br />
+            <strong>Guardia Ingreso:</strong> @Model.GuardiaIngreso?.NombreCompleto<br />
+            <strong>Permanencia actual:</strong>
+            @if (permanencia.TotalHours < 24)
+            {
+                <span>@((int)permanencia.TotalHours)h @permanencia.Minutes minutos</span>
+            }
+            else
+            {
+                <span>@((int)permanencia.TotalDays) día(s) @permanencia.Hours horas</span>
+            }
+        </div>
+    </div>
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">Información del Acceso</h5>
+    <div class="card-header bg-warning">
+        <h5 class="mb-0">Registrar Salida</h5>
     </div>
     <div class="card-body">
-        <form asp-action="Create">
+        <form asp-action="RegistrarSalida" method="post">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            <input type="hidden" asp-for="IdAcceso" />
 
             <div class="row">
-                <!-- Columna Izquierda -->
                 <div class="col-md-6">
-                    <div class="alert alert-info">
-                        <strong>📋 Opción 1:</strong> Seleccione un vehículo registrado de residente<br />
-                        <strong>📋 Opción 2:</strong> Seleccione un visitante conocido<br />
-                        <strong>📋 Opción 3:</strong> Ingrese manualmente la placa del vehículo
+                    <div class="form-group mb-3">
+                        <label for="FechaSalida" class="form-label">Fecha de Salida</label>
+                        <input type="date" name="FechaSalida" class="form-control"
+                               value="@Model.FechaSalida?.ToString("yyyy-MM-dd")" required />
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="IdVehiculo" class="form-label">Vehículo de Residente (Opcional)</label>
-                        <select asp-for="IdVehiculo" class="form-select" asp-items="ViewBag.IdVehiculo">
-                            <option value="">-- Seleccione si es vehículo registrado --</option>
-                        </select>
-                        <small class="form-text text-muted">La placa se llenará automáticamente</small>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="IdVisitante" class="form-label">Visitante (Opcional)</label>
-                        <select asp-for="IdVisitante" class="form-select" asp-items="ViewBag.IdVisitante">
-                            <option value="">-- Seleccione si es visitante conocido --</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Placa" class="form-label">Placa del Vehículo</label>
-                        <input asp-for="Placa" class="form-control" placeholder="Ej. P-123ABC" style="text-transform: uppercase;" />
-                        <span asp-validation-for="Placa" class="text-danger"></span>
-                        <small class="form-text text-muted">Ingrese manualmente si no es vehículo registrado</small>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="TipoAcceso" class="form-label">Tipo de Acceso</label>
-                        <select asp-for="TipoAcceso" class="form-select">
-                            <option value="">-- Seleccione el tipo --</option>
-                            <option value="Residente">🏠 Residente</option>
-                            <option value="Visitante">🚶 Visitante</option>
-                            <option value="Servicio">🔧 Servicio (plomero, electricista, etc.)</option>
-                            <option value="Proveedor">📦 Proveedor/Delivery</option>
-                            <option value="Emergencia">🚨 Emergencia</option>
-                        </select>
-                        <span asp-validation-for="TipoAcceso" class="text-danger"></span>
+                        <label for="HoraSalida" class="form-label">Hora de Salida</label>
+                        <input type="time" name="HoraSalida" class="form-control"
+                               value="@Model.HoraSalida?.ToString(@"hh\:mm")" required />
                     </div>
                 </div>
 
-                <!-- Columna Derecha -->
                 <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label asp-for="IdGarita" class="form-label">Garita de Ingreso</label>
-                        <select asp-for="IdGarita" class="form-select" asp-items="ViewBag.IdGarita">
-                            <option value="">-- Seleccione la garita --</option>
-                        </select>
-                        <span asp-validation-for="IdGarita" class="text-danger"></span>
-                        <small class="form-text text-muted">Garita por donde ingresa el vehículo</small>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="IdGuardiaIngreso" class="form-label">Guardia que Registra</label>
-                        <select asp-for="IdGuardiaIngreso" class="form-select" asp-items="ViewBag.IdGuardiaIngreso">
+                        <label for="IdGuardiaSalida" class="form-label">Guardia que Registra Salida</label>
+                        <select name="IdGuardiaSalida" class="form-select" asp-items="ViewBag.IdGuardiaSalida" required>
                             <option value="">-- Seleccione el guardia --</option>
                         </select>
-                        <span asp-validation-for="IdGuardiaIngreso" class="text-danger"></span>
-                        <small class="form-text text-muted">Guardia de turno en la garita</small>
+                        <small class="form-text text-muted">Guardia de turno que registra la salida</small>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label asp-for="FechaIngreso" class="form-label">Fecha de Ingreso</label>
-                        <input asp-for="FechaIngreso" type="date" class="form-control" />
-                        <span asp-validation-for="FechaIngreso" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="HoraIngreso" class="form-label">Hora de Ingreso</label>
-                        <input asp-for="HoraIngreso" type="time" class="form-control" />
-                        <span asp-validation-for="HoraIngreso" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Observaciones" class="form-label">Observaciones (Opcional)</label>
-                        <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Ej. Viene a visitar casa 45, trae mercadería, etc."></textarea>
-                        <span asp-validation-for="Observaciones" class="text-danger"></span>
+                        <label for="Observaciones" class="form-label">Observaciones de Salida (Opcional)</label>
+                        <textarea name="Observaciones" class="form-control" rows="3"
+                                  placeholder="Ej. Salida normal, incidente reportado, etc."></textarea>
+                        <small class="form-text text-muted">Se agregará a las observaciones existentes</small>
                     </div>
                 </div>
             </div>
@@ -106,7 +81,7 @@
 
             <div class="d-flex justify-content-end gap-2">
                 <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-                <button type="submit" class="btn btn-primary">Registrar Ingreso</button>
+                <button type="submit" class="btn btn-warning">Registrar Salida</button>
             </div>
         </form>
     </div>
@@ -114,7 +89,8 @@
 
 <div class="mt-3">
     <div class="alert alert-warning">
-        <strong>⚠️ Importante:</strong> La salida del vehículo se registrará posteriormente desde la opción "Registrar Salida" en el listado.
+        <strong>⚠️ Importante:</strong> Verifique que la fecha y hora de salida sean correctas.
+        La salida debe ser posterior al ingreso.
     </div>
 </div>
 
@@ -122,11 +98,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    <script>
-        // Script para convertir la placa a mayúsculas automáticamente
-        document.querySelector('input[name="Placa"]').addEventListener('input', function(e) {
-            e.target.value = e.target.value.toUpperCase();
-        });
-    </script>
 }
