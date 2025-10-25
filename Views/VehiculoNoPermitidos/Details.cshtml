@@ -1,42 +1,127 @@
 ﻿@model ARSAN_Web.Models.VehiculoNoPermitido
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Vehículo";
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-text me-2"></i>
+                        Detalles del Vehículo No Permitido
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Estado Banner -->
+                    <div class="alert @(Model.Activo ? "alert-danger" : "alert-secondary") d-flex align-items-center mb-4" role="alert">
+                        <i class="bi @(Model.Activo ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill") fs-4 me-3"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">
+                                Estado: @(Model.Activo ? "RESTRICCIÓN ACTIVA" : "Restricción Inactiva")
+                            </h5>
+                            <p class="mb-0">
+                                @(Model.Activo ? "Este vehículo NO puede ingresar al residencial" : "Este vehículo puede ingresar al residencial")
+                            </p>
+                        </div>
+                    </div>
 
-<div>
-    <h4>VehiculoNoPermitido</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Placa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Placa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Motivo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Motivo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaRegistro)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaRegistro)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Activo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Activo)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdVNP">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+                    <!-- Información Principal -->
+                    <div class="row g-4">
+                        <!-- Placa -->
+                        <div class="col-md-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center">
+                                    <label class="text-muted small fw-bold">
+                                        <i class="bi bi-credit-card-2-front"></i> PLACA
+                                    </label>
+                                    <h2 class="display-5 fw-bold mt-2 mb-0 text-dark">
+                                        @Html.DisplayFor(model => model.Placa)
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha de Registro -->
+                        <div class="col-md-6">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center">
+                                    <label class="text-muted small fw-bold">
+                                        <i class="bi bi-calendar-event"></i> FECHA DE REGISTRO
+                                    </label>
+                                    <h4 class="mt-2 mb-0 text-dark">
+                                        @Model.FechaRegistro.ToString("dd/MM/yyyy")
+                                    </h4>
+                                    <small class="text-muted">
+                                        @Model.FechaRegistro.ToString("dddd, dd 'de' MMMM 'de' yyyy",
+                                        new System.Globalization.CultureInfo("es-ES"))
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo -->
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <label class="text-muted small fw-bold mb-3">
+                                        <i class="bi bi-exclamation-triangle"></i> MOTIVO DE LA RESTRICCIÓN
+                                    </label>
+                                    <p class="lead mb-0 text-dark">
+                                        @Html.DisplayFor(model => model.Motivo)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Residencial -->
+                        @if (Model.Residencial != null)
+                        {
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <label class="text-muted small fw-bold mb-3">
+                                            <i class="bi bi-building"></i> RESIDENCIAL
+                                        </label>
+                                        <h5 class="mb-0 text-dark">
+                                            @Html.DisplayFor(model => model.Residencial.Nombre)
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Volver al Listado
+                        </a>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.IdVNP" class="btn btn-warning btn-lg me-2">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.IdVNP" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-body bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>ID del Registro:</strong> @Model.IdVNP
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
