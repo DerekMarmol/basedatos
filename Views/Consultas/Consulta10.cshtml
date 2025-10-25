@@ -1,60 +1,135 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 10 - Guardia con Más Ingresos";
+    ViewData["Title"] = "Consulta 10 - Guardias por Género";
 }
 
 <div class="container mt-4">
-    <h2>🛡️ Consulta #10: Guardia con Más Ingresos Atendidos</h2>
-    <p class="text-muted">Identifica al guardia más activo en atención de ingresos</p>
+    <h2>👥 Consulta #10: Guardias por Género</h2>
+    <p class="text-muted">Muestra cuántos guardias son hombres y cuántos son mujeres</p>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get">
-                <div class="row">
-                    <div class="col-md-5">
-                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
-                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
-                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+    @if (ViewBag.GuardiasPorGenero != null && ViewBag.GuardiasPorGenero.Count > 0)
+    {
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📊 Distribución de Guardias Activos</h5>
                     </div>
-                    <div class="col-md-5">
-                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
-                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
-                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            @foreach (var grupo in ViewBag.GuardiasPorGenero)
+                            {
+                                var porcentaje = (grupo.Cantidad * 100.0 / ViewBag.TotalGuardias);
+                                var colorBadge = grupo.Genero == "Masculino" ? "bg-primary" : grupo.Genero == "Femenino" ? "bg-danger" : "bg-secondary";
+                                var icono = grupo.Genero == "Masculino" ? "♂️" : grupo.Genero == "Femenino" ? "♀️" : "❓";
+                                
+                                <div class="col-md-4 mb-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body">
+                                            <h1 style="font-size: 4rem;">@icono</h1>
+                                            <h5 class="card-title">@grupo.Genero</h5>
+                                            <h2 class="text-primary">@grupo.Cantidad</h2>
+                                            <p class="text-muted mb-0">
+                                                <span class="badge @colorBadge">@porcentaje.ToString("F1")%</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
 
-    @if (ViewBag.Resultado != null)
-    {
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">🏆 Guardia Más Activo</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <tr>
-                        <th>ID Guardia:</th>
-                        <td>@ViewBag.Resultado.IdGuardia</td>
-                    </tr>
-                    <tr>
-                        <th>Nombre:</th>
-                        <td><h5>@ViewBag.Resultado.NombreCompleto</h5></td>
-                    </tr>
-                    <tr>
-                        <th>Ingresos Atendidos:</th>
-                        <td><span class="badge bg-success fs-4">@ViewBag.Resultado.IngresosAtendidos</span></td>
-                    </tr>
-                </table>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">📈 Resumen General</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Género</th>
+                                    <th>Cantidad</th>
+                                    <th>Porcentaje</th>
+                                    <th>Gráfico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var grupo in ViewBag.GuardiasPorGenero)
+                                {
+                                    var porcentaje = (grupo.Cantidad * 100.0 / ViewBag.TotalGuardias);
+                                    var colorBarra = grupo.Genero == "Masculino" ? "bg-primary" : grupo.Genero == "Femenino" ? "bg-danger" : "bg-secondary";
+                                    
+                                    <tr>
+                                        <td><strong>@grupo.Genero</strong></td>
+                                        <td><span class="badge bg-dark fs-6">@grupo.Cantidad</span></td>
+                                        <td>@porcentaje.ToString("F2")%</td>
+                                        <td>
+                                            <div class="progress" style="height: 30px;">
+                                                <div class="progress-bar @colorBarra" 
+                                                     role="progressbar" 
+                                                     style="width: @porcentaje%"
+                                                     aria-valuenow="@porcentaje" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    @grupo.Cantidad
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th>Total:</th>
+                                    <th colspan="3"><span class="badge bg-success fs-6">@ViewBag.TotalGuardias guardias activos</span></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
+
+        {
+            var listaGuardias = ViewBag.GuardiasPorGenero as IEnumerable<dynamic>;
+            var masculinos = listaGuardias.FirstOrDefault(g => g.Genero == "Masculino");
+            var femeninos = listaGuardias.FirstOrDefault(g => g.Genero == "Femenino");
+
+            if (masculinos != null && femeninos != null)
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6>📊 Análisis:</h6>
+                            @if (masculinos.Cantidad > femeninos.Cantidad)
+                            {
+                                var diferencia = masculinos.Cantidad - femeninos.Cantidad;
+                                <p class="mb-0">Hay @diferencia más guardias masculinos que femeninos en el equipo de seguridad.</p>
+                            }
+                            else if (femeninos.Cantidad > masculinos.Cantidad)
+                            {
+                                var diferencia = femeninos.Cantidad - masculinos.Cantidad;
+                                <p class="mb-0">Hay @diferencia más guardias femeninos que masculinos en el equipo de seguridad.</p>
+                            }
+                            else
+                            {
+                                <p class="mb-0">Hay equidad de género en el equipo de seguridad.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
     }
     else
     {
-        <div class="alert alert-warning">No hay registros en el período seleccionado.</div>
+        <div class="alert alert-warning">
+            <strong>No hay datos.</strong> No se encontraron guardias activos registrados.
+        </div>
     }
 
     <div class="mt-3">

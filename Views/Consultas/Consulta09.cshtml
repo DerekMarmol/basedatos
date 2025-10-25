@@ -1,28 +1,24 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 9 - Top Casas con Más Visitas";
+    ViewData["Title"] = "Consulta 9 - Guardias con Más de 24 Horas";
 }
 
 <div class="container mt-4">
-    <h2>🏠 Consulta #9: Top Casas con Más Visitas</h2>
-    <p class="text-muted">Ranking de casas que reciben más visitas</p>
+    <h2>⚠️ Consulta #9: Guardias que Han Trabajado Más de 24 Horas</h2>
+    <p class="text-muted">Identifica turnos donde un guardia ha trabajado más de 24 horas consecutivas</p>
 
     <div class="card mb-4">
         <div class="card-body">
             <form method="get">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label for="fechaIni" class="form-label">Fecha Inicio:</label>
                         <input type="date" name="fechaIni" id="fechaIni" class="form-control"
                                value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label for="fechaFin" class="form-label">Fecha Fin:</label>
                         <input type="date" name="fechaFin" id="fechaFin" class="form-control"
                                value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="col-md-2">
-                        <label for="topN" class="form-label">Top:</label>
-                        <input type="number" name="topN" id="topN" class="form-control" value="@ViewBag.TopN" min="1" max="20" />
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">Consultar</button>
@@ -32,47 +28,73 @@
         </div>
     </div>
 
-    @if (ViewBag.TopCasas != null && ViewBag.TopCasas.Count > 0)
+    @if (ViewBag.GuardiasSobretiempo != null && ViewBag.GuardiasSobretiempo.Count > 0)
     {
-        <div class="row">
-            @for (int i = 0; i < ViewBag.TopCasas.Count; i++)
-            {
-                var casa = ViewBag.TopCasas[i];
-                <div class="col-md-6 mb-3">
-                    <div class="card @(i == 0 ? "border-warning" : i == 1 ? "border-secondary" : i == 2 ? "border-primary" : "")">
-                        <div class="card-body">
-                            <h4>
-                                @if (i == 0)
-                                {
-                                    <span class="badge bg-warning text-dark">🥇 #1</span>
-                                }
-                                else if (i == 1)
-                                {
+        <div class="alert alert-danger">
+            <strong>⚠️ ALERTA:</strong> Se detectaron @ViewBag.GuardiasSobretiempo.Count turnos con más de 24 horas.
+            <br><small>Esto viola las disposiciones municipales de límite de jornada laboral.</small>
+        </div>
 
-                                    <span class="badge bg-secondary">🥈 #2</span>
-                                }
-                                else if (i == 2)
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Guardia</th>
+                        <th>Garita</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Horas Trabajadas</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var turno in ViewBag.GuardiasSobretiempo)
+                    {
+                        <tr>
+                            <td><strong>@turno.Guardia</strong></td>
+                            <td>@turno.Garita</td>
+                            <td>@turno.FechaInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@turno.FechaFin?.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge @(turno.HorasTrabajadas >= 48 ? "bg-danger" : turno.HorasTrabajadas >= 36 ? "bg-warning text-dark" : "bg-warning") fs-6">
+                                    @turno.HorasTrabajadas.ToString("F2") horas
+                                </span>
+                            </td>
+                            <td>
+                                @if (turno.HorasTrabajadas >= 48)
                                 {
-
-                                    <span class="badge bg-primary">🥉 #3</span>
+                                    <span class="badge bg-danger">Crítico</span>
+                                }
+                                else if (turno.HorasTrabajadas >= 36)
+                                {
+                                    <span class="badge bg-warning text-dark">Muy Alto</span>
                                 }
                                 else
                                 {
-
-                                    <span class="badge bg-info">#@(i + 1)</span>
+                                    <span class="badge bg-warning text-dark">Excedido</span>
                                 }
-                                @casa.Cluster - Casa #@casa.Casa
-                            </h4>
-                            <p class="fs-3 mb-0"><strong>@casa.TotalVisitas</strong> visitas</p>
-                        </div>
-                    </div>
-                </div>
-            }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h6>⚠️ Recomendaciones:</h6>
+            <ul class="mb-0">
+                <li>Revisar la programación de turnos para evitar jornadas extendidas</li>
+                <li>Asegurar el cumplimiento de las normas laborales municipales</li>
+                <li>Garantizar períodos de descanso adecuados para el personal de seguridad</li>
+            </ul>
         </div>
     }
     else
     {
-        <div class="alert alert-warning">No hay visitas registradas en el período.</div>
+        <div class="alert alert-success">
+            <strong>✓ Todo en orden.</strong> No se detectaron turnos que excedan las 24 horas en el período seleccionado.
+            <br><small>Todos los guardias cumplen con las disposiciones municipales.</small>
+        </div>
     }
 
     <div class="mt-3">

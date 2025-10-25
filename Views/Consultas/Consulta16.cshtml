@@ -1,29 +1,24 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 16 - Visitantes Frecuentes";
+    ViewData["Title"] = "Consulta 16 - Visitante Más Frecuente";
 }
 
 <div class="container mt-4">
-    <h2>👥 Consulta #16: Visitantes Frecuentes</h2>
-    <p class="text-muted">Identifica personas que visitan el residencial frecuentemente</p>
+    <h2>👤 Consulta #16: Persona que Más Visita el Condominio</h2>
+    <p class="text-muted">Identifica al visitante con mayor número de visitas</p>
 
     <div class="card mb-4">
         <div class="card-body">
             <form method="get">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label for="fechaIni" class="form-label">Fecha Inicio:</label>
                         <input type="date" name="fechaIni" id="fechaIni" class="form-control"
                                value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <label for="fechaFin" class="form-label">Fecha Fin:</label>
                         <input type="date" name="fechaFin" id="fechaFin" class="form-control"
                                value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
-                    </div>
-                    <div class="col-md-2">
-                        <label for="minVisitas" class="form-label">Mínimo:</label>
-                        <input type="number" name="minVisitas" id="minVisitas" class="form-control"
-                               value="@ViewBag.MinVisitas" min="1" />
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">Consultar</button>
@@ -33,52 +28,82 @@
         </div>
     </div>
 
-    @if (ViewBag.VisitantesFrecuentes != null && ViewBag.VisitantesFrecuentes.Count > 0)
+    @if (ViewBag.Resultado != null)
     {
-        <div class="alert alert-info">
-            <strong>Total:</strong> @ViewBag.VisitantesFrecuentes.Count visitantes frecuentes encontrados
-        </div>
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">🏆 Visitante Más Frecuente</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>ID Visitante:</th>
+                                <td>@ViewBag.Resultado.IdVisitante</td>
+                            </tr>
+                            <tr>
+                                <th>Nombre Completo:</th>
+                                <td><h5 class="mb-0">@ViewBag.Resultado.NombreCompleto</h5></td>
+                            </tr>
+                            <tr>
+                                <th>DPI:</th>
+                                <td>@ViewBag.Resultado.Dpi</td>
+                            </tr>
+                            <tr>
+                                <th>Teléfono:</th>
+                                <td>@ViewBag.Resultado.Telefono</td>
+                            </tr>
+                            <tr>
+                                <th>Última Visita:</th>
+                                <td>@ViewBag.Resultado.UltimaVisita.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total de Visitas</h6>
+                                <h1 class="display-1 text-primary mb-0">@ViewBag.Resultado.TotalVisitas</h1>
+                                <p class="text-muted mt-3">
+                                    visitas registradas
+                                </p>
+                                @{
+                                    var diasPeriodo = (ViewBag.FechaFin - ViewBag.FechaIni).Days + 1;
+                                    var frecuencia = ViewBag.Resultado.TotalVisitas / (double)diasPeriodo;
+                                }
+                                <hr>
+                                <p class="mb-0">
+                                    <strong>Frecuencia:</strong> @frecuencia.ToString("F2") visitas/día
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Total Visitas</th>
-                        <th>Frecuencia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var visitante in ViewBag.VisitantesFrecuentes)
-                    {
-                        <tr>
-                            <td>@visitante.IdVisitante</td>
-                            <td><strong>@visitante.NombreCompleto</strong></td>
-                            <td><span class="badge bg-primary fs-6">@visitante.TotalVisitas</span></td>
-                            <td>
-                                @if (visitante.TotalVisitas >= 10)
-                                {
-                                    <span class="badge bg-danger">Muy Frecuente</span>
-                                }
-                                else if (visitante.TotalVisitas >= 5)
-                                {
-                                    <span class="badge bg-warning text-dark">Frecuente</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-info">Ocasional</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                <div class="alert alert-info mt-3">
+                    <h6>📊 Análisis:</h6>
+                    <ul class="mb-0">
+                        <li>Período analizado: @ViewBag.FechaIni?.ToString("dd/MM/yyyy") - @ViewBag.FechaFin?.ToString("dd/MM/yyyy") (@diasPeriodo días)</li>
+                        <li>Promedio de visitas por día: <strong>@frecuencia.ToString("F2")</strong></li>
+                        @if (ViewBag.Resultado.TotalVisitas >= 50)
+                        {
+                            <li class="text-danger"><strong>⚠️ Visitante muy frecuente</strong> - Se recomienda revisar el motivo de las visitas</li>
+                        }
+                        else if (ViewBag.Resultado.TotalVisitas >= 20)
+                        {
+                            <li class="text-warning"><strong>Visitante frecuente</strong></li>
+                        }
+                    </ul>
+                </div>
+            </div>
         </div>
     }
     else
     {
-        <div class="alert alert-warning">No se encontraron visitantes frecuentes en el período.</div>
+        <div class="alert alert-warning">
+            No se encontraron visitantes en el período seleccionado.
+        </div>
     }
 
     <div class="mt-3">

@@ -1,76 +1,121 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 2 - Visitas de Hoy";
+    ViewData["Title"] = "Consulta 2 - Vehículos de Visitantes por Hora";
 }
 
 <div class="container mt-4">
-    <h2>🚪 Consulta #2: Visitas de Hoy</h2>
-    <p class="text-muted">Muestra todas las visitas registradas el día de hoy</p>
+    <h2>🚗 Consulta #2: Vehículos de Visitantes por Hora</h2>
+    <p class="text-muted">Muestra cuántos vehículos ingresan de visitantes por hora en un período de tiempo</p>
 
-    @if (ViewBag.Visitas != null && ViewBag.Visitas.Count > 0)
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
+                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
+                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
+                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.VehiculosPorHora != null && ViewBag.VehiculosPorHora.Count > 0)
     {
         <div class="alert alert-info">
-            <strong>Total de visitas hoy:</strong> @ViewBag.Visitas.Count
+            <strong>Total de vehículos de visitantes:</strong> @ViewBag.TotalVehiculos
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID Registro</th>
-                        <th>Visitante</th>
-                        <th>Destino</th>
-                        <th>Garita</th>
-                        <th>Guardia Ingreso</th>
-                        <th>Fecha Ingreso</th>
-                        <th>Fecha Salida</th>
-                        <th>Motivo</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var visita in ViewBag.Visitas)
-                    {
-                        <tr>
-                            <td>@visita.IdRegistro</td>
-                            <td>@visita.Visitante</td>
-                            <td>
-                                <strong>@visita.Cluster</strong><br />
-                                <span class="badge bg-primary">Casa #@visita.Residencia</span>
-                            </td>
-                            <td>@visita.Garita</td>
-                            <td>@visita.GuardiaIngreso</td>
-                            <td>@visita.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>
-                                @if (visita.FechaSalida != null)
-                                {
-                                    @visita.FechaSalida?.ToString("dd/MM/yyyy HH:mm")
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
-                            </td>
-                            <td>@visita.Motivo</td>
-                            <td>
-                                @if (visita.FechaSalida == null)
-                                {
-                                    <span class="badge bg-success">Dentro</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Salió</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📊 Distribución por Hora</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Cantidad de Vehículos</th>
+                                        <th>Gráfico</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var lista = ViewBag.VehiculosPorHora as IEnumerable<dynamic>;
+                                        var maxVehiculos = lista.Max(x => (int)x.CantidadVehiculos);
+                                    }
+                                    @foreach (var item in ViewBag.VehiculosPorHora)
+                                    {
+                                        <tr>
+                                            <td><strong>@item.Hora:00</strong></td>
+                                            <td>
+                                                <span class="badge bg-primary fs-6">@item.CantidadVehiculos</span>
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 25px;">
+                                                    <div class="progress-bar bg-success"
+                                                         role="progressbar"
+                                                         style="width: @((item.CantidadVehiculos * 100.0 / maxVehiculos))%"
+                                                         aria-valuenow="@item.CantidadVehiculos"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="@maxVehiculos">
+                                                        @item.CantidadVehiculos
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Hora Pico</h6>
+                        @{
+                            var listaOrdenada = ViewBag.VehiculosPorHora as IEnumerable<dynamic>;
+                            var horaPico = listaOrdenada.OrderByDescending(x => (int)x.CantidadVehiculos).FirstOrDefault();
+                        }
+                        <h2 class="text-primary">@horaPico.Hora:00</h2>
+                        <p class="mb-0"><span class="badge bg-success">@horaPico.CantidadVehiculos vehículos</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Promedio por Hora</h6>
+                        @{
+                            var promedio = ViewBag.TotalVehiculos / (double)ViewBag.VehiculosPorHora.Count;
+                        }
+                        <h2 class="text-info">@promedio.ToString("F2")</h2>
+                        <p class="mb-0">vehículos/hora</p>
+                    </div>
+                </div>
+            </div>
         </div>
     }
     else
     {
         <div class="alert alert-warning">
-            <strong>No hay visitas registradas el día de hoy.</strong>
+            <strong>No hay datos.</strong> No se registraron vehículos de visitantes en el período seleccionado.
         </div>
     }
 

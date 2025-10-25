@@ -50,33 +50,38 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #2: Visitas de hoy
-        public async Task<IActionResult> Consulta02()
+        // Consulta #2: Vehículos de visitantes por hora
+        public async Task<IActionResult> Consulta02(DateTime? fechaIni, DateTime? fechaFin)
         {
-            var hoy = DateTime.Today;
-            var visitas = await _context.RegistrosVisita
-                .Include(r => r.Visitante)
-                .Include(r => r.Residencia)
-                .Include(r => r.GuardiaIngreso)
-                .Include(r => r.Garita)
-                .Where(r => r.FechaIngreso.Date == hoy)
-                .OrderByDescending(r => r.FechaIngreso)
-                .Select(r => new
-                {
-                    r.IdRegistro,
-                    Visitante = r.Visitante.NombreCompleto,
-                    r.IdResidencia,
-                    Residencia = r.Residencia.Numero,
-                    Cluster = r.Residencia.Cluster.Nombre,
-                    GuardiaIngreso = r.GuardiaIngreso.NombreCompleto,
-                    Garita = r.Garita != null ? r.Garita.Nombre : "N/A",
-                    r.FechaIngreso,
-                    r.FechaSalida,
-                    r.Motivo
-                })
+            if (!fechaIni.HasValue || !fechaFin.HasValue)
+            {
+                fechaIni = DateTime.Today.AddDays(-7);
+                fechaFin = DateTime.Today;
+            }
+
+            // Obtener accesos vehiculares de visitantes
+            var accesos = await _context.AccesosVehiculares
+                .Include(a => a.Visitante)
+                .Where(a => a.FechaIngreso.Date >= fechaIni.Value.Date
+                         && a.FechaIngreso.Date <= fechaFin.Value.Date
+                         && a.TipoAcceso == "Visitante")
                 .ToListAsync();
 
-            ViewBag.Visitas = visitas;
+            // Agrupar por hora
+            var vehiculosPorHora = accesos
+                .GroupBy(a => a.HoraIngreso.Hours)
+                .Select(g => new
+                {
+                    Hora = g.Key,
+                    CantidadVehiculos = g.Count()
+                })
+                .OrderBy(x => x.Hora)
+                .ToList();
+
+            ViewBag.VehiculosPorHora = vehiculosPorHora;
+            ViewBag.FechaIni = fechaIni;
+            ViewBag.FechaFin = fechaFin;
+            ViewBag.TotalVehiculos = accesos.Count;
             return View();
         }
 
@@ -107,7 +112,7 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #4: Intentos de personas no gratas
+        // Consulta #4: Vehículos que ingresan entre 23:00 y 01:00
         public async Task<IActionResult> Consulta04(DateTime? fechaIni, DateTime? fechaFin)
         {
             if (!fechaIni.HasValue || !fechaFin.HasValue)
@@ -116,31 +121,51 @@ namespace ARSAN_Web.Controllers
                 fechaFin = DateTime.Today;
             }
 
-            var intentos = await _context.RegistrosVisita
-                .Include(r => r.Visitante)
-                .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
-                         && r.FechaIngreso.Date <= fechaFin.Value.Date)
-                .Join(_context.PersonasNoGratas.Where(p => p.Activo),
-                    rv => rv.Visitante.Dpi ?? rv.Visitante.NombreCompleto,
-                    png => png.Dpi ?? png.NombreCompleto,
-                    (rv, png) => new
-                    {
-                        rv.IdRegistro,
-                        Visitante = rv.Visitante.NombreCompleto,
-                        Dpi = rv.Visitante.Dpi,
-                        MotivoBloqueo = png.Motivo,
-                        rv.FechaIngreso
-                    })
-                .OrderByDescending(x => x.FechaIngreso)
+            var accesos = await _context.AccesosVehiculares
+                .Include(a => a.Vehiculo)
+                    .ThenInclude(v => v.Residencia)
+                        .ThenInclude(r => r.Propietario)
+                .Include(a => a.Vehiculo)
+                    .ThenInclude(v => v.Residencia)
+                        .ThenInclude(r => r.Cluster)
+                .Where(a => a.FechaIngreso.Date >= fechaIni.Value.Date
+                         && a.FechaIngreso.Date <= fechaFin.Value.Date
+                         && a.Vehiculo != null)
                 .ToListAsync();
 
-            ViewBag.Intentos = intentos;
+            // Filtrar en memoria por hora (23:00 a 01:00)
+            var vehiculosNocturnos = accesos
+                .Where(a => a.HoraIngreso.Hours >= 23 || a.HoraIngreso.Hours <= 1)
+                .GroupBy(a => new
+                {
+                    a.Placa,
+                    Propietario = a.Vehiculo.Residencia.Propietario.NombreCompleto,
+                    Cluster = a.Vehiculo.Residencia.Cluster.Nombre,
+                    Casa = a.Vehiculo.Residencia.Numero
+                })
+                .Select(g => new
+                {
+                    g.Key.Placa,
+                    g.Key.Propietario,
+                    g.Key.Cluster,
+                    g.Key.Casa,
+                    TotalIngresos = g.Count(),
+                    Ingresos = g.Select(a => new
+                    {
+                        Fecha = a.FechaIngreso,
+                        Hora = a.HoraIngreso
+                    }).OrderByDescending(x => x.Fecha).ToList()
+                })
+                .OrderByDescending(x => x.TotalIngresos)
+                .ToList();
+
+            ViewBag.VehiculosNocturnos = vehiculosNocturnos;
             ViewBag.FechaIni = fechaIni;
             ViewBag.FechaFin = fechaFin;
             return View();
         }
 
-        // Consulta #5: Vecino que más ha pagado (CORREGIDA)
+        // Consulta #5: Vecino que más ha pagado
         public async Task<IActionResult> Consulta05(DateTime? fechaIni, DateTime? fechaFin)
         {
             if (!fechaIni.HasValue || !fechaFin.HasValue)
@@ -168,7 +193,7 @@ namespace ARSAN_Web.Controllers
                 .Select(g => new
                 {
                     IdResidencia = g.Key.IdResidencia,
-                    IdCasa = g.Key.IdResidencia, // Agregamos esto para compatibilidad con la vista
+                    IdCasa = g.Key.IdResidencia,
                     Propietario = g.Key.Propietario,
                     Cluster = g.Key.Cluster,
                     Casa = g.Key.Casa,
@@ -270,8 +295,8 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #9: Top casas con más visitas
-        public async Task<IActionResult> Consulta09(DateTime? fechaIni, DateTime? fechaFin, int topN = 5)
+        // Consulta #9: Guardia que ha trabajado más de 24 horas
+        public async Task<IActionResult> Consulta09(DateTime? fechaIni, DateTime? fechaFin)
         {
             if (!fechaIni.HasValue || !fechaFin.HasValue)
             {
@@ -279,56 +304,98 @@ namespace ARSAN_Web.Controllers
                 fechaFin = DateTime.Today;
             }
 
-            var topCasas = await _context.RegistrosVisita
-                .Include(r => r.Residencia)
-                    .ThenInclude(res => res.Cluster)
-                .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
-                         && r.FechaIngreso.Date <= fechaFin.Value.Date)
-                .GroupBy(r => new {
-                    r.IdResidencia,
-                    Cluster = r.Residencia.Cluster.Nombre,
-                    Casa = r.Residencia.Numero
+            var turnos = await _context.TurnosGuardia
+                .Include(t => t.Guardia)
+                .Include(t => t.Garita)
+                .Where(t => t.FechaInicio.Date >= fechaIni.Value.Date
+                         && t.FechaInicio.Date <= fechaFin.Value.Date
+                         && t.FechaFin != null)
+                .ToListAsync();
+
+            var guardiasSobretiempo = turnos
+                .Select(t => new
+                {
+                    t.IdGuardia,
+                    Guardia = t.Guardia.NombreCompleto,
+                    Garita = t.Garita.Nombre,
+                    t.FechaInicio,
+                    t.FechaFin,
+                    HorasTrabajadas = (t.FechaFin.Value - t.FechaInicio).TotalHours
+                })
+                .Where(x => x.HorasTrabajadas > 24)
+                .OrderByDescending(x => x.HorasTrabajadas)
+                .ToList();
+
+            ViewBag.GuardiasSobretiempo = guardiasSobretiempo;
+            ViewBag.FechaIni = fechaIni;
+            ViewBag.FechaFin = fechaFin;
+            return View();
+        }
+
+        // Consulta #10: Guardias por género
+        public async Task<IActionResult> Consulta10()
+        {
+            var guardiasPorGenero = await _context.Guardias
+                .Where(g => g.Activo)
+                .GroupBy(g => g.Genero ?? "No especificado")
+                .Select(g => new
+                {
+                    Genero = g.Key == "M" ? "Masculino" : g.Key == "F" ? "Femenino" : "No especificado",
+                    Cantidad = g.Count()
+                })
+                .ToListAsync();
+
+            ViewBag.GuardiasPorGenero = guardiasPorGenero;
+            ViewBag.TotalGuardias = guardiasPorGenero.Sum(g => g.Cantidad);
+            return View();
+        }
+
+        // Consulta #11: Vecino que más ingresa/sale los domingos
+        public async Task<IActionResult> Consulta11(DateTime? fechaIni, DateTime? fechaFin)
+        {
+            if (!fechaIni.HasValue || !fechaFin.HasValue)
+            {
+                fechaIni = DateTime.Today.AddMonths(-3);
+                fechaFin = DateTime.Today;
+            }
+
+            var accesosDomingos = await _context.AccesosVehiculares
+                .Include(a => a.Vehiculo)
+                    .ThenInclude(v => v.Residencia)
+                        .ThenInclude(r => r.Propietario)
+                .Include(a => a.Vehiculo)
+                    .ThenInclude(v => v.Residencia)
+                        .ThenInclude(r => r.Cluster)
+                .Where(a => a.FechaIngreso.Date >= fechaIni.Value.Date
+                         && a.FechaIngreso.Date <= fechaFin.Value.Date
+                         && a.Vehiculo != null
+                         && a.TipoAcceso == "Residente")
+                .ToListAsync();
+
+            // Filtrar solo domingos
+            var accesosDomingosFiltrados = accesosDomingos
+                .Where(a => a.FechaIngreso.DayOfWeek == DayOfWeek.Sunday)
+                .ToList();
+
+            var resultado = accesosDomingosFiltrados
+                .GroupBy(a => new
+                {
+                    IdResidencia = a.Vehiculo.IdResidencia,
+                    Propietario = a.Vehiculo.Residencia.Propietario.NombreCompleto,
+                    Cluster = a.Vehiculo.Residencia.Cluster.Nombre,
+                    Casa = a.Vehiculo.Residencia.Numero
                 })
                 .Select(g => new
                 {
                     g.Key.IdResidencia,
+                    g.Key.Propietario,
                     g.Key.Cluster,
                     g.Key.Casa,
-                    TotalVisitas = g.Count()
+                    TotalMovimientos = g.Count(),
+                    Domingos = g.Select(a => a.FechaIngreso.Date).Distinct().Count()
                 })
-                .OrderByDescending(x => x.TotalVisitas)
-                .Take(topN)
-                .ToListAsync();
-
-            ViewBag.TopCasas = topCasas;
-            ViewBag.FechaIni = fechaIni;
-            ViewBag.FechaFin = fechaFin;
-            ViewBag.TopN = topN;
-            return View();
-        }
-
-        // Consulta #10: Guardia con más ingresos
-        public async Task<IActionResult> Consulta10(DateTime? fechaIni, DateTime? fechaFin)
-        {
-            if (!fechaIni.HasValue || !fechaFin.HasValue)
-            {
-                fechaIni = DateTime.Today.AddMonths(-1);
-                fechaFin = DateTime.Today;
-            }
-
-            var resultado = await _context.RegistrosVisita
-                .Include(r => r.GuardiaIngreso)
-                .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
-                         && r.FechaIngreso.Date <= fechaFin.Value.Date)
-                .GroupBy(r => new { r.GuardiaIngreso.IdGuardia, r.GuardiaIngreso.NombreCompleto })
-                .Select(g => new
-                {
-                    g.Key.IdGuardia,
-                    g.Key.NombreCompleto,
-                    IngresosAtendidos = g.Count()
-                })
-                .OrderByDescending(x => x.IngresosAtendidos)
-                .FirstOrDefaultAsync();
+                .OrderByDescending(x => x.TotalMovimientos)
+                .FirstOrDefault();
 
             ViewBag.Resultado = resultado;
             ViewBag.FechaIni = fechaIni;
@@ -336,33 +403,7 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #11: Visitas abiertas (sin salida)
-        public async Task<IActionResult> Consulta11()
-        {
-            var visitasAbiertas = await _context.RegistrosVisita
-                .Include(r => r.Visitante)
-                .Include(r => r.GuardiaIngreso)
-                .Include(r => r.Residencia)
-                    .ThenInclude(res => res.Cluster)
-                .Where(r => r.FechaSalida == null)
-                .OrderByDescending(r => r.FechaIngreso)
-                .Select(r => new
-                {
-                    r.IdRegistro,
-                    Visitante = r.Visitante.NombreCompleto,
-                    r.IdResidencia,
-                    Cluster = r.Residencia.Cluster.Nombre,
-                    Casa = r.Residencia.Numero,
-                    GuardiaIngreso = r.GuardiaIngreso.NombreCompleto,
-                    r.FechaIngreso
-                })
-                .ToListAsync();
-
-            ViewBag.VisitasAbiertas = visitasAbiertas;
-            return View();
-        }
-
-        // Consulta #12: Vivienda más atrasada en pagos (CORREGIDA - SQLite decimal fix)
+        // Consulta #12: Vivienda más atrasada en pagos
         public async Task<IActionResult> Consulta12()
         {
             var estadosCuenta = await _context.EstadosCuenta
@@ -370,7 +411,7 @@ namespace ARSAN_Web.Controllers
                     .ThenInclude(r => r.Cluster)
                 .Include(e => e.Residencia)
                     .ThenInclude(r => r.Propietario)
-                .ToListAsync(); // Traemos todo a memoria primero para evitar el error de SQLite
+                .ToListAsync();
 
             var resultado = estadosCuenta
                 .OrderByDescending(e => e.SaldoPendiente)
@@ -388,14 +429,14 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #13: Día del mes con mayor recaudación (CORREGIDA - SQLite decimal fix)
+        // Consulta #13: Día del mes con mayor recaudación
         public async Task<IActionResult> Consulta13(int anio)
         {
             if (anio == 0) anio = DateTime.Today.Year;
 
             var recibos = await _context.Recibos
                 .Where(r => r.Fecha.Year == anio)
-                .ToListAsync(); // Traemos todo a memoria primero para evitar el error de SQLite
+                .ToListAsync();
 
             var resultado = recibos
                 .GroupBy(r => r.Fecha.Day)
@@ -448,72 +489,73 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #15: Vehículos no permitidos detectados
-        public async Task<IActionResult> Consulta15(DateTime? fechaIni, DateTime? fechaFin)
+        // Consulta #15: Carros por mes y día
+        public async Task<IActionResult> Consulta15(int? anio, int? mes)
         {
-            if (!fechaIni.HasValue || !fechaFin.HasValue)
-            {
-                fechaIni = DateTime.Today.AddMonths(-1);
-                fechaFin = DateTime.Today;
-            }
+            if (!anio.HasValue) anio = DateTime.Today.Year;
+            if (!mes.HasValue) mes = DateTime.Today.Month;
 
-            var vehiculosDetectados = await _context.RegistrosVisita
-                .Include(r => r.Visitante)
-                .Include(r => r.Residencia)
-                    .ThenInclude(res => res.Cluster)
-                .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
-                         && r.FechaIngreso.Date <= fechaFin.Value.Date
-                         && r.Visitante.Placa != null)
-                .Join(_context.VehiculosNoPermitidos.Where(v => v.Activo),
-                    rv => rv.Visitante.Placa,
-                    vnp => vnp.Placa,
-                    (rv, vnp) => new
-                    {
-                        rv.IdRegistro,
-                        Visitante = rv.Visitante.NombreCompleto,
-                        Placa = rv.Visitante.Placa,
-                        Cluster = rv.Residencia.Cluster.Nombre,
-                        Casa = rv.Residencia.Numero,
-                        rv.FechaIngreso,
-                        Motivo = vnp.Motivo
-                    })
-                .OrderByDescending(x => x.FechaIngreso)
+            var accesos = await _context.AccesosVehiculares
+                .Where(a => a.FechaIngreso.Year == anio.Value
+                         && a.FechaIngreso.Month == mes.Value)
                 .ToListAsync();
 
-            ViewBag.VehiculosDetectados = vehiculosDetectados;
-            ViewBag.FechaIni = fechaIni;
-            ViewBag.FechaFin = fechaFin;
+            var carrosPorDia = accesos
+                .GroupBy(a => a.FechaIngreso.Day)
+                .Select(g => new
+                {
+                    Dia = g.Key,
+                    CantidadCarros = g.Count()
+                })
+                .OrderBy(x => x.Dia)
+                .ToList();
+
+            ViewBag.CarrosPorDia = carrosPorDia;
+            ViewBag.Anio = anio;
+            ViewBag.Mes = mes;
+            ViewBag.TotalCarros = accesos.Count;
+
+            var meses = new[] { "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+            ViewBag.NombreMes = meses[mes.Value];
+
             return View();
         }
 
-        // Consulta #16: Visitantes frecuentes
-        public async Task<IActionResult> Consulta16(DateTime? fechaIni, DateTime? fechaFin, int minVisitas = 2)
+        // Consulta #16: Persona que más visita el condominio
+        public async Task<IActionResult> Consulta16(DateTime? fechaIni, DateTime? fechaFin)
         {
             if (!fechaIni.HasValue || !fechaFin.HasValue)
             {
-                fechaIni = DateTime.Today.AddMonths(-1);
+                fechaIni = DateTime.Today.AddMonths(-3);
                 fechaFin = DateTime.Today;
             }
 
-            var visitantesFrecuentes = await _context.RegistrosVisita
+            var resultado = await _context.RegistrosVisita
                 .Include(r => r.Visitante)
                 .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
                          && r.FechaIngreso.Date <= fechaFin.Value.Date)
-                .GroupBy(r => new { r.Visitante.IdVisitante, r.Visitante.NombreCompleto })
+                .GroupBy(r => new {
+                    r.Visitante.IdVisitante,
+                    r.Visitante.NombreCompleto,
+                    r.Visitante.Dpi,
+                    r.Visitante.Telefono
+                })
                 .Select(g => new
                 {
                     g.Key.IdVisitante,
                     g.Key.NombreCompleto,
-                    TotalVisitas = g.Count()
+                    g.Key.Dpi,
+                    g.Key.Telefono,
+                    TotalVisitas = g.Count(),
+                    UltimaVisita = g.Max(r => r.FechaIngreso)
                 })
-                .Where(x => x.TotalVisitas >= minVisitas)
                 .OrderByDescending(x => x.TotalVisitas)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            ViewBag.VisitantesFrecuentes = visitantesFrecuentes;
+            ViewBag.Resultado = resultado;
             ViewBag.FechaIni = fechaIni;
             ViewBag.FechaFin = fechaFin;
-            ViewBag.MinVisitas = minVisitas;
             return View();
         }
 
@@ -612,29 +654,40 @@ namespace ARSAN_Web.Controllers
             return View();
         }
 
-        // Consulta #20: Bitácora diaria (ingresos y salidas)
+        // Consulta #20: Residencia con más visitas
         public async Task<IActionResult> Consulta20(DateTime? fechaIni, DateTime? fechaFin)
         {
             if (!fechaIni.HasValue || !fechaFin.HasValue)
             {
-                fechaIni = DateTime.Today.AddDays(-7);
+                fechaIni = DateTime.Today.AddMonths(-1);
                 fechaFin = DateTime.Today;
             }
 
-            var bitacora = await _context.RegistrosVisita
+            var resultado = await _context.RegistrosVisita
+                .Include(r => r.Residencia)
+                    .ThenInclude(res => res.Cluster)
+                .Include(r => r.Residencia)
+                    .ThenInclude(res => res.Propietario)
                 .Where(r => r.FechaIngreso.Date >= fechaIni.Value.Date
                          && r.FechaIngreso.Date <= fechaFin.Value.Date)
-                .GroupBy(r => r.FechaIngreso.Date)
+                .GroupBy(r => new {
+                    r.IdResidencia,
+                    Cluster = r.Residencia.Cluster.Nombre,
+                    Casa = r.Residencia.Numero,
+                    Propietario = r.Residencia.Propietario.NombreCompleto
+                })
                 .Select(g => new
                 {
-                    Dia = g.Key,
-                    Ingresos = g.Count(),
-                    Salidas = g.Count(r => r.FechaSalida != null)
+                    g.Key.IdResidencia,
+                    g.Key.Cluster,
+                    g.Key.Casa,
+                    g.Key.Propietario,
+                    TotalVisitas = g.Count()
                 })
-                .OrderBy(x => x.Dia)
-                .ToListAsync();
+                .OrderByDescending(x => x.TotalVisitas)
+                .FirstOrDefaultAsync();
 
-            ViewBag.Bitacora = bitacora;
+            ViewBag.Resultado = resultado;
             ViewBag.FechaIni = fechaIni;
             ViewBag.FechaFin = fechaFin;
             return View();
@@ -769,62 +822,6 @@ namespace ARSAN_Web.Controllers
             ViewBag.Resultado = resultado;
             ViewBag.FechaIni = fechaIni;
             ViewBag.FechaFin = fechaFin;
-            return View();
-        }
-
-        // NUEVAS CONSULTAS ADICIONALES
-
-        // Consulta Extra: Guardia que ha trabajado más de 24 horas
-        public async Task<IActionResult> Consulta09Extra(DateTime? fechaIni, DateTime? fechaFin)
-        {
-            if (!fechaIni.HasValue || !fechaFin.HasValue)
-            {
-                fechaIni = DateTime.Today.AddMonths(-1);
-                fechaFin = DateTime.Today;
-            }
-
-            var turnos = await _context.TurnosGuardia
-                .Include(t => t.Guardia)
-                .Include(t => t.Garita)
-                .Where(t => t.FechaInicio.Date >= fechaIni.Value.Date
-                         && t.FechaInicio.Date <= fechaFin.Value.Date
-                         && t.FechaFin != null)
-                .ToListAsync();
-
-            var guardiasSobretiempo = turnos
-                .Select(t => new
-                {
-                    t.IdGuardia,
-                    Guardia = t.Guardia.NombreCompleto,
-                    Garita = t.Garita.Nombre,
-                    t.FechaInicio,
-                    t.FechaFin,
-                    HorasTrabajadas = (t.FechaFin.Value - t.FechaInicio).TotalHours
-                })
-                .Where(x => x.HorasTrabajadas > 24)
-                .OrderByDescending(x => x.HorasTrabajadas)
-                .ToList();
-
-            ViewBag.GuardiasSobretiempo = guardiasSobretiempo;
-            ViewBag.FechaIni = fechaIni;
-            ViewBag.FechaFin = fechaFin;
-            return View();
-        }
-
-        // Consulta Extra: Guardias por género
-        public async Task<IActionResult> Consulta10Extra()
-        {
-            var guardiasPorGenero = await _context.Guardias
-                .Where(g => g.Activo)
-                .GroupBy(g => g.Genero ?? "No especificado")
-                .Select(g => new
-                {
-                    Genero = g.Key == "M" ? "Masculino" : g.Key == "F" ? "Femenino" : "No especificado",
-                    Cantidad = g.Count()
-                })
-                .ToListAsync();
-
-            ViewBag.GuardiasPorGenero = guardiasPorGenero;
             return View();
         }
     }

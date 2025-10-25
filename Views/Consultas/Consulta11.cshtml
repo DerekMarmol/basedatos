@@ -1,66 +1,84 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 11 - Visitas Abiertas";
+    ViewData["Title"] = "Consulta 11 - Vecino que Más Ingresa/Sale los Domingos";
 }
 
 <div class="container mt-4">
-    <h2>🚪 Consulta #11: Visitas Abiertas (Sin Salida Registrada)</h2>
-    <p class="text-muted">Visitantes que ingresaron pero no han registrado su salida</p>
+    <h2>📅 Consulta #11: Vecino que Más Ingresa y Sale los Domingos</h2>
+    <p class="text-muted">Identifica al residente con mayor actividad los días domingo</p>
 
-    @if (ViewBag.VisitasAbiertas != null && ViewBag.VisitasAbiertas.Count > 0)
-    {
-        <div class="alert alert-warning">
-            <strong>⚠️ Atención:</strong> Hay @ViewBag.VisitasAbiertas.Count visitas sin salida registrada.
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-5">
+                        <label for="fechaIni" class="form-label">Fecha Inicio:</label>
+                        <input type="date" name="fechaIni" id="fechaIni" class="form-control"
+                               value="@ViewBag.FechaIni?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-5">
+                        <label for="fechaFin" class="form-label">Fecha Fin:</label>
+                        <input type="date" name="fechaFin" id="fechaFin" class="form-control"
+                               value="@ViewBag.FechaFin?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Consultar</button>
+                    </div>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-warning">
-                    <tr>
-                        <th>ID Registro</th>
-                        <th>Visitante</th>
-                        <th>Destino</th>
-                        <th>Guardia Ingreso</th>
-                        <th>Fecha/Hora Ingreso</th>
-                        <th>Tiempo Dentro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var visita in ViewBag.VisitasAbiertas)
-                    {
-                        var tiempoDentro = DateTime.Now - visita.FechaIngreso;
-                        <tr>
-                            <td>@visita.IdRegistro</td>
-                            <td><strong>@visita.Visitante</strong></td>
-                            <td>
-                                <strong>@visita.Cluster</strong><br />
-                                <span class="badge bg-primary">Casa #@visita.Casa</span>
-                            </td>
-                            <td>@visita.GuardiaIngreso</td>
-                            <td>@visita.FechaIngreso.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>
-                                @if (tiempoDentro.TotalHours >= 24)
-                                {
-                                    <span class="badge bg-danger">@tiempoDentro.Days días</span>
-                                }
-                                else if (tiempoDentro.TotalHours >= 12)
-                                {
-                                    <span class="badge bg-warning text-dark">@((int)tiempoDentro.TotalHours) horas</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-info">@((int)tiempoDentro.TotalHours) horas</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    @if (ViewBag.Resultado != null)
+    {
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">🏆 Vecino Más Activo los Domingos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Propietario:</th>
+                                <td><h5 class="mb-0">@ViewBag.Resultado.Propietario</h5></td>
+                            </tr>
+                            <tr>
+                                <th>Ubicación:</th>
+                                <td>
+                                    <strong>@ViewBag.Resultado.Cluster</strong>
+                                    <span class="badge bg-primary fs-6 ms-2">Casa #@ViewBag.Resultado.Casa</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total de Movimientos</h6>
+                                <h1 class="display-3 text-primary mb-0">@ViewBag.Resultado.TotalMovimientos</h1>
+                                <p class="text-muted mt-2">
+                                    ingresos/salidas<br>
+                                    <small>en @ViewBag.Resultado.Domingos domingos diferentes</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <h6>📊 Análisis:</h6>
+                    <ul class="mb-0">
+                        <li>Promedio de movimientos por domingo: <strong>@((ViewBag.Resultado.TotalMovimientos / (double)ViewBag.Resultado.Domingos).ToString("F2"))</strong></li>
+                        <li>Período analizado: @ViewBag.FechaIni?.ToString("dd/MM/yyyy") - @ViewBag.FechaFin?.ToString("dd/MM/yyyy")</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     }
     else
     {
-        <div class="alert alert-success">
-            <strong>✓ Todo en orden.</strong> No hay visitas abiertas sin salida registrada.
+        <div class="alert alert-warning">
+            No se encontraron movimientos de residentes los días domingo en el período seleccionado.
         </div>
     }
 

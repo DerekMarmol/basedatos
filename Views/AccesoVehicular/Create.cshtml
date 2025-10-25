@@ -124,9 +124,16 @@
     }
 
     <script>
-        // Script para convertir la placa a mayúsculas automáticamente
         document.querySelector('input[name="Placa"]').addEventListener('input', function(e) {
             e.target.value = e.target.value.toUpperCase();
         });
+
+        var esNoPermitido = await _context.VehiculosNoPermitidos
+            .AnyAsync(v => v.Placa == accesoVehicular.Placa && v.Activo);
+
+        if (esNoPermitido)
+        {
+            ModelState.AddModelError("Placa", "⚠️ ALERTA: Este vehículo está en la lista de NO PERMITIDOS.");
+        }
     </script>
 }

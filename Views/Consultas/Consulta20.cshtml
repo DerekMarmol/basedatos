@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Consulta 20 - Bitácora Diaria";
+    ViewData["Title"] = "Consulta 20 - Residencia con Más Visitas";
 }
 
 <div class="container mt-4">
-    <h2>📅 Consulta #20: Bitácora Diaria de Ingresos y Salidas</h2>
-    <p class="text-muted">Registro diario de movimientos de visitas</p>
+    <h2>🏠 Consulta #20: Residencia que Más Visitas Recibe</h2>
+    <p class="text-muted">Identifica la casa con mayor cantidad de visitas en un período de tiempo</p>
 
     <div class="card mb-4">
         <div class="card-body">
@@ -28,47 +28,95 @@
         </div>
     </div>
 
-    @if (ViewBag.Bitacora != null && ViewBag.Bitacora.Count > 0)
+    @if (ViewBag.Resultado != null)
     {
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Ingresos</th>
-                        <th>Salidas</th>
-                        <th>Visitas Abiertas</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var dia in ViewBag.Bitacora)
-                    {
-                        var abiertas = dia.Ingresos - dia.Salidas;
-                        <tr>
-                            <td><strong>@dia.Dia.ToString("dd/MM/yyyy")</strong></td>
-                            <td><span class="badge bg-success">↓ @dia.Ingresos</span></td>
-                            <td><span class="badge bg-info">↑ @dia.Salidas</span></td>
-                            <td><span class="badge bg-warning text-dark">@abiertas</span></td>
-                            <td>
-                                @if (abiertas == 0)
-                                {
-                                    <span class="text-success">✓ Cerrado</span>
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">🏆 Residencia Más Visitada</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Cluster:</th>
+                                <td><h5 class="mb-0">@ViewBag.Resultado.Cluster</h5></td>
+                            </tr>
+                            <tr>
+                                <th>Casa #:</th>
+                                <td><span class="badge bg-primary" style="font-size: 2rem;">@ViewBag.Resultado.Casa</span></td>
+                            </tr>
+                            <tr>
+                                <th>Propietario:</th>
+                                <td><strong>@ViewBag.Resultado.Propietario</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted">Total de Visitas</h6>
+                                <h1 class="display-1 text-success mb-0">@ViewBag.Resultado.TotalVisitas</h1>
+                                <p class="text-muted mt-3">
+                                    visitas registradas
+                                </p>
+                                @{
+                                    var diasPeriodo = (ViewBag.FechaFin - ViewBag.FechaIni).Days + 1;
+                                    var promedioDiario = ViewBag.Resultado.TotalVisitas / (double)diasPeriodo;
                                 }
-                                else
+                                <hr>
+                                <p class="mb-0">
+                                    <strong>Promedio:</strong> @promedioDiario.ToString("F2") visitas/día
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6>📊 Análisis del Período:</h6>
+                            <ul class="mb-0">
+                                <li>Período analizado: @ViewBag.FechaIni?.ToString("dd/MM/yyyy") - @ViewBag.FechaFin?.ToString("dd/MM/yyyy")</li>
+                                <li>Duración: <strong>@diasPeriodo días</strong></li>
+                                <li>Promedio diario: <strong>@promedioDiario.ToString("F2") visitas/día</strong></li>
+                                @if (ViewBag.Resultado.TotalVisitas >= 100)
                                 {
-                                    <span class="text-warning">⚠ Pendientes</span>
+                                    <li class="text-warning mt-2">
+                                        <strong>⚠️ Alto tráfico de visitas</strong> - Esta residencia recibe un volumen significativo de visitantes.
+                                    </li>
                                 }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                else if (ViewBag.Resultado.TotalVisitas >= 50)
+                                {
+                                    <li class="text-info mt-2">
+                                        <strong>Nivel de visitas moderado-alto</strong>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                @if (ViewBag.Resultado.TotalVisitas >= 50)
+                {
+                    <div class="alert alert-warning mt-3">
+                        <h6>💡 Recomendaciones:</h6>
+                        <ul class="mb-0">
+                            <li>Considerar verificar el tipo de actividad que genera tantas visitas</li>
+                            <li>Asegurar que la residencia cumple con las normas del condominio</li>
+                            <li>Evaluar si se requiere autorización especial por el volumen de visitas</li>
+                        </ul>
+                    </div>
+                }
+            </div>
         </div>
     }
     else
     {
-        <div class="alert alert-warning">No hay movimientos registrados en el período.</div>
+        <div class="alert alert-warning">
+            No se encontraron visitas registradas en el período seleccionado.
+        </div>
     }
 
     <div class="mt-3">
