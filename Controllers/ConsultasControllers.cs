@@ -59,7 +59,6 @@ namespace ARSAN_Web.Controllers
                 fechaFin = DateTime.Today;
             }
 
-            // Obtener accesos vehiculares de visitantes
             var accesos = await _context.AccesosVehiculares
                 .Include(a => a.Visitante)
                 .Where(a => a.FechaIngreso.Date >= fechaIni.Value.Date
@@ -67,7 +66,6 @@ namespace ARSAN_Web.Controllers
                          && a.TipoAcceso == "Visitante")
                 .ToListAsync();
 
-            // Agrupar por hora
             var vehiculosPorHora = accesos
                 .GroupBy(a => a.HoraIngreso.Hours)
                 .Select(g => new

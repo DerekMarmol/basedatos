@@ -55,13 +55,13 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-4">
-                                <label asp-for="IdCasa" class="form-label fw-bold">
+                                <label asp-for="IdResidencia" class="form-label fw-bold">
                                     <i class="bi bi-house-door me-1"></i>Residencia de Destino *
                                 </label>
-                                <select asp-for="IdCasa" class="form-select form-select-lg" asp-items="ViewBag.IdCasa">
+                                <select asp-for="IdResidencia" class="form-select form-select-lg" asp-items="ViewBag.IdResidencia">
                                     <option value="">-- Seleccione una residencia --</option>
                                 </select>
-                                <span asp-validation-for="IdCasa" class="text-danger"></span>
+                                <span asp-validation-for="IdResidencia" class="text-danger"></span>
                                 <div class="form-text">Casa o residencia que visitará</div>
                             </div>
 
@@ -84,19 +84,25 @@
                         </h5>
 
                         <div class="row">
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-4 mb-4">
+                                <label asp-for="IdGarita" class="form-label fw-bold">
+                                    <i class="bi bi-building me-1"></i>Garita *
+                                </label>
+                                <select asp-for="IdGarita" class="form-select form-select-lg" asp-items="ViewBag.IdGarita">
+                                    <option value="">-- Seleccione una garita --</option>
+                                </select>
+                                <span asp-validation-for="IdGarita" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-4">
                                 <label asp-for="FechaIngreso" class="form-label fw-bold">
                                     <i class="bi bi-calendar-check me-1"></i>Fecha y Hora de Ingreso *
                                 </label>
                                 <input asp-for="FechaIngreso" type="datetime-local" class="form-control form-control-lg" />
                                 <span asp-validation-for="FechaIngreso" class="text-danger"></span>
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Por defecto se establece la fecha y hora actual
-                                </div>
                             </div>
 
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-4 mb-4">
                                 <label asp-for="IdGuardiaIngreso" class="form-label fw-bold">
                                     <i class="bi bi-shield-check me-1"></i>Guardia de Ingreso *
                                 </label>
@@ -104,7 +110,6 @@
                                     <option value="">-- Seleccione el guardia --</option>
                                 </select>
                                 <span asp-validation-for="IdGuardiaIngreso" class="text-danger"></span>
-                                <div class="form-text">Guardia que registra el ingreso</div>
                             </div>
                         </div>
 
@@ -143,8 +148,6 @@
                             </div>
                         </div>
 
-                        <hr class="my-4">
-
                         <!-- Botones -->
                         <div class="d-flex justify-content-between align-items-center">
                             <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
@@ -181,12 +184,10 @@
 
     <script>
         $(document).ready(function() {
-            // Establecer fecha y hora actual por defecto
             var ahora = new Date();
             ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
             $('#FechaIngreso').val(ahora.toISOString().slice(0, 16));
 
-            // Validar que la fecha de salida sea posterior a la de ingreso
             $('form').submit(function(e) {
                 var fechaIngreso = new Date($('#FechaIngreso').val());
                 var fechaSalida = $('#FechaSalida').val();
@@ -201,12 +202,6 @@
                         return false;
                     }
                 }
-            });
-
-            // Mejorar búsqueda en select de visitantes
-            $('#IdVisitante').select2({
-                placeholder: '-- Buscar visitante --',
-                allowClear: true
             });
         });
     </script>

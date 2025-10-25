@@ -23,11 +23,10 @@ namespace ARSAN_Web.Controllers
         public async Task<IActionResult> Index()
         {
             var conceptos = await _context.ConceptosPago
-                .OrderBy(c => c.Activo ? 0 : 1) // Activos primero
+                .OrderBy(c => c.Activo ? 0 : 1) 
                 .ThenBy(c => c.Codigo)
                 .ToListAsync();
 
-            // Calcular total de cuota mensual
             var totalCuotaMensual = await _context.ConceptosPago
                 .Where(c => c.Activo)
                 .SumAsync(c => c.Monto);
@@ -67,7 +66,6 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdConceptoPago,Codigo,Nombre,Descripcion,Monto,Activo")] ConceptoPago conceptoPago)
         {
-            // Validar si ya existe un concepto con ese código
             var conceptoExistente = await _context.ConceptosPago
                 .AnyAsync(c => c.Codigo == conceptoPago.Codigo);
 
@@ -76,7 +74,6 @@ namespace ARSAN_Web.Controllers
                 ModelState.AddModelError("Codigo", "Ya existe un concepto de pago con este código.");
             }
 
-            // Validar que el monto sea positivo
             if (conceptoPago.Monto <= 0)
             {
                 ModelState.AddModelError("Monto", "El monto debe ser mayor a 0.");
@@ -120,7 +117,6 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Validar si ya existe otro concepto con ese código
             var conceptoExistente = await _context.ConceptosPago
                 .AnyAsync(c => c.Codigo == conceptoPago.Codigo && c.IdConceptoPago != id);
 
@@ -129,7 +125,6 @@ namespace ARSAN_Web.Controllers
                 ModelState.AddModelError("Codigo", "Ya existe otro concepto de pago con este código.");
             }
 
-            // Validar que el monto sea positivo
             if (conceptoPago.Monto <= 0)
             {
                 ModelState.AddModelError("Monto", "El monto debe ser mayor a 0.");
@@ -176,7 +171,6 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Verificar si tiene detalles de recibo asociados
             var tieneDetalles = await _context.DetallesRecibo
                 .AnyAsync(d => d.IdConceptoPago == id);
 

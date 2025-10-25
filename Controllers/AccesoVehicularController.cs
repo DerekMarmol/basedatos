@@ -34,7 +34,6 @@ namespace ARSAN_Web.Controllers
                 .Include(a => a.Visitante)
                 .AsQueryable();
 
-            // Aplicar filtros
             switch (filtro.ToLower())
             {
                 case "dentro":
@@ -49,10 +48,8 @@ namespace ARSAN_Web.Controllers
                     break;
             }
 
-            // Traer datos a memoria primero (ToListAsync)
             var accesosTemp = await query.ToListAsync();
 
-            // Ordenar en memoria (LINQ to Objects) para evitar el error de SQLite con TimeSpan
             var accesos = accesosTemp
                 .OrderByDescending(a => a.FechaIngreso)
                 .ThenByDescending(a => a.HoraIngreso)
@@ -95,7 +92,6 @@ namespace ARSAN_Web.Controllers
         // GET: AccesoVehicular/Create
         public IActionResult Create()
         {
-            // Obtener solo garitas activas con información completa
             var garitas = _context.Garitas
                 .Include(g => g.Cluster)
                     .ThenInclude(c => c.Residencial)
@@ -107,7 +103,6 @@ namespace ARSAN_Web.Controllers
                 })
                 .ToList();
 
-            // Obtener solo guardias activos que están en turno actualmente
             var guardias = _context.Guardias
                 .Where(g => g.Activo)
                 .Select(g => new
@@ -117,7 +112,6 @@ namespace ARSAN_Web.Controllers
                 })
                 .ToList();
 
-            // Obtener vehículos de residentes con información del propietario
             var vehiculos = _context.Vehiculos
                 .Include(v => v.Residencia)
                     .ThenInclude(r => r.Propietario)
@@ -128,7 +122,6 @@ namespace ARSAN_Web.Controllers
                 })
                 .ToList();
 
-            // Obtener visitantes
             var visitantes = _context.Visitantes
                 .Select(v => new
                 {
@@ -142,7 +135,6 @@ namespace ARSAN_Web.Controllers
             ViewData["IdVehiculo"] = new SelectList(vehiculos, "IdVehiculo", "Texto");
             ViewData["IdVisitante"] = new SelectList(visitantes, "IdVisitante", "Texto");
 
-            // Establecer valores por defecto
             var modelo = new AccesoVehicular
             {
                 FechaIngreso = DateTime.Now.Date,
@@ -157,7 +149,6 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdAcceso,IdVehiculo,IdVisitante,Placa,IdGarita,FechaIngreso,HoraIngreso,IdGuardiaIngreso,TipoAcceso,Observaciones")] AccesoVehicular accesoVehicular)
         {
-            // Remover validaciones de navegación y campos opcionales
             ModelState.Remove("Vehiculo");
             ModelState.Remove("Visitante");
             ModelState.Remove("Garita");
@@ -167,13 +158,11 @@ namespace ARSAN_Web.Controllers
             ModelState.Remove("HoraSalida");
             ModelState.Remove("IdGuardiaSalida");
 
-            // Validación: Al menos uno debe estar presente (vehículo registrado o visitante)
             if (!accesoVehicular.IdVehiculo.HasValue && !accesoVehicular.IdVisitante.HasValue && string.IsNullOrEmpty(accesoVehicular.Placa))
             {
                 ModelState.AddModelError("Placa", "Debe ingresar al menos una placa o seleccionar un vehículo/visitante.");
             }
 
-            // Si hay vehículo registrado, obtener su placa automáticamente
             if (accesoVehicular.IdVehiculo.HasValue)
             {
                 var vehiculo = await _context.Vehiculos.FindAsync(accesoVehicular.IdVehiculo.Value);
@@ -183,7 +172,6 @@ namespace ARSAN_Web.Controllers
                 }
             }
 
-            // Validación: Verificar que no haya un acceso abierto (sin salida) con la misma placa
             var accesoAbierto = await _context.AccesosVehiculares
                 .Where(a => a.Placa == accesoVehicular.Placa && a.FechaSalida == null)
                 .AnyAsync();
@@ -195,7 +183,6 @@ namespace ARSAN_Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // No registrar salida al crear
                 accesoVehicular.FechaSalida = null;
                 accesoVehicular.HoraSalida = null;
                 accesoVehicular.IdGuardiaSalida = null;
@@ -205,7 +192,6 @@ namespace ARSAN_Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Recargar datos para dropdowns
             var garitas = _context.Garitas
                 .Include(g => g.Cluster)
                     .ThenInclude(c => c.Residencial)
@@ -272,14 +258,12 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Verificar que no tenga salida registrada
             if (accesoVehicular.FechaSalida.HasValue)
             {
                 TempData["Error"] = "Este acceso ya tiene una salida registrada.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Obtener guardias activos
             var guardias = _context.Guardias
                 .Where(g => g.Activo)
                 .Select(g => new
@@ -291,7 +275,6 @@ namespace ARSAN_Web.Controllers
 
             ViewData["IdGuardiaSalida"] = new SelectList(guardias, "IdGuardia", "Texto");
 
-            // Establecer fecha y hora actual por defecto
             accesoVehicular.FechaSalida = DateTime.Now.Date;
             accesoVehicular.HoraSalida = DateTime.Now.TimeOfDay;
 
@@ -310,7 +293,6 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Validar que la salida sea posterior al ingreso
             var fechaHoraSalida = FechaSalida.Date + HoraSalida;
             var fechaHoraIngreso = accesoVehicular.FechaIngreso.Date + accesoVehicular.HoraIngreso;
 
@@ -339,7 +321,6 @@ namespace ARSAN_Web.Controllers
                 return View(accesoVehicular);
             }
 
-            // Registrar la salida
             accesoVehicular.FechaSalida = FechaSalida;
             accesoVehicular.HoraSalida = HoraSalida;
             accesoVehicular.IdGuardiaSalida = IdGuardiaSalida;

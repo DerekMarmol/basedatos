@@ -116,7 +116,6 @@ namespace ARSAN_Web.Controllers
         {
             var anioConsulta = anio ?? DateTime.Now.Year;
 
-            // Obtener la residencia con sus relaciones
             var residencia = await _context.Residencias
                 .Include(r => r.Cluster)
                 .Include(r => r.Propietario)
@@ -128,20 +127,17 @@ namespace ARSAN_Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Obtener todos los pagos de mantenimiento del año
             var pagosMantenimiento = await _context.PagosMantenimiento
                 .Where(p => p.IdResidencia == id && p.FechaPago.Year == anioConsulta)
                 .OrderByDescending(p => p.FechaPago)
                 .ToListAsync();
 
-            // Obtener todas las multas (pendientes y pagadas) del año
             var multas = await _context.Multas
                 .Include(m => m.TipoMulta)
                 .Where(m => m.IdResidencia == id && m.Fecha.Year == anioConsulta)
                 .OrderByDescending(m => m.Fecha)
                 .ToListAsync();
 
-            // Calcular estadísticas
             var multasPendientes = multas.Where(m => !m.Pagada).ToList();
             var multasPagadas = multas.Where(m => m.Pagada).ToList();
 
@@ -149,39 +145,31 @@ namespace ARSAN_Web.Controllers
             var totalMultasPendientes = multasPendientes.Sum(m => m.Monto);
             var totalMultasPagadas = multasPagadas.Sum(m => m.Monto);
 
-            // Calcular meses que debe (asumiendo cuota mensual)
-            // Por defecto, asumimos que debe pagar todos los meses del año hasta el mes actual
             var mesActual = DateTime.Now.Month;
             var mesesDeberíaPagar = anioConsulta == DateTime.Now.Year ? mesActual : 12;
             var mesesPagados = pagosMantenimiento.Count;
             var mesesDebe = Math.Max(0, mesesDeberíaPagar - mesesPagados);
 
-            // Obtener el monto de cuota mensual del concepto de pago
             var conceptoPago = await _context.ConceptosPago
                 .FirstOrDefaultAsync(c => (c.Codigo == "MANT" || c.Nombre.Contains("Mantenimiento")) && c.Activo);
             var cuotaMensual = conceptoPago?.Monto ?? 0;
 
             var montoDebeMantenimiento = mesesDebe * cuotaMensual;
 
-            // Calcular saldo total pendiente
             var saldoTotalPendiente = montoDebeMantenimiento + totalMultasPendientes;
 
-            // Determinar si está moroso (más de 10 días sin pagar desde el inicio del mes)
             var ultimoPago = pagosMantenimiento.OrderByDescending(p => p.FechaPago).FirstOrDefault();
             var diasSinPagar = 0;
             var estaMoroso = false;
 
             if (ultimoPago != null)
             {
-                // Calcular días desde el último pago
                 diasSinPagar = (DateTime.Now - ultimoPago.FechaPago).Days;
 
-                // Si han pasado más de 40 días (más de un mes + 10 días de gracia), está moroso
                 estaMoroso = diasSinPagar > 40;
             }
             else
             {
-                // Si nunca ha pagado y ya pasaron 10 días del primer mes del año
                 if (DateTime.Now.Year == anioConsulta && DateTime.Now.Day > 10)
                 {
                     estaMoroso = true;
@@ -189,40 +177,32 @@ namespace ARSAN_Web.Controllers
                 }
             }
 
-            // Calcular estado: "Al día" o "Moroso"
             var estado = estaMoroso ? "Moroso" : (saldoTotalPendiente > 0 ? "Pendiente" : "Al día");
 
-            // Crear el ViewModel
             var viewModel = new EstadoCuentaViewModel
             {
-                // Información de la residencia
                 Residencia = residencia,
 
-                // Pagos y multas
                 PagosMantenimiento = pagosMantenimiento,
                 MultasPendientes = multasPendientes,
                 MultasPagadas = multasPagadas,
 
-                // Estadísticas financieras
                 TotalPagosMantenimiento = totalPagosMantenimiento,
                 TotalMultasPendientes = totalMultasPendientes,
                 TotalMultasPagadas = totalMultasPagadas,
                 CuotaMensual = cuotaMensual,
 
-                // Información de morosidad
                 MesesDeberíaPagar = mesesDeberíaPagar,
                 MesesPagados = mesesPagados,
                 MesesDebe = mesesDebe,
                 MontoDebeMantenimiento = montoDebeMantenimiento,
                 SaldoTotalPendiente = saldoTotalPendiente,
 
-                // Estado
                 EstaMoroso = estaMoroso,
                 DiaSinPagar = diasSinPagar,
                 Estado = estado,
                 UltimoPago = ultimoPago,
 
-                // Año de consulta
                 AnioConsulta = anioConsulta
             };
 
@@ -234,7 +214,6 @@ namespace ARSAN_Web.Controllers
         {
             var anioConsulta = anio ?? DateTime.Now.Year;
 
-            // Obtener el propietario
             var propietario = await _context.Propietarios.FindAsync(id);
             if (propietario == null)
             {
@@ -242,7 +221,6 @@ namespace ARSAN_Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Obtener todas las residencias del propietario
             var residencias = await _context.Residencias
                 .Include(r => r.Cluster)
                 .Where(r => r.IdPropietario == id)
@@ -256,7 +234,6 @@ namespace ARSAN_Web.Controllers
 
             var estadosCuenta = new List<EstadoCuentaViewModel>();
 
-            // Generar estado de cuenta para cada residencia
             foreach (var residencia in residencias)
             {
                 var pagosMantenimiento = await _context.PagosMantenimiento

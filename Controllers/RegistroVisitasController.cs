@@ -22,7 +22,13 @@ namespace ARSAN_Web.Controllers
         // GET: RegistroVisita
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.RegistrosVisita.Include(r => r.Garita).Include(r => r.GuardiaIngreso).Include(r => r.GuardiaSalida).Include(r => r.Residencia).Include(r => r.Visitante);
+            var applicationDbContext = _context.RegistrosVisita
+                .Include(r => r.Garita)
+                .Include(r => r.GuardiaIngreso)
+                .Include(r => r.GuardiaSalida)
+                .Include(r => r.Residencia)
+                    .ThenInclude(res => res.Cluster)
+                .Include(r => r.Visitante);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -39,8 +45,10 @@ namespace ARSAN_Web.Controllers
                 .Include(r => r.GuardiaIngreso)
                 .Include(r => r.GuardiaSalida)
                 .Include(r => r.Residencia)
+                    .ThenInclude(res => res.Cluster)
                 .Include(r => r.Visitante)
                 .FirstOrDefaultAsync(m => m.IdRegistro == id);
+
             if (registroVisita == null)
             {
                 return NotFound();
@@ -52,32 +60,67 @@ namespace ARSAN_Web.Controllers
         // GET: RegistroVisita/Create
         public IActionResult Create()
         {
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre");
-            ViewData["IdGuardiaIngreso"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi");
-            ViewData["IdGuardiaSalida"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi");
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado");
-            ViewData["IdVisitante"] = new SelectList(_context.Visitantes, "IdVisitante", "NombreCompleto");
-            return View();
+            try
+            {
+                var garitas = _context.Garitas.ToList();
+                ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Nombre");
+
+                var guardias = _context.Guardias.Where(g => g.Activo).ToList();
+                ViewData["IdGuardiaIngreso"] = new SelectList(guardias, "IdGuardia", "NombreCompleto");
+                ViewData["IdGuardiaSalida"] = new SelectList(guardias, "IdGuardia", "NombreCompleto");
+
+                var residencias = _context.Residencias
+                    .Include(r => r.Cluster)
+                    .Select(r => new
+                    {
+                        r.IdResidencia,
+                        Descripcion = "Casa " + r.Numero + " - " + r.Cluster.Nombre
+                    })
+                    .ToList();
+
+                ViewData["IdResidencia"] = new SelectList(residencias, "IdResidencia", "Descripcion");
+
+                var visitantes = _context.Visitantes.ToList();
+                ViewData["IdVisitante"] = new SelectList(visitantes, "IdVisitante", "NombreCompleto");
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en Create GET: {ex.Message}");
+                TempData["ErrorMessage"] = "Error al cargar el formulario. Por favor, contacte al administrador.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: RegistroVisita/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdRegistro,IdVisitante,IdCasa,IdResidencia,FechaIngreso,FechaSalida,IdGuardiaIngreso,IdGuardiaSalida,Motivo,IdGarita")] RegistroVisita registroVisita)
+        public async Task<IActionResult> Create([Bind("IdRegistro,IdVisitante,IdResidencia,FechaIngreso,FechaSalida,IdGuardiaIngreso,IdGuardiaSalida,Motivo,IdGarita")] RegistroVisita registroVisita)
         {
+            ModelState.Remove("Garita");
+            ModelState.Remove("GuardiaIngreso");
+            ModelState.Remove("GuardiaSalida");
+            ModelState.Remove("Residencia");
+            ModelState.Remove("Visitante");
+
             if (ModelState.IsValid)
             {
-                _context.Add(registroVisita);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(registroVisita);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Visita registrada exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al guardar: {ex.Message}");
+                    ModelState.AddModelError("", "Error al guardar el registro. Por favor, intente nuevamente.");
+                }
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", registroVisita.IdGarita);
-            ViewData["IdGuardiaIngreso"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaIngreso);
-            ViewData["IdGuardiaSalida"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaSalida);
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", registroVisita.IdResidencia);
-            ViewData["IdVisitante"] = new SelectList(_context.Visitantes, "IdVisitante", "NombreCompleto", registroVisita.IdVisitante);
+
+            RecargarDropdowns(registroVisita);
             return View(registroVisita);
         }
 
@@ -94,25 +137,26 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", registroVisita.IdGarita);
-            ViewData["IdGuardiaIngreso"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaIngreso);
-            ViewData["IdGuardiaSalida"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaSalida);
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", registroVisita.IdResidencia);
-            ViewData["IdVisitante"] = new SelectList(_context.Visitantes, "IdVisitante", "NombreCompleto", registroVisita.IdVisitante);
+
+            RecargarDropdowns(registroVisita);
             return View(registroVisita);
         }
 
         // POST: RegistroVisita/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdRegistro,IdVisitante,IdCasa,IdResidencia,FechaIngreso,FechaSalida,IdGuardiaIngreso,IdGuardiaSalida,Motivo,IdGarita")] RegistroVisita registroVisita)
+        public async Task<IActionResult> Edit(int id, [Bind("IdRegistro,IdVisitante,IdResidencia,FechaIngreso,FechaSalida,IdGuardiaIngreso,IdGuardiaSalida,Motivo,IdGarita")] RegistroVisita registroVisita)
         {
             if (id != registroVisita.IdRegistro)
             {
                 return NotFound();
             }
+
+            ModelState.Remove("Garita");
+            ModelState.Remove("GuardiaIngreso");
+            ModelState.Remove("GuardiaSalida");
+            ModelState.Remove("Residencia");
+            ModelState.Remove("Visitante");
 
             if (ModelState.IsValid)
             {
@@ -120,6 +164,8 @@ namespace ARSAN_Web.Controllers
                 {
                     _context.Update(registroVisita);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Visita actualizada exitosamente.";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -132,13 +178,14 @@ namespace ARSAN_Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al actualizar: {ex.Message}");
+                    ModelState.AddModelError("", "Error al actualizar el registro.");
+                }
             }
-            ViewData["IdGarita"] = new SelectList(_context.Garitas, "IdGarita", "Nombre", registroVisita.IdGarita);
-            ViewData["IdGuardiaIngreso"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaIngreso);
-            ViewData["IdGuardiaSalida"] = new SelectList(_context.Guardias, "IdGuardia", "Dpi", registroVisita.IdGuardiaSalida);
-            ViewData["IdResidencia"] = new SelectList(_context.Residencias, "IdResidencia", "Estado", registroVisita.IdResidencia);
-            ViewData["IdVisitante"] = new SelectList(_context.Visitantes, "IdVisitante", "NombreCompleto", registroVisita.IdVisitante);
+
+            RecargarDropdowns(registroVisita);
             return View(registroVisita);
         }
 
@@ -155,8 +202,10 @@ namespace ARSAN_Web.Controllers
                 .Include(r => r.GuardiaIngreso)
                 .Include(r => r.GuardiaSalida)
                 .Include(r => r.Residencia)
+                    .ThenInclude(res => res.Cluster)
                 .Include(r => r.Visitante)
                 .FirstOrDefaultAsync(m => m.IdRegistro == id);
+
             if (registroVisita == null)
             {
                 return NotFound();
@@ -170,19 +219,60 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var registroVisita = await _context.RegistrosVisita.FindAsync(id);
-            if (registroVisita != null)
+            try
             {
-                _context.RegistrosVisita.Remove(registroVisita);
+                var registroVisita = await _context.RegistrosVisita.FindAsync(id);
+                if (registroVisita != null)
+                {
+                    _context.RegistrosVisita.Remove(registroVisita);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Registro eliminado exitosamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al eliminar: {ex.Message}");
+                TempData["ErrorMessage"] = "Error al eliminar el registro.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool RegistroVisitaExists(int id)
         {
             return _context.RegistrosVisita.Any(e => e.IdRegistro == id);
+        }
+
+        private void RecargarDropdowns(RegistroVisita? registroVisita = null)
+        {
+            var garitas = _context.Garitas.ToList();
+            var guardias = _context.Guardias.Where(g => g.Activo).ToList();
+            var residencias = _context.Residencias
+                .Include(r => r.Cluster)
+                .Select(r => new
+                {
+                    r.IdResidencia,
+                    Descripcion = "Casa " + r.Numero + " - " + r.Cluster.Nombre
+                })
+                .ToList();
+            var visitantes = _context.Visitantes.ToList();
+
+            if (registroVisita != null)
+            {
+                ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Nombre", registroVisita.IdGarita);
+                ViewData["IdGuardiaIngreso"] = new SelectList(guardias, "IdGuardia", "NombreCompleto", registroVisita.IdGuardiaIngreso);
+                ViewData["IdGuardiaSalida"] = new SelectList(guardias, "IdGuardia", "NombreCompleto", registroVisita.IdGuardiaSalida);
+                ViewData["IdResidencia"] = new SelectList(residencias, "IdResidencia", "Descripcion", registroVisita.IdResidencia);
+                ViewData["IdVisitante"] = new SelectList(visitantes, "IdVisitante", "NombreCompleto", registroVisita.IdVisitante);
+            }
+            else
+            {
+                ViewData["IdGarita"] = new SelectList(garitas, "IdGarita", "Nombre");
+                ViewData["IdGuardiaIngreso"] = new SelectList(guardias, "IdGuardia", "NombreCompleto");
+                ViewData["IdGuardiaSalida"] = new SelectList(guardias, "IdGuardia", "NombreCompleto");
+                ViewData["IdResidencia"] = new SelectList(residencias, "IdResidencia", "Descripcion");
+                ViewData["IdVisitante"] = new SelectList(visitantes, "IdVisitante", "NombreCompleto");
+            }
         }
     }
 }

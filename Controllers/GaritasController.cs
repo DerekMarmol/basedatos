@@ -25,7 +25,7 @@ namespace ARSAN_Web.Controllers
             var garitas = await _context.Garitas
                 .Include(g => g.Cluster)
                     .ThenInclude(c => c.Residencial)
-                .OrderBy(g => g.Activa ? 0 : 1) // Activas primero
+                .OrderBy(g => g.Activa ? 0 : 1) 
                 .ThenBy(g => g.Nombre)
                 .ToListAsync();
 
@@ -58,7 +58,6 @@ namespace ARSAN_Web.Controllers
         // GET: Garitas/Create
         public IActionResult Create()
         {
-            // Obtener clusters con su residencial para mostrar información completa
             var clusters = _context.Clusters
                 .Include(c => c.Residencial)
                 .Select(c => new
@@ -77,11 +76,9 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdGarita,Nombre,IdCluster,Ubicacion,Activa")] Garita garita)
         {
-            // Remover validación de navegación
             ModelState.Remove("Cluster");
             ModelState.Remove("Turnos");
 
-            // Validar que no exista una garita con el mismo nombre
             var garitaExistente = await _context.Garitas
                 .AnyAsync(g => g.Nombre == garita.Nombre);
 
@@ -147,11 +144,9 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Remover validación de navegación
             ModelState.Remove("Cluster");
             ModelState.Remove("Turnos");
 
-            // Validar que no exista otra garita con el mismo nombre
             var garitaExistente = await _context.Garitas
                 .AnyAsync(g => g.Nombre == garita.Nombre && g.IdGarita != id);
 
@@ -212,7 +207,6 @@ namespace ARSAN_Web.Controllers
                 return NotFound();
             }
 
-            // Verificar si tiene turnos asignados
             var tieneTurnos = await _context.TurnosGuardia
                 .AnyAsync(t => t.IdGarita == id);
 

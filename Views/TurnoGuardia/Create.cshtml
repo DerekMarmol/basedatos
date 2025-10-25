@@ -133,12 +133,10 @@
 
     <script>
         $(document).ready(function() {
-            // Establecer fecha/hora actual como inicio por defecto
             var ahora = new Date();
             ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
             $('#FechaInicio').val(ahora.toISOString().slice(0, 16));
 
-            // Validar fechas
             $('form').submit(function(e) {
                 var fechaInicio = new Date($('#FechaInicio').val());
                 var fechaFin = new Date($('#FechaFin').val());

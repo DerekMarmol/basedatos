@@ -24,7 +24,7 @@ namespace ARSAN_Web.Controllers
         {
             var guardias = await _context.Guardias
                 .Include(g => g.Residencial)
-                .OrderBy(g => g.Activo ? 0 : 1) // Activos primero
+                .OrderBy(g => g.Activo ? 0 : 1) 
                 .ThenBy(g => g.NombreCompleto)
                 .ToListAsync();
             return View(guardias);
@@ -61,13 +61,11 @@ namespace ARSAN_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdGuardia,NombreCompleto,Dpi,Telefono,FechaContratacion,Turno,Activo,IdResidencial,Genero")] Guardia guardia)
         {
-            // Remover validación de navegación
             ModelState.Remove("Residencial");
             ModelState.Remove("Turnos");
             ModelState.Remove("AccesosIngreso");
             ModelState.Remove("AccesosSalida");
 
-            // Validar si ya existe un guardia con ese DPI
             var guardiaExistente = await _context.Guardias
                 .AnyAsync(g => g.Dpi == guardia.Dpi);
 
@@ -114,14 +112,11 @@ namespace ARSAN_Web.Controllers
             {
                 return NotFound();
             }
-
-            // Remover validación de navegación
             ModelState.Remove("Residencial");
             ModelState.Remove("Turnos");
             ModelState.Remove("AccesosIngreso");
             ModelState.Remove("AccesosSalida");
 
-            // Validar si ya existe otro guardia con ese DPI
             var guardiaExistente = await _context.Guardias
                 .AnyAsync(g => g.Dpi == guardia.Dpi && g.IdGuardia != id);
 
