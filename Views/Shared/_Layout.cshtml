@@ -15,6 +15,15 @@
             --danger-color: #dc3545;
         }
 
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 120px; /* Espacio para el footer */
+        }
+
         .navbar {
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             padding: 1rem 0;
@@ -66,10 +75,20 @@
             opacity: 0.2;
         }
 
+        /* Contenedor principal con padding inferior */
+        .main-container {
+            padding-bottom: 3rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Footer fijo en la parte inferior */
         footer {
-            margin-top: 4rem;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
             padding: 2rem 0;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 1px solid #dee2e6;
         }
 
             footer a {
@@ -104,6 +123,16 @@
                 outline: 2px solid var(--primary-color);
                 outline-offset: 2px;
             }
+
+        /* Espaciado adicional para los formularios */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Asegurar que las tablas tengan espacio */
+        .table {
+            margin-bottom: 3rem;
+        }
     </style>
 </head>
 <body>
@@ -193,13 +222,13 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container main-container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer text-muted">
         <div class="container text-center">
             <p class="mb-0">
                 &copy; 2025 <strong>ARSAN</strong> - Sistema de Administración Residencial
