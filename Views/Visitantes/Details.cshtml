@@ -1,48 +1,182 @@
 ﻿@model ARSAN_Web.Models.Visitante
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Visitante";
 }
 
-<h1>Details</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Visitantes</a></li>
+                        <li class="breadcrumb-item active">Detalles</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-person-badge text-info me-2"></i>Detalles del Visitante
+                </h2>
+                <p class="text-muted">Información completa del visitante</p>
+            </div>
 
-<div>
-    <h4>Visitante</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreCompleto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreCompleto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Dpi)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Dpi)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefono)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefono)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Placa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Placa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Empresa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Empresa)
-        </dd>
-    </dl>
+            <!-- Información Principal -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>Información Personal
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="text-muted small fw-bold text-uppercase">Nombre Completo</label>
+                        <p class="fs-3 mb-0">
+                            <i class="bi bi-person-fill text-primary me-2"></i>
+                            <strong>@Model.NombreCompleto</strong>
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">DPI</label>
+                            <p class="fs-5 mb-0">
+                                @if (!string.IsNullOrEmpty(Model.Dpi))
+                                {
+                                    <span>
+                                        <i class="bi bi-card-text text-secondary me-2"></i>
+                                        @Model.Dpi
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No registrado</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Teléfono</label>
+                            <p class="fs-5 mb-0">
+                                @if (!string.IsNullOrEmpty(Model.Telefono))
+                                {
+                                    <a href="tel:@Model.Telefono" class="text-decoration-none">
+                                        <i class="bi bi-telephone-fill text-success me-2"></i>
+                                        @Model.Telefono
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No registrado</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Placa del Vehículo</label>
+                            <p class="mb-0">
+                                @if (!string.IsNullOrEmpty(Model.Placa))
+                                {
+                                    <span class="badge bg-info fs-5">
+                                        <i class="bi bi-car-front-fill me-2"></i>@Model.Placa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin vehículo registrado</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="text-muted small fw-bold text-uppercase">Empresa</label>
+                            <p class="mb-0">
+                                @if (!string.IsNullOrEmpty(Model.Empresa))
+                                {
+                                    <span class="badge bg-secondary fs-5">
+                                        <i class="bi bi-building me-2"></i>@Model.Empresa
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-dark fs-6">Visita Personal</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-0">
+                        <label class="text-muted small fw-bold text-uppercase">ID de Visitante</label>
+                        <p class="mb-0 text-muted">#@Model.IdVisitante</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipo de Visitante -->
+            <div class="alert @(string.IsNullOrEmpty(Model.Empresa) ? "alert-primary" : "alert-secondary") mb-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-@(string.IsNullOrEmpty(Model.Empresa) ? "person-circle" : "building") me-2"></i>
+                    Tipo de Visitante
+                </h6>
+                <p class="mb-0">
+                    @if (string.IsNullOrEmpty(Model.Empresa))
+                    {
+                        <span>Este es un visitante <strong>personal</strong> (no asociado a ninguna empresa)</span>
+                    }
+                    else
+                    {
+                        <span>Este es un visitante <strong>corporativo</strong> de la empresa: <strong>@Model.Empresa</strong></span>
+                    }
+                </p>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+                        </a>
+
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@Model.IdVisitante" class="btn btn-warning">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.IdVisitante" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="alert alert-info" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-lightbulb me-2"></i>Información
+                </h6>
+                <p class="mb-0 small">
+                    Este visitante puede ser usado en el módulo <strong>"Registro de Visitas"</strong>
+                    para registrar sus ingresos al residencial.
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.IdVisitante">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.8rem;
+    }
+
+    hr {
+        opacity: 0.1;
+    }
+</style>

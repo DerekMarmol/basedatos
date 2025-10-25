@@ -1,53 +1,203 @@
 ﻿@model ARSAN_Web.Models.Visitante
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Registrar Visitante";
 }
 
-<h1>Create</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Visitantes</a></li>
+                        <li class="breadcrumb-item active">Nuevo Visitante</li>
+                    </ol>
+                </nav>
+                <h2>
+                    <i class="bi bi-person-plus text-primary me-2"></i>Registrar Visitante
+                </h2>
+                <p class="text-muted">Complete el formulario para registrar un nuevo visitante en el sistema</p>
+            </div>
 
-<h4>Visitante</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="NombreCompleto" class="control-label"></label>
-                <input asp-for="NombreCompleto" class="form-control" />
-                <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+            <!-- Formulario -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Información Personal -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-person-circle text-primary me-2"></i>Información Personal
+                        </h5>
+
+                        <div class="mb-4">
+                            <label asp-for="NombreCompleto" class="form-label fw-bold">
+                                <i class="bi bi-person me-1"></i>Nombre Completo *
+                            </label>
+                            <input asp-for="NombreCompleto" class="form-control form-control-lg"
+                                   placeholder="Ej: Juan Carlos Pérez López" />
+                            <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Ingrese el nombre completo del visitante
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Dpi" class="form-label fw-bold">
+                                    <i class="bi bi-card-text me-1"></i>DPI
+                                </label>
+                                <input asp-for="Dpi" class="form-control form-control-lg"
+                                       placeholder="0000 00000 0000" maxlength="20" />
+                                <span asp-validation-for="Dpi" class="text-danger"></span>
+                                <div class="form-text">Número de DPI (opcional)</div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Telefono" class="form-label fw-bold">
+                                    <i class="bi bi-telephone me-1"></i>Teléfono
+                                </label>
+                                <input asp-for="Telefono" type="tel" class="form-control form-control-lg"
+                                       placeholder="0000-0000" maxlength="20" />
+                                <span asp-validation-for="Telefono" class="text-danger"></span>
+                                <div class="form-text">Número de contacto (opcional)</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información Adicional -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-info-square text-primary me-2"></i>Información Adicional
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Placa" class="form-label fw-bold">
+                                    <i class="bi bi-car-front me-1"></i>Placa del Vehículo
+                                </label>
+                                <input asp-for="Placa" class="form-control form-control-lg"
+                                       placeholder="P-000XXX" maxlength="20" style="text-transform: uppercase;" />
+                                <span asp-validation-for="Placa" class="text-danger"></span>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Placa del vehículo si el visitante llega en auto
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Empresa" class="form-label fw-bold">
+                                    <i class="bi bi-building me-1"></i>Empresa
+                                </label>
+                                <input asp-for="Empresa" class="form-control form-control-lg"
+                                       placeholder="Ej: Courier Express" maxlength="100" />
+                                <span asp-validation-for="Empresa" class="text-danger"></span>
+                                <div class="form-text">Empresa si es visita corporativa</div>
+                            </div>
+                        </div>
+
+                        <!-- Información visual -->
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <h6 class="mb-2">
+                                    <i class="bi bi-lightbulb text-warning me-1"></i>Sugerencia
+                                </h6>
+                                <p class="mb-0 small text-muted">
+                                    Registrar visitantes frecuentes facilita el control de acceso y agiliza
+                                    el proceso de ingreso en futuras visitas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-save me-2"></i>Registrar Visitante
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Dpi" class="control-label"></label>
-                <input asp-for="Dpi" class="form-control" />
-                <span asp-validation-for="Dpi" class="text-danger"></span>
+
+            <!-- Ayuda -->
+            <div class="alert alert-info mt-3" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-info-circle me-2"></i>Información importante
+                </h6>
+                <ul class="mb-0 small">
+                    <li>El campo <strong>Nombre Completo</strong> es obligatorio</li>
+                    <li>Los demás campos son opcionales pero recomendados</li>
+                    <li>La placa del vehículo se convertirá automáticamente a mayúsculas</li>
+                    <li>Después de registrar, podrá usar este visitante en "Registro de Visitas"</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Placa" class="control-label"></label>
-                <input asp-for="Placa" class="form-control" />
-                <span asp-validation-for="Placa" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Empresa" class="control-label"></label>
-                <input asp-for="Empresa" class="form-control" />
-                <span asp-validation-for="Empresa" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Convertir placa a mayúsculas automáticamente
+            $('#Placa').on('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+
+            // Formatear DPI mientras se escribe
+            $('#Dpi').on('input', function() {
+                var value = this.value.replace(/\D/g, '');
+                if (value.length > 13) value = value.substring(0, 13);
+
+                if (value.length >= 4) {
+                    value = value.substring(0, 4) + ' ' + value.substring(4);
+                }
+                if (value.length >= 10) {
+                    value = value.substring(0, 10) + ' ' + value.substring(10);
+                }
+
+                this.value = value;
+            });
+
+            // Formatear teléfono mientras se escribe
+            $('#Telefono').on('input', function() {
+                var value = this.value.replace(/\D/g, '');
+                if (value.length > 8) value = value.substring(0, 8);
+
+                if (value.length >= 4) {
+                    value = value.substring(0, 4) + '-' + value.substring(4);
+                }
+
+                this.value = value;
+            });
+        });
+    </script>
+
+    <style>
+        .form-label {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
 }
