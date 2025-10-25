@@ -1,57 +1,79 @@
 ﻿@model ARSAN_Web.Models.Inquilino
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar Inquilino";
 }
 
-<h1>Delete</h1>
+<div class="container mt-4">
+    <h1 class="mb-4 text-danger">Eliminar Inquilino</h1>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Inquilino</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreCompleto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreCompleto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Dpi)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Dpi)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefono)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefono)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaNacimiento)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaNacimiento)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EstadoCivil)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EstadoCivil)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoLicencia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoLicencia)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdInquilino" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> ⚠️ Advertencia
+        </h4>
+        <p class="mb-0">¿Está seguro de que desea eliminar este inquilino?</p>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Información del Inquilino</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.NombreCompleto)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.NombreCompleto)
+                </dd>
+
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.Dpi)
+                </dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-secondary">@Html.DisplayFor(model => model.Dpi)</span>
+                </dd>
+
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.Telefono)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Telefono)
+                </dd>
+
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.FechaNacimiento)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.FechaNacimiento)
+                </dd>
+
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.EstadoCivil)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.EstadoCivil)
+                </dd>
+
+                <dt class="col-sm-3 font-weight-bold">
+                    @Html.DisplayNameFor(model => model.TipoLicencia)
+                </dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-success">@Html.DisplayFor(model => model.TipoLicencia)</span>
+                </dd>
+            </dl>
+
+            <hr />
+
+            <form asp-action="Delete" class="mt-4">
+                <input type="hidden" asp-for="IdInquilino" />
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="fas fa-trash"></i> Confirmar Eliminación
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
 </div>

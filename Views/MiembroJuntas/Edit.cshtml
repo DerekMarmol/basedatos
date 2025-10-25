@@ -1,54 +1,124 @@
 ﻿@model ARSAN_Web.Models.MiembroJunta
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Miembro de Junta";
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <div class="mb-4">
+        <h1 class="text-purple">
+            <i class="fas fa-user-edit"></i> Editar Miembro de Junta
+        </h1>
+        <p class="text-muted">Modifique la información del miembro de la junta directiva</p>
+    </div>
 
-<h4>MiembroJunta</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdMiembroJunta" />
-            <div class="form-group">
-                <label asp-for="IdJuntaDirectiva" class="control-label"></label>
-                <select asp-for="IdJuntaDirectiva" class="form-control" asp-items="ViewBag.IdJuntaDirectiva"></select>
-                <span asp-validation-for="IdJuntaDirectiva" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdPropietario" class="control-label"></label>
-                <select asp-for="IdPropietario" class="form-control" asp-items="ViewBag.IdPropietario"></select>
-                <span asp-validation-for="IdPropietario" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdCargo" class="control-label"></label>
-                <select asp-for="IdCargo" class="form-control" asp-items="ViewBag.IdCargo"></select>
-                <span asp-validation-for="IdCargo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
-                <span asp-validation-for="FechaInicio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaFin" class="control-label"></label>
-                <input asp-for="FechaFin" class="form-control" />
-                <span asp-validation-for="FechaFin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient-warning">
+            <h4 class="mb-0 text-dark">
+                <i class="fas fa-edit"></i> Actualizar Información
+            </h4>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <input type="hidden" asp-for="IdMiembroJunta" />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-4">
+                            <label asp-for="IdJuntaDirectiva" class="form-label fw-bold">
+                                <i class="fas fa-building text-warning"></i> Junta Directiva
+                            </label>
+                            <select asp-for="IdJuntaDirectiva" class="form-select form-select-lg" asp-items="ViewBag.IdJuntaDirectiva">
+                                <option value="">-- Seleccione una junta directiva --</option>
+                            </select>
+                            <span asp-validation-for="IdJuntaDirectiva" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="IdPropietario" class="form-label fw-bold">
+                                <i class="fas fa-user text-warning"></i> Propietario
+                            </label>
+                            <select asp-for="IdPropietario" class="form-select form-select-lg" asp-items="ViewBag.IdPropietario">
+                                <option value="">-- Seleccione un propietario --</option>
+                            </select>
+                            <span asp-validation-for="IdPropietario" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="IdCargo" class="form-label fw-bold">
+                                <i class="fas fa-id-badge text-warning"></i> Cargo
+                            </label>
+                            <select asp-for="IdCargo" class="form-select form-select-lg" asp-items="ViewBag.IdCargo">
+                                <option value="">-- Seleccione un cargo --</option>
+                            </select>
+                            <span asp-validation-for="IdCargo" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-4">
+                            <label asp-for="FechaInicio" class="form-label fw-bold">
+                                <i class="fas fa-calendar-alt text-warning"></i> Fecha de Inicio
+                            </label>
+                            <input asp-for="FechaInicio" class="form-control form-control-lg" type="date" />
+                            <span asp-validation-for="FechaInicio" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="FechaFin" class="form-label fw-bold">
+                                <i class="fas fa-calendar-check text-warning"></i> Fecha de Fin
+                                <span class="badge bg-secondary ms-2">Opcional</span>
+                            </label>
+                            <input asp-for="FechaFin" class="form-control form-control-lg" type="date" />
+                            <span asp-validation-for="FechaFin" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Deje vacío si el miembro está actualmente en el cargo
+                            </small>
+                        </div>
+
+                        <div class="alert alert-warning border-0" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Atención:</strong> Los cambios se guardarán inmediatamente al confirmar.
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-warning btn-lg px-5 text-dark">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<style>
+    .text-purple {
+        color: #6f42c1;
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    }
+
+    .form-select-lg, .form-control-lg {
+        border-radius: 0.5rem;
+    }
+</style>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

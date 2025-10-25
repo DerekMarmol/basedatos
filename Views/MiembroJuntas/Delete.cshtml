@@ -1,51 +1,170 @@
 ﻿@model ARSAN_Web.Models.MiembroJunta
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Eliminar Miembro";
+    var estaActivo = Model.FechaFin == null || Model.FechaFin > DateTime.Now;
 }
 
-<h1>Delete</h1>
+<div class="container mt-4">
+    <div class="mb-4">
+        <h1 class="text-danger">
+            <i class="fas fa-user-times"></i> Eliminar Miembro de Junta
+        </h1>
+        <p class="text-muted">Confirmación de eliminación</p>
+    </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>MiembroJunta</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaInicio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaInicio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaFin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaFin)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.JuntaDirectiva)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.JuntaDirectiva.IdJuntaDirectiva)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Propietario)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Propietario.Dpi)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cargo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cargo.Nombre)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="IdMiembroJunta" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="alert alert-danger border-0 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-3x me-3"></i>
+            <div>
+                <h4 class="alert-heading mb-2">
+                    <i class="fas fa-shield-alt"></i> ⚠️ Advertencia de Seguridad
+                </h4>
+                <p class="mb-0">
+                    ¿Está seguro de que desea eliminar este miembro de la junta directiva?
+                    <strong>Esta acción no se puede deshacer.</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-gradient-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle"></i> Información del Miembro a Eliminar
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <dl class="row">
+                        <dt class="col-sm-4 mb-3">
+                            <i class="fas fa-id-badge text-danger"></i> Cargo
+                        </dt>
+                        <dd class="col-sm-8 mb-3">
+                            <h5 class="text-danger mb-0">
+                                @Html.DisplayFor(model => model.Cargo.Nombre)
+                            </h5>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-3">
+                            <i class="fas fa-user text-danger"></i> Propietario
+                        </dt>
+                        <dd class="col-sm-8 mb-3">
+                            <strong>@Html.DisplayFor(model => model.Propietario.NombreCompleto)</strong>
+                            <br>
+                            <small class="text-muted">
+                                DPI: <span class="badge bg-secondary">@Html.DisplayFor(model => model.Propietario.Dpi)</span>
+                            </small>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-3">
+                            <i class="fas fa-building text-danger"></i> Junta Directiva
+                        </dt>
+                        <dd class="col-sm-8 mb-3">
+                            <span class="badge bg-dark fs-6">
+                                ID: @Html.DisplayFor(model => model.JuntaDirectiva.IdJuntaDirectiva)
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-3">
+                            <i class="fas fa-calendar-alt text-danger"></i> Fecha de Inicio
+                        </dt>
+                        <dd class="col-sm-8 mb-3">
+                            <span class="badge bg-success fs-6">
+                                @Html.DisplayFor(model => model.FechaInicio)
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4 mb-3">
+                            <i class="fas fa-calendar-check text-danger"></i> Fecha de Fin
+                        </dt>
+                        <dd class="col-sm-8 mb-3">
+                            @if (Model.FechaFin != null)
+                            {
+                                <span class="badge bg-secondary fs-6">
+                                    @Html.DisplayFor(model => model.FechaFin)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary fs-6">
+                                    <i class="fas fa-infinity"></i> Actualidad
+                                </span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 mb-0">
+                            <i class="fas fa-toggle-on text-danger"></i> Estado Actual
+                        </dt>
+                        <dd class="col-sm-8 mb-0">
+                            @if (estaActivo)
+                            {
+                                <span class="badge bg-success fs-6">
+                                    <i class="fas fa-check-circle"></i> Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6">
+                                    <i class="fas fa-history"></i> Finalizado
+                                </span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow border-danger mb-3">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-user-slash fa-4x text-danger mb-3"></i>
+                    <h5 class="card-title text-danger">Acción Irreversible</h5>
+                    <p class="card-text text-muted small">
+                        Al eliminar este miembro, se perderá toda la información asociada a su participación en la junta directiva.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0 text-danger">
+                        <i class="fas fa-exclamation-circle"></i> Confirmación Requerida
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="IdMiembroJunta" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash-alt"></i> Confirmar Eliminación
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+
+                        <div class="alert alert-warning mt-3 mb-0" role="alert">
+                            <small>
+                                <i class="fas fa-info-circle"></i>
+                                Si cancela, ningún dato será eliminado.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .border-danger {
+        border-width: 2px !important;
+    }
+</style>
